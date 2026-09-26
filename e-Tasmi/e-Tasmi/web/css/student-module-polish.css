@@ -1,0 +1,1655 @@
+/* ============================================================
+   Student Module — UI/UX Polish Layer
+   Applies modern, professional micro-interactions on top of the
+   existing student design system. No structural redesign:
+   - Same green identity (#22c55e / #16a34a)
+   - Same card surfaces, borders, radii
+   - Same logic, JSP routes, and content
+   Goals: subtle hover, smooth transitions, cleaner buttons,
+   better card sizing, animated progress bars, and a footer
+   that always sits at the bottom of short pages.
+   ============================================================ */
+
+/* ---------- 1. Shell + Footer placement ---------- */
+
+body.student-package-page.student-module-page .student-shell-content {
+    display: flex;
+    flex-direction: column;
+}
+
+body.student-package-page.student-module-page .student-shell-content > .student-workspace-view {
+    flex: 1 0 auto;
+    min-height: 0;
+}
+
+body.student-package-page.student-module-page .student-shell-content > .footer {
+    margin-top: auto;
+    padding-top: 18px;
+}
+
+/* ---------- 2. Reduce-motion guard ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    body.student-package-page *,
+    body.student-package-page *::before,
+    body.student-package-page *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    body.student-package-page .ssess-card:hover,
+    body.student-package-page .notification-item:hover,
+    body.student-package-page .student-dashboard-clean__activity-item:hover,
+    body.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-card:hover,
+    body.student-package-page .pbtn:hover,
+    body.student-package-page .ssess-btn:hover,
+    body.student-package-page .btn-receipt-open:hover,
+    body.student-package-page .btn-receipt-download:hover,
+    body.student-package-page .rec-record:hover,
+    body.student-package-page .rec-link-button:hover,
+    body.student-package-page .rec-page__cta:hover,
+    body.student-package-page #progressOverview .sd-progress-metric:hover {
+        transform: none !important;
+    }
+
+    body.student-package-page .ssess-card:hover .ssess-card__banner img {
+        transform: none !important;
+    }
+}
+
+/* ============================================================
+   3. DASHBOARD POLISH
+   ============================================================ */
+
+/* Welcome card — slightly more dynamic, still understated */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-card {
+    position: relative;
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0) 55%),
+        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    overflow: hidden;
+    transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-card::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 18px;
+    bottom: 18px;
+    width: 4px;
+    border-radius: 0 4px 4px 0;
+    background: linear-gradient(180deg, #22c55e, #14b8a6);
+    opacity: 0.9;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #16a34a;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero-copy h2 {
+    margin-top: 6px;
+    font-size: clamp(1.65rem, 2.6vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+/* Progress card — calmer label, cleaner numerals */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--progress {
+    transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__progress-main strong {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero-progress {
+    height: 10px;
+    border-radius: 999px;
+    background: #eef2f7;
+    overflow: hidden;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #22c55e, #14b8a6);
+    transform-origin: left center;
+    animation: studentProgressFill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes studentProgressFill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid div {
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid div:hover {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid strong {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Upcoming session card */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming {
+    transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-card {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-card:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 10px 28px rgba(34, 197, 94, 0.12);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-meta-row span {
+    transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+    line-height: 1.35;
+    font-weight: 600;
+    font-size: 0.86rem;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-meta-row span:hover {
+    background: #ffffff;
+    border-color: #bbf7d0;
+    color: #0f172a;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .btn-primary {
+    padding: 0 22px;
+    box-shadow: 0 8px 18px rgba(34, 197, 94, 0.22);
+    transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.28);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Empty state inside upcoming session */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__empty strong {
+    color: #0f172a;
+    font-size: 1.05rem;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__empty p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__empty .btn-primary {
+    margin-top: 6px;
+}
+
+/* Recent notifications panel — cards with subtle hover + clean scroll */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--notifications {
+    transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-list {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item {
+    position: relative;
+    transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+    cursor: default;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    transform: translateY(-1px);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-date {
+    font-variant-numeric: tabular-nums;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__link {
+    transition: color 0.15s ease;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__link:hover {
+    color: #0b665f;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ============================================================
+   4. SESSION CARDS (Available + My Sessions)
+   ============================================================ */
+
+/* Tighter, balanced card grid */
+body.student-package-page.student-module-page .ssess-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Card surface: subtle hover lift + green accent border */
+body.student-package-page.student-module-page .ssess-card {
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 18px rgba(15, 23, 42, 0.04);
+    transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+}
+
+body.student-package-page.student-module-page .ssess-card:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 12px 28px rgba(34, 197, 94, 0.14), 0 2px 6px rgba(15, 23, 42, 0.04);
+    transform: translateY(-2px);
+}
+
+/* Banner — slightly tighter, smoother corners, subtle zoom on hover */
+body.student-package-page.student-module-page .ssess-card__banner {
+    height: 132px;
+    background: #f1f5f9;
+    overflow: hidden;
+}
+
+body.student-package-page.student-module-page .ssess-card__banner img {
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.student-package-page.student-module-page .ssess-card:hover .ssess-card__banner img {
+    transform: scale(1.04);
+}
+
+/* Card body — tighter spacing, consistent rhythm */
+body.student-package-page.student-module-page .ssess-card__body {
+    padding: 18px 18px 16px;
+    gap: 12px;
+}
+
+body.student-package-page.student-module-page .ssess-card__title {
+    font-size: 1rem;
+    font-weight: 750;
+    letter-spacing: -0.015em;
+}
+
+body.student-package-page.student-module-page .ssess-card__instructor {
+    font-size: 0.84rem;
+}
+
+body.student-package-page.student-module-page .ssess-card__datetime {
+    font-size: 0.84rem;
+    color: #334155;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Meta tiles — softer, equal-height, subtle hover */
+body.student-package-page.student-module-page .ssess-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+body.student-package-page.student-module-page .ssess-card:hover .ssess-card__meta-item {
+    border-color: #e2e8f0;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta-value {
+    font-size: 0.86rem;
+    font-weight: 650;
+}
+
+/* Status row pills — refined */
+body.student-package-page.student-module-page .ssess-card__status-row {
+    gap: 6px;
+}
+
+body.student-package-page.student-module-page .ssess-badge {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.66rem;
+    border-radius: 999px;
+    font-weight: 750;
+}
+
+body.student-package-page.student-module-page .ssess-pill {
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+}
+
+/* Description */
+body.student-package-page.student-module-page .ssess-card__desc {
+    font-size: 0.84rem;
+    color: #475569;
+    line-height: 1.5;
+}
+
+/* Progress bar — animated fill on appear */
+body.student-package-page.student-module-page .ssess-card__progress-wrap {
+    margin-top: 4px;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-header {
+    font-size: 0.74rem;
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-header strong {
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-bar {
+    height: 7px;
+    background: #eef2f7;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-fill {
+    background: linear-gradient(90deg, #22c55e, #14b8a6);
+    border-radius: inherit;
+    transform-origin: left center;
+    animation: studentProgressFill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: width 0.3s ease;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-note {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+/* Buttons inside session cards */
+body.student-package-page.student-module-page .ssess-card__actions {
+    padding-top: 4px;
+}
+
+body.student-package-page.student-module-page .ssess-btn {
+    border-radius: 8px;
+    min-height: 38px;
+    padding: 0.45rem 1rem;
+    font-size: 0.84rem;
+    font-weight: 650;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+        box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+body.student-package-page.student-module-page .ssess-btn--primary,
+body.student-package-page.student-module-page .ssess-btn--join {
+    background: #22c55e;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(34, 197, 94, 0.22);
+}
+
+body.student-package-page.student-module-page .ssess-btn--primary:hover,
+body.student-package-page.student-module-page .ssess-btn--join:hover {
+    background: #16a34a;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(34, 197, 94, 0.28);
+}
+
+body.student-package-page.student-module-page .ssess-btn--primary:active,
+body.student-package-page.student-module-page .ssess-btn--join:active {
+    transform: translateY(0);
+}
+
+body.student-package-page.student-module-page .ssess-btn--outline {
+    background: #ffffff;
+    color: #0b665f;
+    border: 1px solid #d1fae5;
+}
+
+body.student-package-page.student-module-page .ssess-btn--outline:hover {
+    background: #ecfdf5;
+    border-color: #86efac;
+    color: #065f46;
+}
+
+body.student-package-page.student-module-page .ssess-btn--ghost:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+body.student-package-page.student-module-page .ssess-btn--disabled,
+body.student-package-page.student-module-page .ssess-btn--muted {
+    background: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+}
+
+/* Card actions — make the primary CTA span the card width for a confident,
+   consistent feel across both Available and My Sessions */
+body.student-package-page.student-module-page .ssess-card__actions {
+    width: 100%;
+}
+
+body.student-package-page.student-module-page .ssess-card__actions > .ssess-btn,
+body.student-package-page.student-module-page .ssess-card__actions > .ssess-btn--primary,
+body.student-package-page.student-module-page .ssess-card__actions > .ssess-btn--join,
+body.student-package-page.student-module-page .ssess-card__actions > .ssess-btn--outline,
+body.student-package-page.student-module-page .ssess-card__actions > .ssess-btn--disabled,
+body.student-package-page.student-module-page .ssess-card__actions > .ssess-btn--muted {
+    width: 100%;
+}
+
+body.student-package-page.student-module-page .ssess-card__actions--split {
+    justify-content: stretch;
+}
+
+/* Card footer / session id (legacy — still in profile/other surfaces) */
+body.student-package-page.student-module-page .ssess-card__footer {
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+}
+
+body.student-package-page.student-module-page .ssess-card__session-id {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+/* ---------- Course-card style bottom row (Available + My Sessions) ----------
+   Two-column row: "X% complete" + "#ID" on the left,
+   primary action button (Continue / Join / Enroll) on the right.
+*/
+body.student-package-page.student-module-page .ssess-card__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+body.student-package-page.student-module-page .ssess-card__bottom-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+body.student-package-page.student-module-page .ssess-card__bottom-pct {
+    font-size: 0.78rem;
+    font-weight: 650;
+    color: #475569;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+}
+
+body.student-package-page.student-module-page .ssess-card__bottom-id {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+}
+
+/* The action wrapper inside the bottom row should NOT span full width
+   — it's now a compact CTA on the right. */
+body.student-package-page.student-module-page .ssess-card__bottom .ssess-card__actions {
+    width: auto;
+    flex-shrink: 0;
+    padding-top: 0;
+    margin: 0;
+    display: inline-flex;
+}
+
+body.student-package-page.student-module-page .ssess-card__bottom .ssess-card__actions > .ssess-btn {
+    width: auto;
+    min-height: 36px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+}
+
+/* Hide the verbose "Based on…" note — the % already conveys progress. */
+body.student-package-page.student-module-page .ssess-card__progress-note {
+    display: none;
+}
+
+/* Make the body lay out so the bottom row truly hugs the card bottom,
+   keeping cards equal-height across the grid. */
+body.student-package-page.student-module-page .ssess-card {
+    display: flex;
+    flex-direction: column;
+}
+
+body.student-package-page.student-module-page .ssess-card__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Slightly bolder, tighter title to match the reference card */
+body.student-package-page.student-module-page .ssess-card__title {
+    font-size: 1.02rem;
+    font-weight: 800;
+    line-height: 1.32;
+    letter-spacing: -0.018em;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Instructor — single soft gray line, no bold name */
+body.student-package-page.student-module-page .ssess-card__instructor {
+    font-size: 0.84rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+body.student-package-page.student-module-page .ssess-card__instructor .ssess-card__instructor-label {
+    color: #64748b;
+}
+
+body.student-package-page.student-module-page .ssess-card__instructor strong {
+    color: #475569;
+    font-weight: 650;
+}
+
+/* Compact the date/time + level/mode strip so cards stay tight */
+body.student-package-page.student-module-page .ssess-card__datetime {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta--compact {
+    margin-top: 4px;
+    gap: 8px;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta--compact .ssess-card__meta-item {
+    padding: 8px 10px;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta--compact .ssess-card__meta-label {
+    font-size: 0.62rem;
+}
+
+body.student-package-page.student-module-page .ssess-card__meta--compact .ssess-card__meta-value {
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+/* Progress block — tighter to the bottom row */
+body.student-package-page.student-module-page .ssess-card__progress-wrap {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-header strong {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+body.student-package-page.student-module-page .ssess-card__progress-bar {
+    height: 6px;
+}
+
+/* Responsive: stack bottom row on very narrow cards */
+@media (max-width: 380px) {
+    body.student-package-page.student-module-page .ssess-card__bottom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    body.student-package-page.student-module-page .ssess-card__bottom .ssess-card__actions > .ssess-btn {
+        width: 100%;
+    }
+}
+
+/* Hero (page heading) — tighter */
+body.student-package-page.student-module-page .ssess-hero--compact {
+    padding: 18px 22px;
+    border-radius: 12px;
+}
+
+body.student-package-page.student-module-page .ssess-hero__actions .ssess-btn--outline {
+    min-height: 38px;
+}
+
+/* Empty state — friendlier */
+body.student-package-page.student-module-page .ssess-empty {
+    padding: 56px 24px;
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+body.student-package-page.student-module-page .ssess-empty__title {
+    color: #0f172a;
+    font-size: 1.05rem;
+}
+
+body.student-package-page.student-module-page .ssess-empty__sub {
+    color: #64748b;
+}
+
+/* Toolbar / search */
+body.student-package-page.student-module-page .ssess-section-toolbar {
+    margin-bottom: 16px;
+}
+
+body.student-package-page.student-module-page .ssess-search-bar input[type="text"] {
+    border-radius: 10px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.student-package-page.student-module-page .ssess-search-bar input[type="text"]:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.14);
+}
+
+/* Alerts inside sessions pages */
+body.student-package-page.student-module-page .ssess-alert {
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+}
+
+/* ============================================================
+   5. RECITATION POLISH
+   ============================================================ */
+
+body.student-recitations-page .rec-record {
+    transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+}
+
+body.student-recitations-page .rec-record:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+    transform: translateY(-1px);
+}
+
+body.student-recitations-page .rec-record__summary {
+    transition: background 0.18s ease;
+}
+
+body.student-recitations-page .rec-record__summary:hover {
+    background: #f8fafc;
+}
+
+body.student-recitations-page .rec-record__title {
+    letter-spacing: -0.01em;
+}
+
+body.student-recitations-page .rec-record__toggle {
+    border-radius: 999px;
+    padding: 0 14px;
+    min-height: 32px;
+    font-size: 0.78rem;
+    border: 1px solid #d1fae5;
+    background: #ecfdf5;
+    color: #16a34a;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+body.student-recitations-page .rec-record__toggle:hover {
+    background: #d1fae5;
+    border-color: #86efac;
+    color: #065f46;
+}
+
+body.student-recitations-page .rec-record[open] .rec-record__toggle {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #ffffff;
+}
+
+body.student-recitations-page .rec-page__cta {
+    transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+}
+
+body.student-recitations-page .rec-page__cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.26);
+}
+
+body.student-recitations-page .rec-page__cta:active {
+    transform: translateY(0);
+}
+
+body.student-recitations-page .rec-link-button {
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+        transform 0.12s ease, box-shadow 0.18s ease;
+}
+
+body.student-recitations-page .rec-link-button--primary {
+    box-shadow: 0 8px 18px rgba(34, 197, 94, 0.22);
+}
+
+body.student-recitations-page .rec-link-button--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(34, 197, 94, 0.28);
+}
+
+body.student-recitations-page .rec-history,
+body.student-recitations-page .rec-card {
+    border-radius: 12px;
+}
+
+body.student-recitations-page .rec-media-chip {
+    border-radius: 999px;
+}
+
+body.student-recitations-page .rec-detail {
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+body.student-recitations-page .rec-detail:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+}
+
+/* ============================================================
+   6. PAYMENT TABLE POLISH
+   ============================================================ */
+
+body.student-page--payments .table-wrap--payments {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+}
+
+body.student-page--payments .student-payment-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 860px;
+}
+
+body.student-page--payments .student-payment-table th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: start;
+    white-space: nowrap;
+}
+
+body.student-page--payments .student-payment-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+    font-size: 0.9rem;
+    vertical-align: middle;
+    background: #ffffff;
+    transition: background 0.18s ease;
+}
+
+body.student-page--payments .student-payment-table tbody tr:nth-child(even) td {
+    background: #fbfdff;
+}
+
+body.student-page--payments .student-payment-table tbody tr:hover td {
+    background: #f0fdf4;
+}
+
+body.student-page--payments .student-payment-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+body.student-page--payments .student-payment-table .status-pill {
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.7rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Receipt action buttons — consistent, modern outline */
+body.student-page--payments .receipt-action-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+body.student-page--payments .btn-receipt-open,
+body.student-page--payments .btn-receipt-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 650;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+        box-shadow 0.18s ease, transform 0.12s ease;
+    white-space: nowrap;
+}
+
+body.student-page--payments .btn-receipt-open svg,
+body.student-page--payments .btn-receipt-download svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+body.student-page--payments .btn-receipt-open {
+    background: #ffffff;
+    color: #0b665f;
+    border-color: #d1fae5;
+}
+
+body.student-page--payments .btn-receipt-open:hover {
+    background: #ecfdf5;
+    border-color: #86efac;
+    color: #065f46;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(34, 197, 94, 0.14);
+}
+
+body.student-page--payments .btn-receipt-download {
+    background: #22c55e;
+    color: #ffffff;
+    border-color: #22c55e;
+    box-shadow: 0 6px 14px rgba(34, 197, 94, 0.22);
+}
+
+body.student-page--payments .btn-receipt-download:hover {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(34, 197, 94, 0.28);
+}
+
+body.student-page--payments .btn-receipt-open:active,
+body.student-page--payments .btn-receipt-download:active {
+    transform: translateY(0);
+}
+
+/* Reference number — monospace numerals */
+body.student-page--payments .student-payment-table td:nth-child(3),
+body.student-page--payments .student-payment-table td:nth-child(5),
+body.student-page--payments .student-payment-table td:nth-child(6) {
+    font-variant-numeric: tabular-nums;
+}
+
+body.student-page--payments .sd-card {
+    border-radius: 12px;
+}
+
+/* ============================================================
+   7. PROGRESS POLISH
+   ============================================================ */
+
+/* Minimalist plain header — title sits plainly on the #F8FAFC canvas
+   (matches the Browse Sessions .browse-ss-head pattern). Scoped to the
+   progress page so shared .sd-hero rules on other pages are untouched. */
+body.student-page--progress .student-progress-head {
+  margin: 0 0 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+body.student-page--progress .student-progress-head__title {
+  margin: 0;
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+body.student-page--progress .student-progress-head__sub {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 400;
+  max-width: 620px;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progressbar {
+    height: 10px;
+    border-radius: 999px;
+    background: #eef2f7;
+    overflow: hidden;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progressbar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #22c55e, #14b8a6);
+    transform-origin: left center;
+    animation: studentProgressFill 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-rate {
+    background: #ecfdf5;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-metrics {
+    gap: 16px;
+    margin-top: 24px;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-metric {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 20px;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-metric:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+    transform: translateY(-1px);
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-metric__label {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: #64748b;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-metric__value {
+    margin-top: 8px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+body.student-package-page.student-module-page #progressOverview .sd-progress-metric__hint {
+    color: #94a3b8;
+    font-size: 0.74rem;
+}
+
+/* ============================================================
+   8. NOTIFICATIONS PAGE POLISH
+   ============================================================ */
+
+body.student-package-page.student-module-page .notification-list {
+    gap: 12px;
+}
+
+body.student-package-page.student-module-page .notification-item {
+    position: relative;
+    padding: 18px 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+    overflow: hidden;
+}
+
+body.student-package-page.student-module-page .notification-item::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: #e5e7eb;
+    transition: background 0.18s ease;
+}
+
+body.student-package-page.student-module-page .notification-item:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    transform: translateY(-1px);
+}
+
+body.student-package-page.student-module-page .notification-item:hover::before {
+    background: #22c55e;
+}
+
+body.student-package-page.student-module-page .notification-item .sd-session-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+body.student-package-page.student-module-page .notification-item h3 {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    font-weight: 650;
+    color: #0f172a;
+}
+
+body.student-package-page.student-module-page .notification-item-meta {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   9. PROFILE POLISH
+   ============================================================ */
+
+body.student-package-page.student-module-page .profile-hero {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border-radius: 12px;
+}
+
+body.student-package-page.student-module-page .profile-hero__eyebrow {
+    color: #16a34a !important;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card {
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card:hover {
+    border-color: #bbf7d0;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-avatar-wrap {
+    position: relative;
+    width: 124px;
+    height: 124px;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 3px #bbf7d0, 0 12px 28px rgba(34, 197, 94, 0.18);
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-avatar-wrap .avatar-fallback {
+    color: #16a34a;
+    font-weight: 800;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-sidebar-name {
+    font-weight: 800;
+    color: #0f172a;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-sidebar-role {
+    color: #16a34a;
+    letter-spacing: 0.08em;
+    font-weight: 750;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 650;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-upload-btn:hover {
+    background: #ecfdf5;
+    border-color: #86efac;
+    color: #16a34a;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-sidebar-info .info-label {
+    color: #64748b;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-sidebar-info .status-badge {
+    border-radius: 999px;
+    padding: 0.22rem 0.65rem;
+    font-weight: 750;
+}
+
+body.student-package-page.student-module-page .profile-sidebar-card .profile-sidebar-info .status-badge--active {
+    background: #ecfdf5;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+body.student-package-page.student-module-page .profile-form-card {
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* Form fields — green focus ring to match identity */
+body.student-package-page.student-module-page .pf-field input,
+body.student-package-page.student-module-page .pf-field select,
+body.student-package-page.student-module-page .pf-field textarea {
+    border-radius: 10px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+body.student-package-page.student-module-page .pf-field input:focus,
+body.student-package-page.student-module-page .pf-field select:focus,
+body.student-package-page.student-module-page .pf-field textarea:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.14);
+}
+
+/* Profile buttons — clean, identity-matching */
+body.student-package-page.student-module-page .pbtn {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 650;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+        box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+body.student-package-page.student-module-page .pbtn-primary {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(22, 163, 74, 0.22);
+}
+
+body.student-package-page.student-module-page .pbtn-primary:hover {
+    background: #15803d;
+    border-color: #15803d;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(22, 163, 74, 0.28);
+}
+
+body.student-package-page.student-module-page .pbtn-primary:active {
+    transform: translateY(0);
+}
+
+body.student-package-page.student-module-page .pbtn-outline {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+body.student-package-page.student-module-page .pbtn-outline:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+body.student-package-page.student-module-page .pbtn-ghost {
+    color: #64748b;
+}
+
+body.student-package-page.student-module-page .pbtn-ghost:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+body.student-package-page.student-module-page .profile-actions-row {
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Profile alerts — match identity */
+body.student-package-page.student-module-page .profile-alert {
+    border-radius: 10px;
+}
+
+body.student-package-page.student-module-page .profile-alert--success {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
+/* ============================================================
+   10. ALERTS — global polish (within student module)
+   ============================================================ */
+
+body.student-package-page.student-module-page .alert-success,
+body.student-package-page.student-module-page .ssess-alert--success {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #15803d;
+}
+
+body.student-package-page.student-module-page .alert-error,
+body.student-package-page.student-module-page .ssess-alert--error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+body.student-package-page.student-module-page .ssess-alert--warning {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #b45309;
+}
+
+/* ============================================================
+   11. FOCUS RING — accessible keyboard focus on interactive bits
+   ============================================================ */
+
+body.student-package-page.student-module-page .ssess-btn:focus-visible,
+body.student-package-page.student-module-page .pbtn:focus-visible,
+body.student-package-page.student-module-page .btn-receipt-open:focus-visible,
+body.student-package-page.student-module-page .btn-receipt-download:focus-visible,
+body.student-package-page.student-module-page .rec-link-button:focus-visible,
+body.student-package-page.student-module-page .rec-page__cta:focus-visible,
+body.student-dashboard-page.student-package-page .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.32);
+}
+
+/* ============================================================
+   12. RESPONSIVE TWEAKS
+   ============================================================ */
+
+@media (max-width: 1100px) {
+    body.student-package-page.student-module-page .ssess-card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 720px) {
+    body.student-package-page.student-module-page .ssess-card__banner {
+        height: 120px;
+    }
+
+    body.student-page--payments .receipt-action-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    body.student-page--payments .btn-receipt-open,
+    body.student-page--payments .btn-receipt-download {
+        justify-content: center;
+    }
+
+    body.student-package-page.student-module-page .ssess-card__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    body.student-package-page.student-module-page .ssess-card__actions .ssess-btn {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   13. SHARED MOTION + VISUAL STANDARDS (student module)
+   Reusable tokens and a fade-up utility so every student page —
+   current and future — shares one consistent motion language.
+   The reduce-motion guard in section 2 already neutralizes these.
+   ============================================================ */
+
+body.student-package-page {
+    --student-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --student-radius-sm: 12px;
+    --student-radius-md: 16px;
+    --student-radius-lg: 22px;
+    --student-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 18px -12px rgba(15, 23, 42, 0.18);
+    --student-shadow-md: 0 10px 30px -18px rgba(11, 107, 90, 0.4);
+    --student-shadow-glow: 0 0 18px rgba(22, 163, 74, 0.22);
+}
+
+@keyframes studentFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes studentFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Opt-in utilities (use on any student page element) */
+body.student-package-page .student-anim-fade-up {
+    animation: studentFadeUp 0.5s var(--student-ease) both;
+}
+
+body.student-package-page .student-anim-fade-in {
+    animation: studentFadeIn 0.5s ease both;
+}
+
+/* Staggered children via inline custom property --i (e.g. style="--i:2") */
+body.student-package-page .student-anim-stagger > * {
+    animation: studentFadeUp 0.5s var(--student-ease) both;
+    animation-delay: calc(var(--i, 0) * 0.06s);
+}
+
+/* Soft, premium hover lift available to any surface that opts in */
+body.student-package-page .student-hover-lift {
+    transition: transform 0.22s var(--student-ease), box-shadow 0.22s ease;
+}
+
+body.student-package-page .student-hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--student-shadow-md);
+}
+
+/* ============================================================
+   14. UNIFIED PAGE HERO — green main-content header card
+   A premium green header card with a title, subtitle, and an
+   animated right-side visual. Applied to every student feature
+   page EXCEPT the dashboard (which keeps its own minimal hero).
+   The reduce-motion guard in section 2 neutralizes the loops.
+   ============================================================ */
+
+body.student-package-page .student-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0 0 18px;
+    padding: 15px 22px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background:
+        radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 52%),
+        linear-gradient(135deg, #064e46 0%, #0b6b5a 48%, #16a34a 100%);
+    box-shadow:
+        0 12px 30px -20px rgba(6, 78, 70, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    color: #ffffff;
+    animation: studentFadeUp 0.55s var(--student-ease) both;
+}
+
+/* Islamic-inspired geometric pattern accent (decorative, right edge) */
+body.student-package-page .student-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-end: 0;
+    width: 240px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 0 16px 16px 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1' opacity='0.22'%3E%3Cpath d='M30 2l8 8-8 8-8-8z'/%3E%3Cpath d='M30 42l8 8-8 8-8-8z'/%3E%3Cpath d='M2 30l8-8 8 8-8 8z'/%3E%3Cpath d='M42 30l8-8 8 8-8 8z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 48px 48px;
+    -webkit-mask-image: linear-gradient(to left, #000 20%, transparent);
+    mask-image: linear-gradient(to left, #000 20%, transparent);
+}
+
+[dir="rtl"] body.student-package-page .student-hero::before {
+    border-radius: 16px 0 0 16px;
+    -webkit-mask-image: linear-gradient(to right, #000 20%, transparent);
+    mask-image: linear-gradient(to right, #000 20%, transparent);
+}
+
+body.student-package-page .student-hero__copy {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+}
+
+body.student-package-page .student-hero__title {
+    margin: 0;
+    font-family: "Poppins", "Inter", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+}
+
+body.student-package-page .student-hero__sub {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 560px;
+}
+
+/* Right-side visual base: frosted circle + looping pulse rings */
+body.student-package-page .student-hero__visual {
+    position: relative;
+    z-index: 2;
+    flex: none;
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+}
+
+body.student-package-page .student-hero__visual::before,
+body.student-package-page .student-hero__visual::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    animation: studentHeroPulse 2.8s ease-out infinite;
+}
+
+body.student-package-page .student-hero__visual::after {
+    animation-delay: 1.4s;
+}
+
+body.student-package-page .student-hero__badge {
+    position: relative;
+    z-index: 1;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    animation: studentHeroFloat 4.5s ease-in-out infinite;
+}
+
+body.student-package-page .student-hero__badge svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Equalizer / waveform bars (Upload Recitation) */
+body.student-package-page .student-hero__bars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 24px;
+}
+
+body.student-package-page .student-hero__bars span {
+    width: 4px;
+    height: 8px;
+    border-radius: 3px;
+    background: #ffffff;
+    animation: studentHeroBars 1.1s ease-in-out infinite;
+}
+
+body.student-package-page .student-hero__bars span:nth-child(1) { animation-delay: 0s; }
+body.student-package-page .student-hero__bars span:nth-child(2) { animation-delay: 0.18s; }
+body.student-package-page .student-hero__bars span:nth-child(3) { animation-delay: 0.36s; }
+body.student-package-page .student-hero__bars span:nth-child(4) { animation-delay: 0.22s; }
+body.student-package-page .student-hero__bars span:nth-child(5) { animation-delay: 0.05s; }
+
+/* Action area for headers that keep a functional control on the right */
+body.student-package-page .student-hero__actions {
+    position: relative;
+    z-index: 2;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.student-package-page .student-hero__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.95);
+    color: #064e46;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.35);
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.student-package-page .student-hero__btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+body.student-package-page .student-hero__btn:hover {
+    background: #ffffff;
+    color: #0b6b5a;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes studentHeroPulse {
+    0% { transform: scale(0.72); opacity: 0.7; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+@keyframes studentHeroFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes studentHeroBars {
+    0%, 100% { height: 7px; }
+    50% { height: 22px; }
+}
+
+@media (max-width: 720px) {
+    body.student-package-page .student-hero {
+        padding: 14px 18px;
+        gap: 12px;
+    }
+    body.student-package-page .student-hero__title {
+        font-size: 1.3rem;
+    }
+    body.student-package-page .student-hero__visual {
+        width: 56px;
+        height: 56px;
+    }
+    body.student-package-page .student-hero__badge {
+        width: 44px;
+        height: 44px;
+    }
+    body.student-package-page .student-hero__badge svg {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+@media (max-width: 520px) {
+    body.student-package-page .student-hero {
+        flex-wrap: wrap;
+    }
+    body.student-package-page .student-hero__visual {
+        display: none;
+    }
+}

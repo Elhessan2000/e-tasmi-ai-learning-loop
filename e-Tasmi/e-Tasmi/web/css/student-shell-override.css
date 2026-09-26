@@ -1,0 +1,996 @@
+/* =============================================================================
+   Student Shell Override ? Unified White + Lime Green Design System
+   v2 ? 2026-06-14
+   Loads LAST in student_ui_head.jspf; fully overrides the old dark teal
+   (#004D40) student-figma-shell to match the instructor's premium shell.
+
+   ARCHITECTURE NOTE:
+   The student pages use an in-flow CSS Grid layout (etasmi-shell-layout.css):
+     .student-shell-layout { display: grid; grid-template-columns: sidebar main; }
+   The sidebar lives as grid column 1 (position: sticky, NOT fixed).
+   Only the topbar is position: fixed.
+   ============================================================================= */
+
+/* ??? Design tokens ?????????????????????????????????????????????????????????? */
+body.student-package-page {
+  --et-brand        : #89F336;
+  --et-brand-dark   : #6DC527;
+  --et-brand-grad   : linear-gradient(135deg, #89F336, #6DC527);
+  --et-brand-glow   : rgba(137, 243, 54, 0.35);
+  --et-brand-text   : #1a2e05;
+  --et-brand-soft   : rgba(137, 243, 54, 0.12);
+
+  --et-surface      : #ffffff;
+  --et-canvas       : #f8fafc;
+  --et-border       : #E2E8F0;
+  --et-text         : #1e293b;
+  --et-muted        : #64748b;
+  --et-faint        : #94a3b8;
+  --et-hover-bg     : #f1f5f9;
+  --et-danger       : #ef4444;
+  --et-danger-soft  : #fef2f2;
+
+  /* Unified dark-emerald sidebar — matches the Browse Sessions reference and is
+     now applied to every student page (dashboard, browse, recitations, library,
+     profile, and any future page). */
+  --et-sidebar-bg          : #064e46;
+  --et-sidebar-link        : rgba(255, 255, 255, 0.74);
+  --et-sidebar-link-hover  : rgba(255, 255, 255, 0.08);
+  --et-sidebar-active-bg   : rgba(255, 255, 255, 0.16);
+  --et-sidebar-icon        : rgba(255, 255, 255, 0.58);
+  --et-sidebar-indicator   : #5eead4;
+  --et-sidebar-border      : rgba(255, 255, 255, 0.12);
+
+  /* Navbar ? 64px matches the clean template proportions and fits the
+     profile name + avatar + chevron action block comfortably. */
+  --et-topbar-h     : 64px;
+  --et-sidebar-w    : var(--etasmi-shell-sidebar-width, 272px);
+  --et-rail-w       : var(--etasmi-shell-sidebar-width-collapsed, 76px);
+
+  /* Shared horizontal inset so brand mark and nav icons share one vertical axis */
+  --et-sidebar-gutter-x   : 10px;
+  --et-sidebar-link-pad-x : 12px;
+  --et-sidebar-icon-inset : calc(var(--et-sidebar-gutter-x) + var(--et-sidebar-link-pad-x));
+
+  --et-shadow       : 0 4px 6px -1px rgba(0,0,0,.06), 0 2px 4px -1px rgba(0,0,0,.04);
+  --et-shadow-lg    : 0 20px 50px -12px rgba(0,0,0,.12);
+
+  /* Override the old 72px topbar-height variable so all old consumers align */
+  --student-topbar-height: 64px !important;
+}
+
+/* Dark mode token overrides */
+html[data-theme="dark"] body.student-package-page {
+  --et-surface  : #1e2533;
+  --et-canvas   : #141925;
+  --et-border   : rgba(255,255,255,.08);
+  --et-text     : #e2e8f0;
+  --et-muted    : #94a3b8;
+  --et-faint    : #64748b;
+  --et-hover-bg : rgba(255,255,255,.04);
+}
+
+/* ??? Page background ???????????????????????????????????????????????????????? */
+body.student-package-page {
+  background: var(--et-canvas) !important;
+}
+
+/* ??? APP SHELL ? full-width, full-height, non-scrolling column ??????????????? */
+/* The shell is the original self-contained flex column: topbar row + scrolling
+   main. We make it edge-to-edge (kill the 9px floating-card margin) so the
+   topbar can span the full width while staying IN FLOW (no overlap). */
+body.student-package-page.student-module-page .app-shell,
+body.student-dashboard-page.student-package-page .app-shell {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+@media (min-width: 1101px) {
+  body.student-package-page.student-module-page .app-shell,
+  body.student-dashboard-page.student-package-page .app-shell {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ??? TOP BAR ? slim, full-width, glassmorphic ??????????????????????????????? */
+/* Base (mobile): sticky so it stays pinned while the body scrolls.
+   Desktop: in-flow relative flex row (see media query below) ? as the first
+   flex child of the non-scrolling shell column it occupies the top 44px and
+   the sidebar + content sit BELOW it, so the Dashboard nav item can never be
+   hidden behind the header. */
+body.student-package-page .student-shell-topbar,
+body.student-package-page.student-module-page .student-shell-topbar,
+body.student-dashboard-page.student-package-page .student-shell-topbar {
+  position: sticky !important;
+  top: 0 !important; left: auto !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  height: var(--et-topbar-h) !important;
+  min-height: var(--et-topbar-h) !important;
+  z-index: 70 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+
+  background: #ffffff !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border-bottom: 1px solid var(--et-border) !important;
+  box-shadow: none !important;
+}
+@media (min-width: 1101px) {
+  body.student-package-page .student-shell-topbar,
+  body.student-package-page.student-module-page .student-shell-topbar,
+  body.student-dashboard-page.student-package-page .student-shell-topbar {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+html[data-theme="dark"] body.student-package-page .student-shell-topbar {
+  background: var(--et-surface) !important;
+  border-bottom: 1px solid var(--et-border) !important;
+  box-shadow: none !important;
+}
+/* Topbar inner row: full height, comfortable horizontal padding */
+body.student-package-page .student-shell-topbar__inner {
+  padding: 0 28px !important;
+}
+body.student-package-page.student-module-page .student-shell-topbar__inner,
+body.student-package-page.student-module-page .student-shell-topbar__brandbar,
+body.student-dashboard-page.student-package-page .student-shell-topbar__inner,
+body.student-dashboard-page.student-package-page .student-shell-topbar__brandbar {
+  min-height: var(--et-topbar-h) !important;
+}
+
+body.student-package-page .student-shell-topbar__inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  padding: 0 28px !important;
+  gap: 8px !important;
+  max-width: none !important;
+}
+
+/* Desktop: brand column matches sidebar grid track width */
+@media (min-width: 1101px) {
+  body.student-package-page .student-shell-topbar__inner {
+    padding-inline-start: 0 !important;
+    padding-inline-end: 28px !important;
+    gap: 0 !important;
+  }
+
+  /* Brand bar is pinned to a STATIC width (--et-sidebar-w = 272px).
+     It deliberately does NOT use --student-sidebar-width, because that
+     variable flips to 76px on collapse and would drag the header with it.
+     Result: the hamburger + logo header never shifts, shrinks, or animates
+     when the navigation rail collapses. */
+  body.student-package-page .student-shell-topbar__brandbar {
+    flex: 0 0 var(--et-sidebar-w) !important;
+    width: var(--et-sidebar-w) !important;
+    max-width: var(--et-sidebar-w) !important;
+    min-height: var(--et-topbar-h) !important;
+    padding-inline: var(--et-sidebar-gutter-x) !important;
+    gap: 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    border-inline-end: 1px solid var(--et-border) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    transition: none !important; /* never animate the header on toggle */
+  }
+
+  /* Hamburger stays far-left (first in DOM = first visually, no order tricks) */
+  body.student-package-page .student-shell-topbar__menu {
+    order: 0 !important;
+    flex-shrink: 0 !important;
+    margin-inline-start: 0 !important;
+    margin-inline-end: 0 !important;
+  }
+
+  /* Brand (logo + text) sits to the right of the hamburger */
+  body.student-package-page .student-shell-topbar__brand {
+    order: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    padding-inline-start: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* -- Collapsed: brand bar STAYS identical; only the nav rail collapses --
+     Same static width as the expanded state so there is zero movement. */
+  html[data-student-nav="collapsed"] body.student-package-page .student-shell-topbar__brandbar,
+  body.student-package-page.student-nav-collapsed .student-shell-topbar__brandbar {
+    flex: 0 0 var(--et-sidebar-w) !important;
+    width: var(--et-sidebar-w) !important;
+    max-width: var(--et-sidebar-w) !important;
+    padding-inline: var(--et-sidebar-gutter-x) !important;
+    gap: 10px !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Keep brand mark (icon) visible ? only hide the "e-Tasmi" text */
+  html[data-student-nav="collapsed"] body.student-package-page .student-shell-topbar__brand,
+  body.student-package-page.student-nav-collapsed .student-shell-topbar__brand {
+    flex: 1 1 auto !important;
+    padding-inline-start: 0 !important;
+    display: inline-flex !important;
+  }
+
+  /* Keep the full "e-Tasmi" wordmark visible even when the nav rail collapses */
+  html[data-student-nav="collapsed"] body.student-package-page .student-shell-topbar__brand-name,
+  body.student-package-page.student-nav-collapsed .student-shell-topbar__brand-name {
+    display: inline !important;
+  }
+
+  html[data-student-nav="collapsed"] body.student-package-page .student-shell-topbar__menu,
+  body.student-package-page.student-nav-collapsed .student-shell-topbar__menu {
+    margin: 0 !important;
+  }
+}
+
+/* Medium desktop (1101-1180px): the sidebar grid column is 256px here, so
+   match the header width to keep the divider aligned. Still constant across
+   collapse ? only changes with viewport size, never on toggle. */
+@media (min-width: 1101px) and (max-width: 1180px) {
+  body.student-package-page .student-shell-topbar__brandbar,
+  html[data-student-nav="collapsed"] body.student-package-page .student-shell-topbar__brandbar,
+  body.student-package-page.student-nav-collapsed .student-shell-topbar__brandbar {
+    flex-basis: var(--etasmi-shell-sidebar-width-md, 256px) !important;
+    width: var(--etasmi-shell-sidebar-width-md, 256px) !important;
+    max-width: var(--etasmi-shell-sidebar-width-md, 256px) !important;
+  }
+}
+
+/* hamburger */
+body.student-package-page .student-shell-topbar__menu {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  width: 34px !important; height: 34px !important;
+  border: 1px solid var(--et-border) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: background .14s ease, border-color .14s ease !important;
+}
+body.student-package-page .student-shell-topbar__menu:hover {
+  background: var(--et-hover-bg) !important;
+  border-color: var(--et-muted) !important;
+}
+body.student-package-page .student-shell-topbar__menu span {
+  display: block !important;
+  width: 16px !important; height: 1.6px !important;
+  border-radius: 2px !important;
+  background: var(--et-text) !important;
+  transition: transform .2s ease, opacity .2s ease !important;
+}
+
+/* brand */
+body.student-package-page .student-shell-topbar__brand,
+body.student-package-page .student-shell-topbar__brandbar a {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  text-decoration: none !important;
+  flex-shrink: 0 !important;
+}
+body.student-package-page .student-shell-topbar__brand strong,
+body.student-package-page .student-shell-topbar__brandbar a strong {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: var(--et-text) !important;
+  letter-spacing: -.01em !important;
+}
+body.student-package-page .student-shell-topbar__brand-mark svg {
+  width: 24px !important; height: 24px !important;
+  color: var(--et-brand-dark) !important;
+}
+body.student-package-page .student-shell-topbar__brand-mark {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 8px !important;
+  background: var(--et-brand-grad) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+/* Brand divider + "Student Workspace" subtitle */
+body.student-package-page .student-shell-topbar__brand-divider {
+  width: 1px !important;
+  height: 20px !important;
+  background: var(--et-border) !important;
+  margin: 0 4px !important;
+  flex-shrink: 0 !important;
+}
+body.student-package-page .student-shell-topbar__brand-sub {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--et-muted) !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 640px) {
+  body.student-package-page .student-shell-topbar__brand-divider,
+  body.student-package-page .student-shell-topbar__brand-sub {
+    display: none !important;
+  }
+}
+
+/* spacer */
+body.student-package-page .student-shell-topbar__spacer {
+  flex: 1 !important;
+}
+
+/* right-side actions */
+body.student-package-page .student-shell-topbar__actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+body.student-package-page .student-shell-topbar__iconbtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important; height: 34px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--et-muted) !important;
+  cursor: pointer !important;
+  position: relative !important;
+  text-decoration: none !important;
+  transition: background .13s ease, color .13s ease !important;
+}
+body.student-package-page .student-shell-topbar__iconbtn:hover {
+  background: var(--et-hover-bg) !important;
+  color: var(--et-text) !important;
+}
+body.student-package-page .student-shell-topbar__iconbtn svg {
+  width: 18px !important; height: 18px !important;
+}
+
+/* notification badge */
+body.student-package-page .student-shell-topbar__badge {
+  position: absolute !important;
+  top: 4px !important; right: 4px !important;
+  min-width: 15px !important; height: 15px !important;
+  border-radius: 999px !important;
+  background: var(--et-brand) !important;
+  color: var(--et-brand-text) !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 3px !important;
+  line-height: 1 !important;
+}
+
+/* profile chip */
+body.student-package-page .student-shell-profile {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 3px !important;
+  border-radius: 9px !important;
+  text-decoration: none !important;
+  transition: background .13s ease !important;
+}
+body.student-package-page .student-shell-profile:hover {
+  background: var(--et-hover-bg) !important;
+}
+body.student-package-page .student-shell-profile__avatar {
+  width: 28px !important; height: 28px !important;
+  border-radius: 50% !important;
+  background: var(--et-brand-soft) !important;
+  border: 2px solid var(--et-brand) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+body.student-package-page .student-shell-profile__fallback {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--et-brand-dark) !important;
+}
+body.student-package-page .student-shell-profile__image {
+  width: 100% !important; height: 100% !important;
+  object-fit: cover !important;
+  position: relative !important; z-index: 1 !important;
+}
+
+/* ??? PROFILE DROPDOWN MENU ??????????????????????????????????????????????????? */
+body.student-package-page .student-shell-profilemenu {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  margin-left: 4px !important;
+}
+/* Trigger button */
+body.student-package-page .student-shell-profilemenu__trigger {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 4px 8px 4px 4px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: background .14s ease, border-color .14s ease !important;
+  max-width: 220px !important;
+}
+body.student-package-page .student-shell-profilemenu__trigger:hover,
+body.student-package-page .student-shell-profilemenu.is-open .student-shell-profilemenu__trigger {
+  background: var(--et-hover-bg) !important;
+  border-color: var(--et-border) !important;
+}
+body.student-package-page .student-shell-profilemenu__trigger .student-shell-profile__avatar {
+  width: 32px !important; height: 32px !important;
+  border-radius: 50% !important;
+  background: var(--et-brand-soft) !important;
+  border: 2px solid var(--et-brand) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+body.student-package-page .student-shell-profilemenu__name {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: var(--et-text) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 140px !important;
+}
+body.student-package-page .student-shell-profilemenu__chevron {
+  width: 16px !important; height: 16px !important;
+  color: var(--et-muted) !important;
+  flex-shrink: 0 !important;
+  transition: transform .18s ease !important;
+}
+body.student-package-page .student-shell-profilemenu.is-open .student-shell-profilemenu__chevron {
+  transform: rotate(180deg) !important;
+}
+/* Floating panel */
+body.student-package-page .student-shell-profilemenu__panel {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  width: 220px !important;
+  background: #ffffff !important;
+  border: 1px solid var(--et-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.05) !important;
+  padding: 8px !important;
+  z-index: 200 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+body.student-package-page .student-shell-profilemenu__panel[hidden] { display: none !important; }
+html[data-theme="dark"] body.student-package-page .student-shell-profilemenu__panel {
+  background: var(--et-surface) !important;
+  border-color: var(--et-border) !important;
+  box-shadow: 0 10px 30px -6px rgba(0,0,0,.5) !important;
+}
+/* Menu items */
+body.student-package-page .student-shell-profilemenu__item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px 10px !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  color: var(--et-text) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  transition: background .12s ease, color .12s ease !important;
+}
+body.student-package-page .student-shell-profilemenu__item svg {
+  width: 17px !important; height: 17px !important;
+  color: var(--et-muted) !important;
+  flex-shrink: 0 !important;
+}
+body.student-package-page .student-shell-profilemenu__item:hover {
+  background: var(--et-hover-bg) !important;
+  color: var(--et-text) !important;
+}
+body.student-package-page .student-shell-profilemenu__item:hover svg {
+  color: var(--et-text) !important;
+}
+body.student-package-page .student-shell-profilemenu__divider {
+  height: 1px !important;
+  background: var(--et-border) !important;
+  margin: 6px 4px !important;
+}
+body.student-package-page .student-shell-profilemenu__item--danger {
+  color: var(--et-danger) !important;
+}
+body.student-package-page .student-shell-profilemenu__item--danger svg {
+  color: var(--et-danger) !important;
+}
+body.student-package-page .student-shell-profilemenu__item--danger:hover {
+  background: var(--et-danger-soft) !important;
+  color: var(--et-danger) !important;
+}
+body.student-package-page .student-shell-profilemenu__item--danger:hover svg {
+  color: var(--et-danger) !important;
+}
+/* Hide the name on small screens, keep avatar + chevron */
+@media (max-width: 640px) {
+  body.student-package-page .student-shell-profilemenu__name { display: none !important; }
+}
+
+/* language switcher ? inside topbar */
+body.student-package-page .student-shell-topbar__actions .lang-switcher-btn,
+body.student-package-page .student-shell-topbar__actions [data-lang-trigger] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 4px 8px !important;
+  border: 1px solid var(--et-border) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--et-muted) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background .13s ease, border-color .13s ease !important;
+}
+body.student-package-page .student-shell-topbar__actions .lang-switcher-btn:hover,
+body.student-package-page .student-shell-topbar__actions [data-lang-trigger]:hover {
+  background: var(--et-hover-bg) !important;
+  border-color: var(--et-muted) !important;
+}
+
+/* ??? LAYOUT: shell-layout container ????????????????????????????????????????? */
+/* Remove old rounded/shadow chrome, pure white background, no gap */
+body.student-package-page.student-module-page .student-shell-layout,
+body.student-dashboard-page.student-package-page .student-shell-layout {
+  background: var(--et-surface) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  gap: 0 !important;
+  column-gap: 0 !important;
+}
+/* Desktop: layout fills the remaining shell height; content scrolls internally */
+@media (min-width: 1101px) {
+  body.student-package-page.student-module-page .student-shell-layout,
+  body.student-dashboard-page.student-package-page .student-shell-layout {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+body.student-package-page.student-module-page .container.sd-container.student-workspace-shell,
+body.student-dashboard-page.student-package-page .container.sd-container.student-workspace-shell {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* No extra padding on app-main ? just provide full height context */
+body.student-package-page.student-module-page .app-main,
+body.student-dashboard-page.student-package-page .app-main {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  /* NO margin-left ? the grid handles the sidebar column */
+  width: 100% !important;
+}
+
+/* ??? SIDEBAR ? fills the shell height; nav scrolls internally ??????????????? */
+/* Aligns with the original non-scrolling shell model: the sidebar column
+   stretches to the full height of .app-main (which sits below the in-flow
+   topbar). The PANEL is height:100% and its NAV scrolls if it overflows.
+   No sticky/fixed/100vh hacks ? so nothing can slide under the topbar. */
+@media (min-width: 1101px) {
+  body.student-package-page .student-shell-sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    align-self: stretch !important;
+    height: auto !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    z-index: 10 !important;
+    transform: none !important;
+  }
+}
+
+body.student-package-page .student-shell-sidebar__panel,
+body.student-package-page .student-shell-sidebar__panel--minimal {
+  background: var(--et-sidebar-bg) !important;
+  border: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.14) !important;
+  padding: 14px var(--et-sidebar-gutter-x) 10px !important;
+  position: relative !important;
+  top: auto !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Nav fills remaining space and scrolls independently if too tall */
+body.student-package-page .student-shell-sidebar__panel--minimal .student-shell-sidebar__nav,
+body.student-package-page .student-shell-sidebar__panel .student-shell-sidebar__nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* ??? Nav links ?????????????????????????????????????????????????????????????? */
+body.student-package-page .student-shell-sidebar__link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px var(--et-sidebar-link-pad-x) !important;
+  border-radius: 12px !important;
+  border: 1px solid transparent !important;
+  text-decoration: none !important;
+  color: var(--et-sidebar-link) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: background .18s ease, color .18s ease, border-color .18s ease,
+    transform .18s cubic-bezier(.22,1,.36,1), box-shadow .2s ease !important;
+  margin-bottom: 2px !important;
+  position: relative !important;
+}
+
+/* Modern active indicator — accent bar that grows in from the inline-start edge */
+body.student-package-page .student-shell-sidebar__link::before {
+  display: block !important;
+  content: "" !important;
+  position: absolute !important;
+  inset-inline-start: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) scaleY(0) !important;
+  transform-origin: center !important;
+  width: 3px !important;
+  height: 20px !important;
+  border-radius: 0 4px 4px 0 !important;
+  background: linear-gradient(180deg, #5eead4, #16a34a) !important;
+  opacity: 0 !important;
+  transition: transform .25s cubic-bezier(.22,1,.36,1), opacity .25s ease !important;
+}
+body.student-package-page .student-shell-sidebar__link::after {
+  display: none !important;
+}
+
+body.student-package-page .student-shell-sidebar__link:hover {
+  background: var(--et-sidebar-link-hover) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  transform: translateX(3px) !important;
+}
+[dir="rtl"] body.student-package-page .student-shell-sidebar__link:hover {
+  transform: translateX(-3px) !important;
+}
+
+body.student-package-page .student-shell-sidebar__link.is-active {
+  background: var(--et-sidebar-active-bg) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border: 1px solid var(--et-sidebar-border) !important;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.22),
+    0 0 18px rgba(94, 234, 212, 0.16) !important;
+}
+body.student-package-page .student-shell-sidebar__link.is-active::before {
+  transform: translateY(-50%) scaleY(1) !important;
+  opacity: 1 !important;
+}
+body.student-package-page .student-shell-sidebar__link.is-active::after {
+  display: block !important;
+  content: "" !important;
+  position: static !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  margin-inline-start: auto !important;
+  background: var(--et-sidebar-indicator) !important;
+  box-shadow: 0 0 8px rgba(94, 234, 212, 0.7) !important;
+  flex-shrink: 0 !important;
+}
+
+body.student-package-page .student-shell-sidebar__icon {
+  width: 17px !important; height: 17px !important;
+  flex-shrink: 0 !important;
+  color: var(--et-sidebar-icon) !important;
+}
+body.student-package-page .student-shell-sidebar__icon svg {
+  width: 17px !important; height: 17px !important;
+}
+
+body.student-package-page .student-shell-sidebar__link.is-active .student-shell-sidebar__icon,
+body.student-package-page .student-shell-sidebar__link:hover .student-shell-sidebar__icon {
+  color: #ffffff !important;
+}
+
+body.student-package-page .student-shell-sidebar__label {
+  flex: 1 !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* ??? Logout ????????????????????????????????????????????????????????????????? */
+body.student-package-page .student-shell-sidebar__footer--logout {
+  margin-top: auto !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--et-sidebar-border) !important;
+}
+
+body.student-package-page .student-shell-sidebar__logout,
+body.student-package-page .student-shell-sidebar__logout--solid {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 11px var(--et-sidebar-link-pad-x) !important;
+  border-radius: 12px !important;
+  border: 1px solid #fecaca !important;
+  text-decoration: none !important;
+  color: #b91c1c !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  background: #fef2f2 !important;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform .12s ease !important;
+  box-shadow: none !important;
+}
+body.student-package-page .student-shell-sidebar__logout:hover,
+body.student-package-page .student-shell-sidebar__logout--solid:hover {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #f87171 !important;
+}
+body.student-package-page .student-shell-sidebar__logout .student-shell-sidebar__icon,
+body.student-package-page .student-shell-sidebar__logout--solid .student-shell-sidebar__icon {
+  color: #b91c1c !important;
+}
+body.student-package-page .student-shell-sidebar__logout:hover .student-shell-sidebar__icon,
+body.student-package-page .student-shell-sidebar__logout--solid:hover .student-shell-sidebar__icon {
+  color: #991b1b !important;
+}
+
+/* Main content area */
+body.student-package-page .student-shell-content {
+  background: #F8FAFC !important;
+  border-left: 1px solid var(--et-border) !important;
+  min-width: 0;
+}
+
+/* Content inner padding — generous on all sides so inner elements
+   (breadcrumbs, headers, cards) never touch the panel edges */
+body.student-package-page .student-workspace-view {
+  padding: 28px 28px 48px !important;
+}
+
+/* ??? Mobile bar (close button inside sidebar) ??????????????????????????????? */
+body.student-package-page .student-shell-sidebar__mobile-bar {
+  display: none !important;
+}
+@media (max-width: 1100px) {
+  body.student-package-page .student-shell-sidebar__mobile-bar {
+    display: flex !important;
+    justify-content: flex-end !important;
+    padding: 4px 2px 10px !important;
+  }
+  body.student-package-page .student-shell-sidebar__close {
+    display: inline-flex !important;
+    align-items: center !important; justify-content: center !important;
+    width: 30px !important; height: 30px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--et-sidebar-border) !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    cursor: pointer !important;
+    transition: background .13s ease, color .13s ease !important;
+  }
+  body.student-package-page .student-shell-sidebar__close:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+  body.student-package-page .student-shell-sidebar__close svg {
+    width: 15px !important; height: 15px !important;
+  }
+}
+
+/* ??? Mobile sidebar drawer (slide in from left) ????????????????????????????? */
+@media (max-width: 1100px) {
+  body.student-package-page .student-shell-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: var(--et-sidebar-w) !important;
+    height: 100vh !important;
+    z-index: 80 !important;
+    transform: translateX(-100%) !important;
+    transition: transform .25s cubic-bezier(.32,.72,.2,1) !important;
+  }
+  body.student-package-page .student-shell-sidebar.is-open,
+  body.student-nav-open .student-shell-sidebar {
+    transform: translateX(0) !important;
+  }
+  /* Scrim */
+  body.student-package-page .student-shell-sidebar__scrim {
+    display: block !important;
+    position: fixed !important; inset: 0 !important;
+    z-index: 79 !important;
+    background: rgba(15,23,42,.45) !important;
+    backdrop-filter: blur(2px) !important;
+    opacity: 0 !important; pointer-events: none !important;
+    transition: opacity .25s ease !important;
+  }
+  body.student-nav-open .student-shell-sidebar__scrim {
+    opacity: 1 !important; pointer-events: auto !important;
+  }
+  /* Content: no shift on mobile */
+  body.student-package-page.student-module-page .app-main,
+  body.student-dashboard-page.student-package-page .app-main {
+    width: 100% !important;
+  }
+}
+
+/* ??? Collapsed rail (desktop) ???????????????????????????????????????????????? */
+html[data-student-nav="collapsed"] body.student-package-page .student-shell-sidebar__label,
+body.student-package-page.student-nav-collapsed .student-shell-sidebar__label {
+  display: none !important;
+}
+
+/* The active dot and accent bar look cramped in the 76px rail — hide them and let
+   the filled active background carry the state instead. */
+html[data-student-nav="collapsed"] body.student-package-page .student-shell-sidebar__link::after,
+body.student-package-page.student-nav-collapsed .student-shell-sidebar__link::after,
+html[data-student-nav="collapsed"] body.student-package-page .student-shell-sidebar__link::before,
+body.student-package-page.student-nav-collapsed .student-shell-sidebar__link::before {
+  display: none !important;
+}
+html[data-student-nav="collapsed"] body.student-package-page .student-shell-sidebar__link:hover,
+body.student-package-page.student-nav-collapsed .student-shell-sidebar__link:hover {
+  transform: none !important;
+}
+
+/* ??? Dark mode sidebar ?????????????????????????????????????????????????????? */
+/* The emerald sidebar is intentionally kept consistent in dark mode too, so the
+   green identity is uniform across themes. Only the content canvas goes dark. */
+html[data-theme="dark"] body.student-package-page .student-shell-sidebar__panel,
+html[data-theme="dark"] body.student-package-page .student-shell-sidebar__panel--minimal {
+  background: var(--et-sidebar-bg) !important;
+  border-right: none !important;
+}
+html[data-theme="dark"] body.student-package-page .student-shell-sidebar__link {
+  color: var(--et-sidebar-link) !important;
+}
+html[data-theme="dark"] body.student-package-page .student-shell-sidebar__link:hover {
+  background: var(--et-sidebar-link-hover) !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"] body.student-package-page .student-shell-sidebar__link.is-active {
+  background: var(--et-sidebar-active-bg) !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"] body.student-package-page .student-shell-content {
+  background: var(--et-canvas) !important; /* dark canvas (#141925) in dark mode */
+}
+
+/* ??? Quran assistant FAB ????????????????????????????????????????????????????? */
+body.student-package-page .quran-assistant-fab {
+  z-index: 65 !important;
+}
+
+/* ??? Profile avatar ? image covers the fallback letter ????????????????????? */
+/* The <img> and the fallback <span> both live inside the avatar circle.
+   Stack the image on top so the letter is only visible when the photo fails. */
+body.student-package-page .student-shell-profile__avatar {
+  position: relative !important;
+}
+body.student-package-page .student-shell-profile__image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 2 !important;
+  border-radius: 50% !important;
+}
+body.student-package-page .student-shell-profile__fallback {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--et-brand-dark) !important;
+}
+
+/* -- Breadcrumb -------------------------------------------------------------
+   .etasmi-bc ? renders above every student workspace view.
+   Uses existing nav keys so i18n is free. RTL-aware via CSS transform.
+-------------------------------------------------------------------------- */
+.etasmi-bc {
+  margin-bottom: 18px;
+}
+
+.etasmi-bc__list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.etasmi-bc__link {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.etasmi-bc__link:hover {
+  color: #1e293b;
+  background: #f1f5f9;
+}
+
+.etasmi-bc__sep {
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+/* flip chevron for RTL locales */
+[dir="rtl"] .etasmi-bc__chevron {
+  transform: scaleX(-1);
+}
+
+.etasmi-bc__item--active {
+  display: flex;
+  align-items: center;
+}
+
+.etasmi-bc__current {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Dark mode */
+html[data-theme="dark"] .etasmi-bc__link        { color: #94a3b8; }
+html[data-theme="dark"] .etasmi-bc__link:hover   { color: #e2e8f0; background: rgba(255,255,255,.05); }
+html[data-theme="dark"] .etasmi-bc__sep          { color: #475569; }
+html[data-theme="dark"] .etasmi-bc__current      { color: #e2e8f0; }

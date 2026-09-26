@@ -1,0 +1,2230 @@
+/* ============================================================
+ * e-Tasmi — DARK MODE POLISH LAYER
+ * ============================================================
+ * Loads LAST in every *_ui_head jspf.
+ * It does NOT change light mode at all.
+ * It targets only :root[data-theme="dark"] and patches every
+ * hard-coded light color introduced by:
+ *   - student-module-polish.css
+ *   - instructor-module-polish.css
+ *   - instructor-sessions-redesign.css
+ *   - profile-redesign.css
+ *   - admin-dashboard-saas.css / admin-redesign.css
+ *   - inline <style> blocks in evaluations.jsp + payments.jsp
+ *
+ * Specificity is intentionally high (often body chains plus
+ * the data-theme attribute selector) and !important is used
+ * sparingly to defeat inline styles in JSPs.
+ * ============================================================ */
+
+/* ============================================================
+ * 0. SHARED BACKGROUND CONSISTENCY
+ *    Make sure NO light page wrapper leaks through.
+ *    Three-layer fix:
+ *      (a) Re-map the package CSS variables that drive the
+ *          page background into dark equivalents.
+ *      (b) Strip the white-overlay linear-gradient that the
+ *          packages layer on top of those vars.
+ *      (c) Force every wrapper / shell / workspace / main /
+ *          dashboard root to render against --theme-bg.
+ * ============================================================ */
+
+/* (a) Re-map package-level main backgrounds in dark mode.
+   Affects:
+     student-package.css       --student-main-bg: #f5faf7 / #f8fafc
+     student-ui-refine.css     --student-main-bg: #f8fafc
+     instructor-package.css    --instructor-main-bg: #f5faf7
+     instructor-ui-refine.css  --instructor-main-bg: #f8fafc
+     admin-package.css         --admin-main-bg: #f5faf7
+     admin-package.css         --admin-brutal-bg: #f5f5f5            */
+:root[data-theme="dark"],
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] body.student-package-page,
+:root[data-theme="dark"] body.student-package-page.student-module-page,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page,
+:root[data-theme="dark"] body.instructor-package-page,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page,
+:root[data-theme="dark"] body.admin-package-page,
+:root[data-theme="dark"] body.admin-package-page.admin-module-page,
+:root[data-theme="dark"] body.admin-dashboard-brutal {
+    --instructor-main-bg: var(--theme-bg);
+    --admin-main-bg: var(--theme-bg);
+    --student-main-bg: var(--theme-bg);
+    --admin-brutal-bg: var(--theme-bg);
+}
+
+/* (c) Body + outermost shell */
+:root[data-theme="dark"] body.student-package-page,
+:root[data-theme="dark"] body.instructor-package-page,
+:root[data-theme="dark"] body.admin-package-page,
+:root[data-theme="dark"] body.admin-body {
+    background: var(--theme-bg) !important;
+    color: var(--theme-text);
+}
+
+/* (b) + (c) Force shell-content / main-content / workspace-view
+   to plain dark, defeating the white-overlay gradient and any
+   hard-coded #f8fafc backgrounds in the *-ui-refine layers. */
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .instructor-shell-content,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-shell-content,
+:root[data-theme="dark"] body.student-package-page.student-module-page .student-shell-content,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-shell-content,
+:root[data-theme="dark"] body.student-recitations-page .student-shell-content,
+:root[data-theme="dark"] body.student-recitations-page .student-workspace-view,
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-main,
+:root[data-theme="dark"] body.admin-dashboard-brutal .admin-main {
+    background: var(--theme-bg) !important;
+    background-image: none !important;
+    color: var(--theme-text);
+}
+
+/* Catch-all for the rest of the wrappers */
+:root[data-theme="dark"] .student-shell,
+:root[data-theme="dark"] .instructor-shell,
+:root[data-theme="dark"] .admin-shell,
+:root[data-theme="dark"] .student-shell-content,
+:root[data-theme="dark"] .instructor-shell-content,
+:root[data-theme="dark"] .admin-main,
+:root[data-theme="dark"] .admin-workspace-view,
+:root[data-theme="dark"] .student-workspace-view,
+:root[data-theme="dark"] .instructor-workspace-view,
+:root[data-theme="dark"] .instructor-dashboard-clean,
+:root[data-theme="dark"] .student-dashboard-clean {
+    background: transparent !important;
+    background-image: none !important;
+    color: var(--theme-text);
+}
+
+/* Footer uses muted text on a transparent bar above page bg */
+:root[data-theme="dark"] .footer,
+:root[data-theme="dark"] .app-footer,
+:root[data-theme="dark"] footer.app-footer {
+    background: transparent !important;
+    color: var(--theme-text-muted) !important;
+    border-top-color: var(--theme-border) !important;
+}
+
+/* ============================================================
+ * 1. SHARED HERO + PAGE TITLES (.sd-hero, breadcrumb hero)
+ * Used by instructor evaluations, notifications, profile, etc.
+ * ============================================================ */
+
+:root[data-theme="dark"] .sd-hero,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .sd-hero,
+:root[data-theme="dark"] body.student-package-page.student-module-page .sd-hero,
+:root[data-theme="dark"] .student-breadcrumb-hero,
+:root[data-theme="dark"] .instructor-breadcrumb-hero,
+:root[data-theme="dark"] .admin-breadcrumb-hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .sd-hero-kicker {
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .sd-hero-title,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .sd-hero-title,
+:root[data-theme="dark"] body.student-package-page.student-module-page .sd-hero-title,
+:root[data-theme="dark"] .ar-hero__title,
+:root[data-theme="dark"] .student-breadcrumb-hero h1,
+:root[data-theme="dark"] .instructor-breadcrumb-hero h1,
+:root[data-theme="dark"] .admin-breadcrumb-hero h1 {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .sd-hero-subtitle,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .sd-hero-subtitle,
+:root[data-theme="dark"] body.student-package-page.student-module-page .sd-hero-subtitle,
+:root[data-theme="dark"] .ar-hero__sub,
+:root[data-theme="dark"] .student-breadcrumb-hero p,
+:root[data-theme="dark"] .instructor-breadcrumb-hero p,
+:root[data-theme="dark"] .admin-breadcrumb-hero p {
+    color: var(--theme-text-muted) !important;
+}
+
+/* ============================================================
+ * 2. INSTRUCTOR DASHBOARD POLISH OVERRIDES
+ * (instructor-module-polish.css → dark)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__welcome-label,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__welcome-eyebrow {
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__welcome-name,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__welcome-title,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__panel-head h3,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__panel-head h2 {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__welcome-sub,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__panel-head p {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__panel,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card:hover {
+    border-color: rgba(45, 212, 191, 0.45) !important;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card strong,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card .instructor-dashboard-clean__session-title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-meta,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-meta-row,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card .meta {
+    color: var(--theme-text-muted) !important;
+}
+
+/* Tile chips inside the session card */
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-meta-row span,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card .tile,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__session-card .meta span {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+/* Empty state */
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .sd-empty,
+:root[data-theme="dark"] body.student-package-page.student-module-page .sd-empty {
+    background: var(--theme-surface-muted) !important;
+    border: 1.5px dashed var(--theme-border-strong) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .sd-empty strong,
+:root[data-theme="dark"] body.student-package-page.student-module-page .sd-empty strong {
+    color: var(--theme-text) !important;
+}
+
+/* ============================================================
+ * 3. STATUS PILLS (success / warning / danger / neutral)
+ * ============================================================ */
+
+:root[data-theme="dark"] .status-pill,
+:root[data-theme="dark"] .status-pill--neutral {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .status-pill--success,
+:root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .status-pill--success {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+    border: 1px solid rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] .status-pill--warning {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border: 1px solid rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] .status-pill--danger {
+    background: rgba(248, 113, 113, 0.14) !important;
+    color: #fca5a5 !important;
+    border: 1px solid rgba(248, 113, 113, 0.32) !important;
+}
+
+/* ============================================================
+ * 4. INSTRUCTOR PROFILE (profile-redesign.css + polish overrides)
+ * ============================================================ */
+
+:root[data-theme="dark"] .profile-hero,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .profile-hero,
+:root[data-theme="dark"] body.student-package-page.student-module-page .profile-hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .profile-hero h1,
+:root[data-theme="dark"] .profile-hero .profile-hero__title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .profile-hero p,
+:root[data-theme="dark"] .profile-hero .profile-hero__sub,
+:root[data-theme="dark"] .profile-breadcrumb {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .profile-sidebar-card,
+:root[data-theme="dark"] .profile-form-card,
+:root[data-theme="dark"] .profile-stat-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .profile-sidebar-card .profile-name,
+:root[data-theme="dark"] .profile-sidebar-card .profile-display-name,
+:root[data-theme="dark"] .profile-form-card h2,
+:root[data-theme="dark"] .profile-form-card h3 {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .profile-sidebar-card .profile-role,
+:root[data-theme="dark"] .profile-sidebar-card .profile-meta-line,
+:root[data-theme="dark"] .profile-form-card .pf-help,
+:root[data-theme="dark"] .profile-form-card .pf-hint {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .profile-avatar-wrap {
+    background: linear-gradient(135deg, rgba(45, 212, 191, 0.18), rgba(45, 212, 191, 0.04)) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .pf-field label,
+:root[data-theme="dark"] .pf-label {
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .pf-field input,
+:root[data-theme="dark"] .pf-field select,
+:root[data-theme="dark"] .pf-field textarea {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .pf-field input:focus,
+:root[data-theme="dark"] .pf-field select:focus,
+:root[data-theme="dark"] .pf-field textarea:focus {
+    border-color: var(--theme-primary) !important;
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18) !important;
+}
+
+:root[data-theme="dark"] .pbtn,
+:root[data-theme="dark"] .pbtn-outline,
+:root[data-theme="dark"] .pbtn-ghost {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .pbtn:hover,
+:root[data-theme="dark"] .pbtn-outline:hover,
+:root[data-theme="dark"] .pbtn-ghost:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] .pbtn-primary {
+    background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
+    border: 1px solid rgba(45, 212, 191, 0.35) !important;
+    color: #0b1220 !important;
+    box-shadow: 0 6px 16px rgba(20, 184, 166, 0.28) !important;
+}
+
+:root[data-theme="dark"] .pbtn-primary:hover {
+    background: linear-gradient(135deg, #2dd4bf, #14b8a6) !important;
+    color: #0b1220 !important;
+}
+
+/* ============================================================
+ * 5. INSTRUCTOR SESSIONS PAGE (.isess-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] .isess-breadcrumb,
+:root[data-theme="dark"] .isess-breadcrumb a,
+:root[data-theme="dark"] .isess-breadcrumb .sep {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .isess-breadcrumb a:hover {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .isess-hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] .isess-hero__text .isess-hero__eyebrow,
+:root[data-theme="dark"] .isess-hero__eyebrow {
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .isess-hero__text h1,
+:root[data-theme="dark"] .isess-hero h1 {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .isess-hero__text p,
+:root[data-theme="dark"] .isess-hero p {
+    color: var(--theme-text-muted) !important;
+}
+
+/* Section header + count badge */
+:root[data-theme="dark"] .isess-section-header h2,
+:root[data-theme="dark"] .isess-section-head h2,
+:root[data-theme="dark"] .isess-section-head h3 {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .isess-section-head p {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .isess-count-badge,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .isess-count-badge {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+    border: 1px solid rgba(45, 212, 191, 0.32) !important;
+}
+
+/* Sessions table wrapper + rows */
+:root[data-theme="dark"] .isess-table-wrap,
+:root[data-theme="dark"] .isess-table {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .isess-table thead,
+:root[data-theme="dark"] .isess-table thead th,
+:root[data-theme="dark"] .isess-table th {
+    background: var(--theme-surface-raised) !important;
+    color: var(--theme-text-muted) !important;
+    border-bottom: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .isess-summary-row,
+:root[data-theme="dark"] .isess-summary-row td,
+:root[data-theme="dark"] .isess-table tbody tr,
+:root[data-theme="dark"] .isess-table tbody td {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text-soft) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .isess-table tbody tr:hover,
+:root[data-theme="dark"] .isess-summary-row:hover,
+:root[data-theme="dark"] .isess-summary-row:hover td {
+    background: var(--theme-surface-hover) !important;
+}
+
+/* Sessions row kebab menu (popover, not in-flow) */
+:root[data-theme="dark"] .isess-more-menu {
+    background: var(--theme-surface-raised) !important;
+    border-color: var(--theme-border) !important;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55) !important;
+}
+
+:root[data-theme="dark"] .isess-more-menu button {
+    color: #f87171 !important;
+}
+
+:root[data-theme="dark"] .isess-more-menu button:hover {
+    background: rgba(248, 113, 113, 0.12) !important;
+}
+
+:root[data-theme="dark"] .isess-detail-row,
+:root[data-theme="dark"] .isess-detail-row td,
+:root[data-theme="dark"] .isess-detail-grid {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .isess-detail-grid > div,
+:root[data-theme="dark"] .isess-detail-card {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .isess-detail-grid label,
+:root[data-theme="dark"] .isess-detail-grid .label,
+:root[data-theme="dark"] .isess-detail-card .label {
+    color: var(--theme-text-muted) !important;
+}
+
+/* Alerts on the sessions page */
+:root[data-theme="dark"] .isess-alert {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .isess-alert--success {
+    background: rgba(45, 212, 191, 0.10) !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+    color: #6ee7d6 !important;
+}
+
+:root[data-theme="dark"] .isess-alert--error {
+    background: rgba(248, 113, 113, 0.12) !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+    color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] .isess-alert--warning {
+    background: rgba(251, 191, 36, 0.12) !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+    color: #fcd34d !important;
+}
+
+/* Status pills inside the sessions table */
+:root[data-theme="dark"] .isess-pill {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .isess-pill--scheduled {
+    background: rgba(96, 165, 250, 0.15) !important;
+    color: #93c5fd !important;
+    border-color: rgba(96, 165, 250, 0.32) !important;
+}
+
+:root[data-theme="dark"] .isess-pill--ongoing {
+    background: rgba(45, 212, 191, 0.15) !important;
+    color: #6ee7d6 !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] .isess-pill--completed {
+    background: rgba(148, 163, 184, 0.15) !important;
+    color: var(--theme-text-soft) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .isess-pill--cancelled {
+    background: rgba(248, 113, 113, 0.14) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+}
+
+/* Buttons on the sessions page */
+:root[data-theme="dark"] .ibtn,
+:root[data-theme="dark"] .ibtn-outline,
+:root[data-theme="dark"] .ibtn-ghost,
+:root[data-theme="dark"] .ibtn-secondary {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .ibtn:hover,
+:root[data-theme="dark"] .ibtn-outline:hover,
+:root[data-theme="dark"] .ibtn-ghost:hover,
+:root[data-theme="dark"] .ibtn-secondary:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .ibtn-primary,
+:root[data-theme="dark"] .ibtn--primary,
+:root[data-theme="dark"] .ibtn-start {
+    background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
+    border: 1px solid rgba(45, 212, 191, 0.35) !important;
+    color: #0b1220 !important;
+    box-shadow: 0 6px 14px rgba(20, 184, 166, 0.30) !important;
+}
+
+:root[data-theme="dark"] .ibtn-primary:hover,
+:root[data-theme="dark"] .ibtn--primary:hover,
+:root[data-theme="dark"] .ibtn-start:hover {
+    background: linear-gradient(135deg, #2dd4bf, #14b8a6) !important;
+    color: #0b1220 !important;
+}
+
+:root[data-theme="dark"] .ibtn-danger,
+:root[data-theme="dark"] .ibtn--danger {
+    background: rgba(248, 113, 113, 0.16) !important;
+    border: 1px solid rgba(248, 113, 113, 0.35) !important;
+    color: #fecaca !important;
+}
+
+:root[data-theme="dark"] .ibtn-danger:hover {
+    background: rgba(248, 113, 113, 0.24) !important;
+    color: #fff !important;
+}
+
+/* Modals from the sessions page */
+:root[data-theme="dark"] .isess-modal,
+:root[data-theme="dark"] .isess-modal__panel {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-lg) !important;
+}
+
+:root[data-theme="dark"] .isess-modal__overlay,
+:root[data-theme="dark"] .isess-modal-overlay {
+    background: var(--theme-overlay) !important;
+}
+
+/* ============================================================
+ * 6. INSTRUCTOR PAYMENTS (inline styles in payments.jsp)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .ip-hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-hero h1 {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-hero p {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-hero__eyebrow {
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-card,
+:root[data-theme="dark"] body.instructor-package-page .ip-method-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-card__title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-card__sub {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-method-card.is-disabled {
+    background: var(--theme-surface-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-method-brand__meta strong {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-method-brand__meta .ip-method-provider,
+:root[data-theme="dark"] body.instructor-package-page .ip-field-hint {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-field label {
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-field input,
+:root[data-theme="dark"] body.instructor-package-page .ip-field textarea {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-field input::placeholder,
+:root[data-theme="dark"] body.instructor-package-page .ip-field textarea::placeholder {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-field input:focus,
+:root[data-theme="dark"] body.instructor-package-page .ip-field textarea:focus {
+    background: var(--theme-surface-raised) !important;
+    border-color: var(--theme-primary) !important;
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18) !important;
+}
+
+/* Payments table */
+:root[data-theme="dark"] body.instructor-package-page .ip-table-wrap {
+    border: 1px solid var(--theme-border) !important;
+    background: var(--theme-surface) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-table {
+    background: transparent !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-table th {
+    background: var(--theme-surface-raised) !important;
+    color: var(--theme-text-muted) !important;
+    border-bottom: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-table td {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-bottom: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-table tbody tr:hover td,
+:root[data-theme="dark"] body.instructor-package-page .ip-table tr:hover td {
+    background: var(--theme-surface-hover) !important;
+}
+
+/* Payment status pills */
+:root[data-theme="dark"] body.instructor-package-page .ip-pill {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-pill--success {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-pill--warning {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-pill--danger {
+    background: rgba(248, 113, 113, 0.14) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-link {
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-link:hover {
+    color: #5eead4 !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-empty {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-empty strong {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-actions input {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-alert {
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-alert--success {
+    background: rgba(45, 212, 191, 0.12) !important;
+    color: #6ee7d6 !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-alert--error {
+    background: rgba(248, 113, 113, 0.12) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+}
+
+/* Payment modal */
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__panel {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: 0 32px 90px rgba(0, 0, 0, 0.55) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__head,
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__foot {
+    background: var(--theme-surface-raised) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__sub,
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__foot-hint {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__icon {
+    background: rgba(45, 212, 191, 0.18) !important;
+    color: #6ee7d6 !important;
+    border: 1px solid rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__trust {
+    background: rgba(45, 212, 191, 0.18) !important;
+    color: #6ee7d6 !important;
+    border: 1px solid rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__close {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-modal__close:hover {
+    background: var(--theme-surface-hover) !important;
+}
+
+/* Payment summary meter + dropzone + state badges + switch */
+:root[data-theme="dark"] body.instructor-package-page .ip-summary {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-summary__meter {
+    background: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-summary__meter-fill {
+    background: linear-gradient(90deg, #14b8a6, #2dd4bf) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-summary__text {
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-summary__text strong {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-dropzone {
+    background: var(--theme-surface-muted) !important;
+    border: 1.5px dashed var(--theme-border-strong) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-dropzone:hover,
+:root[data-theme="dark"] body.instructor-package-page .ip-dropzone.is-focus,
+:root[data-theme="dark"] body.instructor-package-page .ip-dropzone.is-drag {
+    background: rgba(45, 212, 191, 0.08) !important;
+    border-color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-dropzone__paper {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-state-badge--configured {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+    border: 1px solid rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-state-badge--unset {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border: 1px solid rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-switch {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-switch__track {
+    background: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .ip-switch input:checked + .ip-switch__track {
+    background: #14b8a6 !important;
+}
+
+/* ============================================================
+ * 7. INSTRUCTOR EVALUATIONS (inline styles in evaluations.jsp)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table-wrap,
+:root[data-theme="dark"] body.instructor-package-page .eval-table-wrap {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table,
+:root[data-theme="dark"] body.instructor-package-page .eval-table {
+    background: transparent !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table thead th,
+:root[data-theme="dark"] body.instructor-package-page .eval-table thead th {
+    background: var(--theme-surface-raised) !important;
+    color: var(--theme-text-muted) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table tbody td,
+:root[data-theme="dark"] body.instructor-package-page .eval-table tbody td {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table tbody tr:hover td,
+:root[data-theme="dark"] body.instructor-package-page .eval-table tbody tr:hover td {
+    background: var(--theme-surface-hover) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-student__name,
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-student__id {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-student__id {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-session-meta,
+:root[data-theme="dark"] body.instructor-package-page .eval-session-meta {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-session-meta__label {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-session-meta__value {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-session-meta__warn {
+    background: rgba(251, 191, 36, 0.12) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+/* eval-final block */
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final,
+:root[data-theme="dark"] body.instructor-package-page .eval-final {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final__title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final__grid label {
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final__grid input[type="number"],
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final__grid textarea {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final__grid input[type="number"]:focus,
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-final__grid textarea:focus {
+    border-color: var(--theme-primary) !important;
+    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.20) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-save-btn,
+:root[data-theme="dark"] body.instructor-package-page .eval-save-btn {
+    background: linear-gradient(135deg, #14b8a6, #0d9488) !important;
+    border: 1px solid rgba(45, 212, 191, 0.35) !important;
+    color: #0b1220 !important;
+    box-shadow: 0 6px 16px rgba(20, 184, 166, 0.30) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-save-btn:hover {
+    background: linear-gradient(135deg, #2dd4bf, #14b8a6) !important;
+}
+
+/* AI Report main shell */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report,
+:root[data-theme="dark"] body.instructor-package-page .ai-report {
+    background: linear-gradient(180deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report--error {
+    background: rgba(248, 113, 113, 0.10) !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+    color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report__title,
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report__heading {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report__sub {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report__icon {
+    background: linear-gradient(135deg, #14b8a6, #0ea5a4) !important;
+    color: #0b1220 !important;
+    box-shadow: 0 6px 14px rgba(20, 184, 166, 0.28) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report__score {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+/* AI badges */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-badge {
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-badge--excellent {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-badge--good {
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #93c5fd !important;
+    border-color: rgba(96, 165, 250, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-badge--fair {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-badge--needs {
+    background: rgba(248, 113, 113, 0.14) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+}
+
+/* AI stats */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat,
+:root[data-theme="dark"] body.instructor-package-page .ai-stat {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat__label {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat__value {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat--ok {
+    border-inline-start: 3px solid #2dd4bf !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat--miss {
+    border-inline-start: 3px solid #f87171 !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat--sub {
+    border-inline-start: 3px solid #fbbf24 !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-stat--extra {
+    border-inline-start: 3px solid var(--theme-text-muted) !important;
+}
+
+/* AI sections (each subsection card) */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section,
+:root[data-theme="dark"] body.instructor-package-page .ai-section {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section--summary {
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.06) 0%, var(--theme-surface-raised) 100%) !important;
+    border-color: rgba(45, 212, 191, 0.22) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section--match {
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.05) 0%, var(--theme-surface-raised) 100%) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section--reference {
+    background: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section__title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section__hint {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-section__body {
+    color: var(--theme-text-soft) !important;
+}
+
+/* AI chips */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-chip {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-chip--miss {
+    background: rgba(248, 113, 113, 0.14) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-chip--sub {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-chip--extra,
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-chip--more {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-muted) !important;
+    border-color: var(--theme-border) !important;
+}
+
+/* Confidence bar + value */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-conf__label {
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-conf__bar {
+    background: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-conf__fill {
+    background: linear-gradient(90deg, #14b8a6, #2dd4bf) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-conf__value {
+    color: var(--theme-text) !important;
+}
+
+/* Passage banner (warm tint in light → muted teal in dark) */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner {
+    background: rgba(45, 212, 191, 0.08) !important;
+    border: 1px solid rgba(45, 212, 191, 0.22) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner__icon {
+    background: rgba(45, 212, 191, 0.18) !important;
+    color: #6ee7d6 !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner__title {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner__text,
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner__chiplabel {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-chip {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner__hint,
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-passage-banner__note {
+    color: var(--theme-text-muted) !important;
+}
+
+/* AI status cards (rejected / invalid / cannot / failed) */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--rejected {
+    background: rgba(248, 113, 113, 0.10) !important;
+    border-color: rgba(248, 113, 113, 0.30) !important;
+    color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--rejected .ai-status-card__icon {
+    background: #b91c1c !important;
+    color: #fff !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--invalid {
+    background: rgba(251, 191, 36, 0.10) !important;
+    border-color: rgba(251, 191, 36, 0.30) !important;
+    color: #fcd34d !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--invalid .ai-status-card__icon {
+    background: #b45309 !important;
+    color: #fff !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--cannot {
+    background: var(--theme-surface-muted) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--cannot .ai-status-card__icon {
+    background: var(--theme-text-muted) !important;
+    color: #fff !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--failed {
+    background: rgba(248, 113, 113, 0.10) !important;
+    border-color: rgba(248, 113, 113, 0.30) !important;
+    color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card--failed .ai-status-card__icon {
+    background: #991b1b !important;
+    color: #fff !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card__transcript {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+/* "Analyze with eTasmi AI" button */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-analyze-btn,
+:root[data-theme="dark"] body.instructor-package-page .ai-analyze-btn {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-analyze-btn:hover,
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-analyze-btn:focus-visible {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-analyze-btn--disabled,
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-analyze-btn[disabled] {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-analyze-btn__icon {
+    color: var(--theme-primary) !important;
+}
+
+/* ============================================================
+ * 8. STUDENT MODULE POLISH OVERRIDES
+ * (student-module-polish.css → dark)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-card,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__panel,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__session-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-card {
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(45, 212, 191, 0.08) 0%, rgba(45, 212, 191, 0) 55%),
+        linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-name,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-title,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__panel-head h2,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__panel-head h3,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__session-card strong {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-label {
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-sub,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__panel-head p,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item small,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__session-card .meta {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item {
+    background: var(--theme-surface) !important;
+    border-bottom: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item:hover {
+    background: var(--theme-surface-hover) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item strong {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-empty {
+    background: var(--theme-surface-muted) !important;
+    border: 1.5px dashed var(--theme-border-strong) !important;
+    color: var(--theme-text-muted) !important;
+}
+
+/* Student session cards (My Sessions / Available Sessions) */
+:root[data-theme="dark"] body.student-package-page .ssess-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-card:hover {
+    border-color: rgba(45, 212, 191, 0.40) !important;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-card__title,
+:root[data-theme="dark"] body.student-package-page .ssess-card__heading {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-card__sub,
+:root[data-theme="dark"] body.student-package-page .ssess-card__meta {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-chip {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-card__bottom {
+    background: var(--theme-surface-raised) !important;
+    border-top: 1px solid var(--theme-border) !important;
+}
+
+/* Progress bars */
+:root[data-theme="dark"] body.student-package-page .ssess-progress,
+:root[data-theme="dark"] body.student-package-page .sd-progress-bar,
+:root[data-theme="dark"] body.student-package-page .progress-track {
+    background: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-progress__fill,
+:root[data-theme="dark"] body.student-package-page .sd-progress-fill,
+:root[data-theme="dark"] body.student-package-page .progress-fill {
+    background: linear-gradient(90deg, #14b8a6, #2dd4bf) !important;
+}
+
+/* Recitation page */
+:root[data-theme="dark"] body.student-package-page .rec-card,
+:root[data-theme="dark"] body.student-package-page .rec-record {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .rec-record:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .rec-link-button {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .rec-link-button:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+}
+
+/* Student receipt buttons (payments page) */
+:root[data-theme="dark"] body.student-package-page .btn-receipt-open,
+:root[data-theme="dark"] body.student-package-page .btn-receipt-download {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .btn-receipt-open:hover,
+:root[data-theme="dark"] body.student-package-page .btn-receipt-download:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+}
+
+/* Student progress overview metrics */
+:root[data-theme="dark"] body.student-package-page #progressOverview .sd-progress-metric,
+:root[data-theme="dark"] body.student-package-page .sd-progress-metric {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+/* ============================================================
+ * 9. NOTIFICATIONS (shared)
+ * ============================================================ */
+
+:root[data-theme="dark"] .notification-list,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .notification-list,
+:root[data-theme="dark"] body.student-package-page.student-module-page .notification-list {
+    background: transparent !important;
+}
+
+:root[data-theme="dark"] .notification-item,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .notification-item,
+:root[data-theme="dark"] body.student-package-page.student-module-page .notification-item {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .notification-item:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] .notification-item.is-unread {
+    background: linear-gradient(180deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border-color: rgba(45, 212, 191, 0.30) !important;
+}
+
+:root[data-theme="dark"] .notification-item__title,
+:root[data-theme="dark"] .notification-item strong {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .notification-item__message,
+:root[data-theme="dark"] .notification-item p {
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .notification-item__time,
+:root[data-theme="dark"] .notification-item small,
+:root[data-theme="dark"] .notification-item time {
+    color: var(--theme-text-muted) !important;
+}
+
+/* ============================================================
+ * 10. ADMIN MODULE (.ar-* + .admin-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.admin-package-page .ar-hero,
+:root[data-theme="dark"] body.admin-package-page .ar-hero--dashboard {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: var(--theme-shadow-md) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page:not(.admin-dashboard-page) .ar-stat,
+:root[data-theme="dark"] body.admin-package-page:not(.admin-dashboard-page) .ar-quick-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page:not(.admin-dashboard-page) .ar-stat:hover,
+:root[data-theme="dark"] body.admin-package-page:not(.admin-dashboard-page) .ar-quick-card:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__label,
+:root[data-theme="dark"] body.admin-package-page .ar-quick-card__sub {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__value,
+:root[data-theme="dark"] body.admin-package-page .ar-quick-card__text {
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__icon,
+:root[data-theme="dark"] body.admin-package-page .ar-quick-card__icon {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-primary) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__chip {
+    background: var(--theme-surface-muted) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__chip--em {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__chip--blue {
+    background: rgba(96, 165, 250, 0.14) !important;
+    color: #93c5fd !important;
+    border-color: rgba(96, 165, 250, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__chip--amber {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__micro--success {
+    color: #6ee7d6 !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__micro--warning {
+    color: #fcd34d !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-stat__micro--neutral {
+    color: var(--theme-text-muted) !important;
+}
+
+/* Admin tables */
+:root[data-theme="dark"] body.admin-package-page .ar-table-wrap,
+:root[data-theme="dark"] body.admin-package-page .admin-table-wrap {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-table,
+:root[data-theme="dark"] body.admin-package-page .admin-table {
+    background: transparent !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-table thead,
+:root[data-theme="dark"] body.admin-package-page .ar-table th,
+:root[data-theme="dark"] body.admin-package-page .admin-table th {
+    background: var(--theme-surface-raised) !important;
+    color: var(--theme-text-muted) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-table td,
+:root[data-theme="dark"] body.admin-package-page .admin-table td {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-table tbody tr:hover td,
+:root[data-theme="dark"] body.admin-package-page .admin-table tbody tr:hover td {
+    background: var(--theme-surface-hover) !important;
+}
+
+/* Admin filters / search row */
+:root[data-theme="dark"] body.admin-package-page .ar-filters,
+:root[data-theme="dark"] body.admin-package-page .ar-toolbar,
+:root[data-theme="dark"] body.admin-package-page .admin-toolbar {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+/* Admin breadcrumb */
+:root[data-theme="dark"] body.admin-package-page .ar-breadcrumb {
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-breadcrumb .sep {
+    color: var(--theme-text-muted) !important;
+}
+
+/* Admin alerts */
+:root[data-theme="dark"] body.admin-package-page .ar-alert,
+:root[data-theme="dark"] body.admin-package-page .admin-alert {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-alert--success {
+    background: rgba(45, 212, 191, 0.12) !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+    color: #6ee7d6 !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-alert--error {
+    background: rgba(248, 113, 113, 0.12) !important;
+    border-color: rgba(248, 113, 113, 0.32) !important;
+    color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page .ar-alert--warning {
+    background: rgba(251, 191, 36, 0.12) !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+    color: #fcd34d !important;
+}
+
+/* ============================================================
+ * 11. SHARED CARDS that may still leak white
+ *     (catch-all for any panel with explicit white background)
+ * ============================================================ */
+
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .surface-card,
+:root[data-theme="dark"] .pkg-card,
+:root[data-theme="dark"] .form-card,
+:root[data-theme="dark"] .info-card,
+:root[data-theme="dark"] .ar-card,
+:root[data-theme="dark"] .admin-card,
+:root[data-theme="dark"] .student-card,
+:root[data-theme="dark"] .instructor-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-sm) !important;
+}
+
+/* Generic table fallback inside admin/instructor/student pages */
+:root[data-theme="dark"] body.admin-package-page table.data-table,
+:root[data-theme="dark"] body.admin-package-page table.list-table,
+:root[data-theme="dark"] body.instructor-package-page table.data-table,
+:root[data-theme="dark"] body.instructor-package-page table.list-table,
+:root[data-theme="dark"] body.student-package-page table.data-table,
+:root[data-theme="dark"] body.student-package-page table.list-table {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-color: var(--theme-border) !important;
+}
+
+/* ============================================================
+ * 12. INPUTS / SEARCH BARS / FILTER CHIPS (catch leftovers)
+ * ============================================================ */
+
+:root[data-theme="dark"] .search-bar,
+:root[data-theme="dark"] .search-bar input,
+:root[data-theme="dark"] .filter-chip,
+:root[data-theme="dark"] .toolbar-input {
+    background: var(--theme-surface-raised) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .filter-chip:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] .filter-chip.is-active,
+:root[data-theme="dark"] .filter-chip[aria-pressed="true"] {
+    background: rgba(45, 212, 191, 0.16) !important;
+    border-color: rgba(45, 212, 191, 0.40) !important;
+    color: #6ee7d6 !important;
+}
+
+/* ============================================================
+ * 13. HEADINGS + LINKS (fallback)
+ * ============================================================ */
+
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] h5,
+:root[data-theme="dark"] h6 {
+    color: var(--theme-text);
+}
+
+:root[data-theme="dark"] a:not([class]) {
+    color: var(--theme-primary);
+}
+
+:root[data-theme="dark"] a:not([class]):hover {
+    color: #5eead4;
+}
+
+/* ============================================================
+ * 14. FINE PRINT — divider lines, lists, tooltips
+ * ============================================================ */
+
+:root[data-theme="dark"] .divider,
+:root[data-theme="dark"] .sd-divider,
+:root[data-theme="dark"] hr {
+    border-color: var(--theme-border) !important;
+    background: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] dl,
+:root[data-theme="dark"] dl dt {
+    color: var(--theme-text);
+}
+
+:root[data-theme="dark"] dl dd {
+    color: var(--theme-text-soft);
+}
+
+/* ============================================================
+ * 15. STRONG OVERRIDES — every remaining hard-coded #fff / #f8fafc
+ *     leak from the older redesign / package layers.
+ * ============================================================ */
+
+/* ---- 15.1 Student tables in student-package.css ---- */
+:root[data-theme="dark"] body.student-package-page .table-wrap,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page table,
+:root[data-theme="dark"] body.student-package-page table {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .table-wrap th,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page table th,
+:root[data-theme="dark"] body.student-package-page table th {
+    background: var(--theme-surface-raised) !important;
+    color: var(--theme-text-muted) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .table-wrap td,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page table td,
+:root[data-theme="dark"] body.student-package-page table td {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .table-wrap tr:hover td,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page table tr:hover td,
+:root[data-theme="dark"] body.student-package-page table tr:hover td {
+    background: var(--theme-surface-hover) !important;
+}
+
+/* Misc hard-coded white surfaces in student-package.css */
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .btn-ghost {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .btn-ghost:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page.student-receipt-page,
+:root[data-theme="dark"] body.student-package-page.student-receipt-page .receipt-section {
+    background: var(--theme-bg) !important;
+    color: var(--theme-text);
+}
+
+:root[data-theme="dark"] body.student-package-page.student-receipt-page .receipt-section {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page.student-receipt-page .btn-ghost {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text) !important;
+    border-color: var(--theme-border) !important;
+}
+
+/* ---- 15.2 Student sessions redesign (.ssess-*) ---- */
+:root[data-theme="dark"] body.student-package-page .ssess-hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-hero__stats,
+:root[data-theme="dark"] body.student-package-page .ssess-summary-item {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-tabs--pills .ssess-tab {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-tabs--pills .ssess-tab:hover {
+    background: var(--theme-surface-hover) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-tab.is-active,
+:root[data-theme="dark"] body.student-package-page .ssess-tabs--pills .ssess-tab.is-active {
+    background: rgba(45, 212, 191, 0.16) !important;
+    color: #6ee7d6 !important;
+    border-color: rgba(45, 212, 191, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-pill,
+:root[data-theme="dark"] body.student-package-page .ssess-pill--progress {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-badge--pending {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border: 1px solid rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-btn--outline {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-btn--outline:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .ssess-alert--warning {
+    background: rgba(251, 191, 36, 0.12) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+/* ---- 15.3 Profile redesign (.profile-*) ---- */
+:root[data-theme="dark"] .profile-hero {
+    background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .profile-stat-card,
+:root[data-theme="dark"] .profile-sidebar-card,
+:root[data-theme="dark"] .profile-form-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .pf-field input,
+:root[data-theme="dark"] .pf-field select,
+:root[data-theme="dark"] .pf-field textarea {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .pf-field input[readonly] {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .pbtn-outline {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .pbtn-outline:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .pwd-modal,
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .pwd-modal {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+    box-shadow: var(--theme-shadow-lg) !important;
+}
+
+/* ---- 15.4 Admin redesign (admin-redesign.css .ar-*) ---- */
+:root[data-theme="dark"] .ar-stat,
+:root[data-theme="dark"] .ar-section,
+:root[data-theme="dark"] .ar-quick-card {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .ar-btn--outline {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .ar-btn--outline:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .ar-badge--success {
+    background: rgba(45, 212, 191, 0.14) !important;
+    color: #6ee7d6 !important;
+}
+
+:root[data-theme="dark"] .ar-badge--warning {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+}
+
+:root[data-theme="dark"] .ar-alert--error {
+    background: rgba(248, 113, 113, 0.12) !important;
+    color: #fca5a5 !important;
+    border: 1px solid rgba(248, 113, 113, 0.32) !important;
+}
+
+:root[data-theme="dark"] .ar-alert--warning {
+    background: rgba(251, 191, 36, 0.12) !important;
+    color: #fcd34d !important;
+    border: 1px solid rgba(251, 191, 36, 0.32) !important;
+}
+
+:root[data-theme="dark"] .ar-quick-card__icon--blue {
+    background: rgba(96, 165, 250, 0.16) !important;
+    color: #93c5fd !important;
+}
+
+:root[data-theme="dark"] .ar-quick-card__icon--amber {
+    background: rgba(251, 191, 36, 0.16) !important;
+    color: #fcd34d !important;
+}
+
+:root[data-theme="dark"] .ar-quick-card__icon--green {
+    background: rgba(45, 212, 191, 0.16) !important;
+    color: #6ee7d6 !important;
+}
+
+/* ---- 15.5 Admin UI refine (admin-ui-refine.css) ---- */
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .ar-quick-card,
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-table,
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-table-wrap {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-table thead,
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-table th {
+    background: var(--theme-surface-raised) !important;
+    color: var(--theme-text-muted) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-table td {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-package-page.admin-module-page .admin-table tbody tr:hover td {
+    background: var(--theme-surface-hover) !important;
+}
+
+:root[data-theme="dark"] body.admin-report-page .status-pill--neutral,
+:root[data-theme="dark"] body.admin-package-page .status-pill--neutral {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+/* ---- 15.6 Admin dashboard SaaS (admin-dashboard-saas.css) ---- */
+:root[data-theme="dark"] body.admin-dashboard-page .ar-stat {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-dashboard-page .ar-quick-card {
+    background: var(--theme-surface) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.admin-dashboard-page .ar-stat__icon {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-primary) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-dashboard-page .ar-stat__micro--warning {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+}
+
+:root[data-theme="dark"] body.admin-dashboard-page .ar-stat__sub .ar-stat__chip {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text-soft) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.admin-dashboard-page .ar-stat__sub .ar-stat__chip--amber {
+    background: rgba(251, 191, 36, 0.14) !important;
+    color: #fcd34d !important;
+    border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+/* ---- 15.7 Instructor sessions redesign (instructor-sessions-redesign.css) ---- */
+/* Most already covered in section 5; this catches the leftovers. */
+:root[data-theme="dark"] .ibtn-outline,
+:root[data-theme="dark"] body.instructor-package-page .ibtn-outline {
+    background: var(--theme-surface-muted) !important;
+    color: var(--theme-text) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .ibtn-outline:hover,
+:root[data-theme="dark"] body.instructor-package-page .ibtn-outline:hover {
+    background: var(--theme-surface-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .ibtn-ghost:hover {
+    background: var(--theme-surface-hover) !important;
+    color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .ibtn-danger {
+    background: rgba(248, 113, 113, 0.12) !important;
+    color: #fca5a5 !important;
+    border: 1px solid rgba(248, 113, 113, 0.32) !important;
+}
+
+:root[data-theme="dark"] .isess-history-detail,
+:root[data-theme="dark"] .isess-detail,
+:root[data-theme="dark"] .isess-modal {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+    border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .isess-table {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+}
+
+/* Inputs in instructor sessions */
+:root[data-theme="dark"] body.instructor-package-page .isess-modal input[type="text"],
+:root[data-theme="dark"] body.instructor-package-page .isess-modal input[type="number"],
+:root[data-theme="dark"] body.instructor-package-page .isess-modal input[type="date"],
+:root[data-theme="dark"] body.instructor-package-page .isess-modal input[type="time"],
+:root[data-theme="dark"] body.instructor-package-page .isess-modal select,
+:root[data-theme="dark"] body.instructor-package-page .isess-modal textarea {
+    background: var(--theme-surface-raised) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+/* ---- 15.8 More inline styles in evaluations.jsp that slipped through ---- */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-status-card__transcript,
+:root[data-theme="dark"] body.instructor-package-page .ai-status-card__transcript {
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text-soft) !important;
+}
+
+/* The AI report __score box and any leftover white panel */
+:root[data-theme="dark"] body.instructor-evaluations-page .ai-report__score,
+:root[data-theme="dark"] body.instructor-package-page .ai-report__score {
+    background: var(--theme-surface-raised) !important;
+    border: 1px solid var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+/* ---- 15.9 Final defensive net for any element that uses a
+       known light surface variable that isn't remapped above. */
+:root[data-theme="dark"] [style*="background:#fff"],
+:root[data-theme="dark"] [style*="background: #fff"],
+:root[data-theme="dark"] [style*="background:#FFFFFF"],
+:root[data-theme="dark"] [style*="background: #FFFFFF"],
+:root[data-theme="dark"] [style*="background-color:#fff"],
+:root[data-theme="dark"] [style*="background-color: #fff"] {
+    background: var(--theme-surface) !important;
+    color: var(--theme-text) !important;
+}
+
+/* ============================================================
+ * 17. LEGACY AUTH SHELL (pages.css / components.css)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.auth-body .auth-status-badge {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-status-badge--danger {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-icon-badge {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-alert[data-tone="success"] {
+  background: rgba(45, 212, 191, 0.12) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-alert[data-tone="error"] {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-link,
+:root[data-theme="dark"] body.auth-body .auth-help,
+:root[data-theme="dark"] body.auth-body .auth-meta {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-link:hover {
+  color: var(--theme-primary) !important;
+}
+
+/* Register page — etasmi-auth-shell.css */
+:root[data-theme="dark"] body.etasmi-auth-v2--register,
+:root[data-theme="dark"] body.etasmi-auth-v2--register .auth-page {
+  background: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-shell,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-form-surface {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body {
+  background: #0f172a !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__hero {
+  background: linear-gradient(155deg, #0f766e 0%, #0d9488 42%, #115e59 88%) !important;
+  color: #fff !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body-head h2,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body-head p,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__brand,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__tagline {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body-head p,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__tagline {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-role-switch {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-role-switch__option {
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-role-switch__option.is-active {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control {
+  background: rgba(30, 41, 59, 0.5) !important;
+  border-color: #334155 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control select,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control textarea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-label,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-help {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-alert[data-tone="error"] {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}
+
+/* ============================================================
+ * 16. REDUCE-MOTION respect
+ * ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    :root[data-theme="dark"] *,
+    :root[data-theme="dark"] *::before,
+    :root[data-theme="dark"] *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}

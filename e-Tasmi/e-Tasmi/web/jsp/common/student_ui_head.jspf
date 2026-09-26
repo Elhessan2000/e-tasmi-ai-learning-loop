@@ -1,0 +1,35 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ include file="/jsp/common/etasmi_theme_init.jspf" %>
+<%@ include file="/jsp/common/etasmi_i18n_head.jspf" %>
+<script>
+  (function(){
+    try{
+      var c = localStorage.getItem('etasmi-student-nav-collapsed');
+      if (c === '1' && window.matchMedia && window.matchMedia('(min-width: 1101px)').matches){
+        document.documentElement.setAttribute('data-student-nav', 'collapsed');
+      }
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-package.css?v=20260429-header-photo-stack1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-ui-refine.css?v=20260502-student-shell-parity">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-figma-shell.css?v=20260624-student-redesign1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-shell-layout.css?v=20260610-shell-foundation1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-platform.css?v=20260610-shell-foundation1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-theme.css?v=20260609-theme-unified">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-module-polish.css?v=20260624-hero-compact2">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-dark-polish.css?v=20260609-theme-unified">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-theme-dark.css?v=20260609-student-dark">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-surface-unified.css?v=20260614-progress-minimal-head">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-mobile-responsive.css?v=20260511-no-dash-float-qc">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-typography.css?v=20260520-type-balanced">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;600&family=Scheherazade+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/quran-assistant.css?v=20260628-eqa-greet1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-shell-override.css?v=20260624-student-redesign1">
+<script defer src="<%= request.getContextPath() %>/assets/js/student-workspace.js?v=20260420-student-polish2"></script>
+<script defer src="<%= request.getContextPath() %>/assets/js/etasmi-theme.js?v=20260609-theme-unified"></script>
+<script defer src="<%= request.getContextPath() %>/assets/js/quran-assistant.js?v=20260628-eqa-greet1"></script>
+<script defer src="<%= request.getContextPath() %>/assets/js/quran-voice.js?v=20260625-eqa-voice5"></script>

@@ -1,0 +1,316 @@
+/**
+ * Instructor sidebar — collapsed (icon rail) state only.
+ * Scoped to desktop (≥1101px) instructor pages.
+ * Uses the white/blue design tokens from instructor-figma-shell.css.
+ */
+@media (min-width: 1101px) {
+  :root {
+    --instructor-rail-hit: 44px;
+    --instructor-rail-gap: 4px;
+    --instructor-rail-radius: 10px;
+  }
+
+  /* ── Panel ──────────────────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__panel,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 8px !important;
+    margin: 0;
+    box-sizing: border-box;
+    gap: 0 !important;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: 0 !important;
+    background: var(--et-surface, #ffffff) !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: padding 0.22s ease;
+  }
+
+  /* ── Nav list ──────────────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__nav,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--instructor-rail-gap);
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    scrollbar-gutter: stable;
+  }
+
+  /* ── Labels: visually hidden (screen-reader only) ──────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__label,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    clip-path: inset(50%) !important;
+    opacity: 0 !important;
+    max-width: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* ── Links: 44×44 icon squares ─────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link {
+    position: relative;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--instructor-rail-hit) !important;
+    max-width: var(--instructor-rail-hit) !important;
+    height: var(--instructor-rail-hit) !important;
+    min-height: var(--instructor-rail-hit) !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border-radius: var(--instructor-rail-radius) !important;
+    gap: 0 !important;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none !important;
+    color: var(--et-muted, #64748b) !important;
+    transform: none;
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link::before,
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active::before,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link::before,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active::before {
+    display: none !important;
+  }
+
+  /* ── Icons ─────────────────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__icon,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__icon {
+    position: static;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    max-width: none !important;
+    pointer-events: auto;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__icon svg,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* ── Hover ─────────────────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:hover,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:hover {
+    background: var(--et-hover-bg, #f1f5f9) !important;
+    border-color: var(--et-border, #e2e8f0) !important;
+    color: var(--et-text, #1e293b) !important;
+    box-shadow: none !important;
+  }
+
+  /* ── Active ────────────────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active {
+    background: var(--et-brand-grad, linear-gradient(135deg, #89F336, #6DC527)) !important;
+    border-color: transparent !important;
+    color: var(--et-brand-text, #1a2e05) !important;
+    box-shadow: 0 4px 12px rgba(137, 243, 54, 0.40) !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active .instructor-shell-sidebar__icon,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active .instructor-shell-sidebar__icon {
+    color: var(--et-brand-text, #1a2e05) !important;
+  }
+
+  /* ── Tooltips ──────────────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link::after,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    inset-inline-start: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.18s ease;
+    z-index: 200;
+    width: auto;
+    height: auto;
+    margin: 0;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:hover::after,
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:focus-visible::after,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:hover::after,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:focus-visible::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* ── Footer (logout area) ──────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__footer,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__footer {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--et-border, #e2e8f0);
+  }
+
+  /* ── Logout icon square ────────────────────────────────────────────────── */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout {
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: var(--instructor-rail-hit) !important;
+    max-width: var(--instructor-rail-hit) !important;
+    height: var(--instructor-rail-hit) !important;
+    min-height: var(--instructor-rail-hit) !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border-radius: var(--instructor-rail-radius) !important;
+    gap: 0 !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    color: var(--et-danger, #ef4444) !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    box-shadow: none;
+    flex-shrink: 0;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout .instructor-shell-sidebar__icon,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout .instructor-shell-sidebar__icon {
+    width: 22px !important;
+    height: 22px !important;
+    display: flex !important;
+    margin: 0 !important;
+    color: var(--et-danger, #ef4444) !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout .instructor-shell-sidebar__icon svg,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout .instructor-shell-sidebar__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:hover,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:hover {
+    background: #fef2f2 !important;
+    border-color: rgba(239, 68, 68, 0.2) !important;
+    color: #dc2626 !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout::after,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout::after {
+    content: attr(data-tooltip);
+    display: block;
+    position: absolute;
+    inset-inline-start: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 200;
+    transition: opacity 0.15s ease, transform 0.18s ease;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:hover::after,
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:focus-visible::after,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:hover::after,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:focus-visible::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* ── Dark mode overrides ────────────────────────────────────────────────── */
+@media (min-width: 1101px) {
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__panel,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__panel {
+    background: var(--theme-surface, #1e293b) !important;
+  }
+
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:hover,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--theme-text, #f1f5f9) !important;
+  }
+
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link.is-active {
+    background: var(--et-brand-grad, linear-gradient(135deg, #89F336, #6DC527)) !important;
+    color: var(--et-brand-text, #1a2e05) !important;
+    box-shadow: 0 4px 12px rgba(137, 243, 54, 0.40) !important;
+  }
+
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__footer,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__footer {
+    border-top-color: var(--theme-border, rgba(255,255,255,0.1)) !important;
+  }
+
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout {
+    color: #fca5a5 !important;
+  }
+
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:hover,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout:hover {
+    background: rgba(127, 29, 29, 0.25) !important;
+    border-color: rgba(248, 113, 113, 0.3) !important;
+  }
+
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link::after,
+  :root[data-theme="dark"] body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout::after,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link::after,
+  :root[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout::after {
+    background: #1e293b;
+    color: #f1f5f9;
+  }
+}

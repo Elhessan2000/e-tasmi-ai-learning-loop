@@ -1,0 +1,31 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ include file="/jsp/common/etasmi_theme_init.jspf" %>
+<%@ include file="/jsp/common/etasmi_i18n_head.jspf" %>
+<script>
+  (function(){
+    try{
+      var c = localStorage.getItem('etasmi-admin-nav-collapsed');
+      if (c === '1' && window.matchMedia && window.matchMedia('(min-width: 1101px)').matches){
+        document.documentElement.setAttribute('data-admin-nav', 'collapsed');
+      }
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-platform.css?v=20260610-instructor-shell2">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-package.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-figma-shell.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-ui-refine.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-theme.css?v=20260609-theme-unified">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-dark-polish.css?v=20260609-theme-unified">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-mobile-responsive.css?v=20260511-no-dash-float-qc">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-typography.css?v=20260520-type-balanced">
+<%-- Shell grid + flex layout + collapse rail: MUST load after all theme/polish layers --%>
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-shell-layout.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-layout-behavior.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-sidebar-collapsed.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-shell-override.css?v=20260621-no-brandbar-divider">
+<script defer src="<%= request.getContextPath() %>/assets/js/admin-workspace.js?v=20260610-admin-shell3"></script>
+<script defer src="<%= request.getContextPath() %>/assets/js/etasmi-theme.js?v=20260609-theme-unified"></script>

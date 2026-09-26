@@ -1,0 +1,240 @@
+/**
+ * Instructor Dashboard — premium greeting card
+ * Spacious two-column layout: welcome (left) · live clock (right)
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+body.instructor-dashboard-page .idash-greet.idash-greet--premium.iup-page-hero--welcome {
+  --idash-greet-radius: 20px;
+  --idash-greet-font: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  padding: 2rem 2.5rem !important;
+  min-height: 0;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: nowrap;
+  border-radius: var(--idash-greet-radius);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, #065f46 0%, #064e3b 48%, #022c22 100%);
+  box-shadow:
+    0 4px 6px rgba(2, 44, 34, 0.06),
+    0 20px 48px rgba(2, 44, 34, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-family: var(--idash-greet-font);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+body.instructor-dashboard-page .idash-greet--premium:hover {
+  box-shadow:
+    0 8px 12px rgba(2, 44, 34, 0.08),
+    0 28px 56px rgba(2, 44, 34, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+body.instructor-dashboard-page .idash-greet--premium .iup-page-hero__glow {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(52, 211, 153, 0.2), transparent 46%),
+    radial-gradient(circle at 6% 82%, rgba(255, 255, 255, 0.05), transparent 42%);
+}
+
+/* Two-column grid */
+body.instructor-dashboard-page .idash-greet__grid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+body.instructor-dashboard-page .idash-greet__welcome {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+body.instructor-dashboard-page .idash-greet__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.125rem;
+}
+
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__avatar {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+body.instructor-dashboard-page .idash-greet__copy {
+  min-width: 0;
+  padding-top: 0.15rem;
+}
+
+body.instructor-dashboard-page .idash-greet__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(167, 243, 208, 0.95);
+}
+
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__title {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-family: var(--idash-greet-font);
+  line-height: 1.1;
+}
+
+body.instructor-dashboard-page .idash-greet__salutation {
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(236, 253, 245, 0.88);
+}
+
+body.instructor-dashboard-page .idash-greet__name {
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
+
+body.instructor-dashboard-page .idash-greet__tagline {
+  margin: 0.625rem 0 0;
+  max-width: 36rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  color: rgba(236, 253, 245, 0.82);
+}
+
+body.instructor-dashboard-page .idash-greet__date {
+  margin: 0;
+  padding-inline-start: calc(56px + 1.125rem);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(236, 253, 245, 0.62);
+}
+
+/* Right column — live clock */
+body.instructor-dashboard-page .idash-greet__time {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+body.instructor-dashboard-page .idash-greet__time-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(236, 253, 245, 0.55);
+}
+
+body.instructor-dashboard-page .idash-greet__clock {
+  display: flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #ffffff;
+}
+
+body.instructor-dashboard-page .idash-greet__clock-h,
+body.instructor-dashboard-page .idash-greet__clock-m {
+  font-size: clamp(2.25rem, 4.5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+body.instructor-dashboard-page .idash-greet__clock-colon {
+  display: inline-block;
+  margin: 0 0.15rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: rgba(236, 253, 245, 0.55);
+  animation: idash-colon-blink 1s step-end infinite;
+}
+
+@keyframes idash-colon-blink {
+  0%, 45% { opacity: 1; }
+  46%, 100% { opacity: 0.2; }
+}
+
+body.instructor-dashboard-page .idash-greet__clock-secs {
+  margin-inline-start: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(236, 253, 245, 0.5);
+  align-self: flex-end;
+  padding-bottom: 0.35rem;
+}
+
+html[data-theme="dark"] body.instructor-dashboard-page .idash-greet.idash-greet--premium {
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 55%, #011a14 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  body.instructor-dashboard-page .idash-greet.idash-greet--premium.iup-page-hero--welcome {
+    padding: 1.5rem 1.25rem !important;
+  }
+
+  body.instructor-dashboard-page .idash-greet__grid {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  body.instructor-dashboard-page .idash-greet__time {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  body.instructor-dashboard-page .idash-greet__date {
+    padding-inline-start: 0;
+  }
+
+  body.instructor-dashboard-page .idash-greet__name {
+    font-size: 1.625rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.instructor-dashboard-page .idash-greet--premium:hover {
+    transform: none;
+  }
+
+  body.instructor-dashboard-page .idash-greet__clock-colon {
+    animation: none;
+    opacity: 0.55;
+  }
+}

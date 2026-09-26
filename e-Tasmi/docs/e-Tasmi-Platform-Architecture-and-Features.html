@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>e-Tasmi' Platform Architecture, Workflows, and Features</title>
+<style>
+@page {
+  size: A4;
+  margin: 22mm 20mm 24mm 20mm;
+}
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  color: #111;
+  max-width: 170mm;
+  margin: 0 auto;
+}
+h1 {
+  font-size: 16pt;
+  text-align: center;
+  line-height: 1.3;
+  margin: 0 0 18pt;
+  page-break-after: avoid;
+}
+h2 {
+  font-size: 12.5pt;
+  margin: 16pt 0 8pt;
+  page-break-after: avoid;
+  border-bottom: 0.6pt solid #333;
+  padding-bottom: 3pt;
+}
+h3 {
+  font-size: 11.5pt;
+  margin: 12pt 0 6pt;
+  page-break-after: avoid;
+}
+p, li { text-align: justify; }
+p { margin: 0 0 8pt; }
+ul, ol { margin: 0 0 8pt; padding-left: 22pt; }
+li { margin-bottom: 3pt; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 9.5pt;
+  margin: 8pt 0 12pt;
+  page-break-inside: avoid;
+}
+th, td {
+  border: 0.6pt solid #333;
+  padding: 4pt 6pt;
+  vertical-align: top;
+  text-align: left;
+}
+th { background: #f0f0f0; font-weight: bold; }
+pre {
+  font-size: 8.5pt;
+  white-space: pre-wrap;
+  background: #f7f7f7;
+  border: 0.6pt solid #ddd;
+  padding: 8pt;
+  line-height: 1.3;
+  page-break-inside: avoid;
+}
+code { font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; }
+hr { border: none; border-top: 0.6pt solid #ccc; margin: 14pt 0; }
+em { font-style: italic; }
+strong { font-weight: bold; }
+.math { font-style: italic; white-space: nowrap; }
+.footer-note {
+  font-size: 9.5pt;
+  color: #333;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+<h1>e-Tasmi&#39;: Platform Architecture, Workflows, and Features</h1>
+<h2>1. Executive Summary / Overview</h2>
+<p>e-Tasmi&#39; is a web-based Qur&#39;anic recitation and evaluation platform designed to digitalize and augment traditional <em>Tasmi&#39;</em> practice—the instructor-supervised recitation, memorization, and oral assessment of the Holy Qur&#39;an. Conventional Tasmi&#39; is pedagogically robust but operationally fragmented: scheduling, audio collection, grading, feedback, and progress records are often distributed across messaging applications, spreadsheets, and disconnected live-video links. e-Tasmi&#39; consolidates these activities into a single, role-based learning environment in which students submit recitations tied to assigned Surahs and Ayahs, instructors manage classes and evaluations, and automated analysis accelerates—but does not replace—expert review.</p>
+<p>The platform serves two primary instructional roles. <strong>Students</strong> enrol in Tasmi&#39; sessions, join live classes, record or upload recitations, track completion and scores, consult an embedded Qur&#39;an study assistant, and review instructor-approved feedback. <strong>Instructors</strong> create and administer sessions, monitor enrolments and submissions, analyse recitations with an automated assessment engine, and issue the final grade and qualitative comments. A third administrative role supports user verification, payments oversight, and system reporting, but is outside the instructional core described here.</p>
+<p>Two complementary AI subsystems are embedded in this workflow. A student-facing conversational assistant, powered by large language models (LLMs) accessed through a server-side application programming interface (API), provides on-demand guidance on tafsir, tajweed rules, memorization technique, and verse meaning. An instructor-facing assessment engine combines automatic speech recognition (ASR) with phonetic and lexical alignment to produce a structured preliminary report—transcript, word-level discrepancies, passage-match flags, pronunciation notes, and a suggested score. That report is presented to the qualified instructor as a recommendation. Only the instructor&#39;s saved score and feedback become the official evaluation.</p>
+<p>The resulting architecture is a <strong>hybrid evaluation pipeline</strong>: Stage 1 performs automated acoustic and textual pre-evaluation; Stage 2 places the audio, the expected passage, and the AI report under expert human review, after which the instructor locks the final decision. This design uses computation to absorb time-consuming transcription and alignment work while keeping pedagogical judgement, theological precision, and grading authority with the Qur&#39;an instructor.</p>
+<hr>
+<h2>2. Core Platform Capabilities and Architecture</h2>
+<h3>2.1 Purpose and instructional scope</h3>
+<p>e-Tasmi&#39; operationalizes the full Tasmi&#39; cycle as a managed digital workflow:</p>
+<ol>
+<li>Session definition (title, schedule, assigned Qur&#39;anic portion, mode, capacity, and payment terms).</li>
+<li>Student enrolment and, where applicable, payment confirmation.</li>
+<li>Live recitation via integrated video conferencing, and/or asynchronous recitation submission.</li>
+<li>Automated pre-evaluation of submitted audio against the assigned passage.</li>
+<li>Instructor review, annotation, scoring, and publication of feedback.</li>
+<li>Persistent progress, attendance, and evaluation history for both the learner and the teacher.</li>
+</ol>
+<p>Assigned content is expressed as a <em>Qur&#39;an portion</em> on each Tasmi&#39; session (for example, a named Surah, an ayah range, or a memorization assignment). Recitations are bound to the student&#39;s enrolment in that session, so every audio file is evaluated in the context of a specific lesson rather than as an unanchored recording.</p>
+<h3>2.2 Multi-role access and application stack</h3>
+<p>The system is a three-tier web application:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Presentation</td>
+<td>JSP views and client-side JavaScript (dashboards, Recitation Studio, evaluation portal, chat and voice UI, MediaRecorder for in-browser capture)</td>
+</tr>
+<tr>
+<td>Application</td>
+<td>Java Servlet controllers and service layer on Apache Tomcat; session-based authentication with role-specific route protection</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>MySQL relational schema: users, instructors, students, Tasmi&#39; sessions, enrolments, recitations, evaluations, payments, progress, attendance, notifications, and audit records</td>
+</tr>
+<tr>
+<td>External services</td>
+<td>OpenAI REST APIs (LLM, ASR, text-to-speech) invoked only from the server; Zoom for live sessions; Qur&#39;an Foundation content APIs for library text, reciters, and tafsir; Cloudinary and/or local storage for media</td>
+</tr>
+</tbody></table>
+<p>Authenticated roles are <strong>Student</strong>, <strong>Instructor</strong>, and <strong>Administrator</strong>. Login establishes an HTTP session. Instructors require administrative approval before instructional functions are enabled. API keys for speech and language models remain on the server and are never exposed to the browser.</p>
+<h3>2.3 Functional modules by role</h3>
+<p><strong>Student module.</strong> Session catalogue and enrolment; live Tasmi&#39; (embedded or external Zoom join); Recitation Studio (record or upload audio bound to an enrolment and assigned portion); recitation history with evaluation status; progress dashboard (completion rate, submissions, evaluated recitations, attendance); Qur&#39;an Library (Surah/Ayah reading with reciter audio, translations, and tafsir); embedded Qur&#39;an Assistant (text and turn-based voice); payments and receipts; profile and notifications.</p>
+<p><strong>Instructor module.</strong> Session creation and roster management; calendar and live-session hosting; evaluation portal (active vs. reviewed sessions, pending students, per-recitation audio review); AI Assessment Assistant (transcription, alignment, preliminary score and feedback draft); final score and qualitative feedback persistence; attendance; session materials; payment settings and verification as implemented.</p>
+<p><strong>Shared instructional artefacts.</strong> Each Tasmi&#39; session carries a <code>quran_portion</code> used both as the student&#39;s assignment label and as the <em>expected text</em> for automated analysis. Recitations store an audio path (remote URL or local upload). Evaluations store the instructor&#39;s score and feedback. Progress records maintain a completion rate that is updated as enrolments, submissions, and evaluations accumulate.</p>
+<h3>2.4 End-to-end instructional data flow</h3>
+<pre><code>Instructor creates Tasmi&#39; session (portion, schedule, capacity)
+        │
+        ▼
+Student enrols → (optional) payment confirmed → enrolment APPROVED
+        │
+        ├── Live session (Zoom)
+        └── Recitation Studio: record / upload audio → recitation record
+                    │
+                    ▼
+         Instructor Evaluation Portal
+                    │
+                    ├── Stage 1: ASR + alignment + preliminary report
+                    └── Stage 2: instructor listens, edits, scores, saves
+                    │
+                    ▼
+         Official evaluation visible to student; progress updated
+</code></pre>
+<p>This flow is the operational backbone of e-Tasmi&#39;. The AI components described in Sections 3–5 attach to it; they do not form a separate product.</p>
+<hr>
+<h2>3. Student Module and AI Integration (Chatbot Engine and Models)</h2>
+<h3>3.1 Student dashboard and learning workspace</h3>
+<p>After authentication, the student workspace presents a dashboard of upcoming and active sessions, average score where evaluations exist, enrolment status, and shortcuts into recitations, progress, the Qur&#39;an Library, and live class. Navigation is consistent across Recitation Studio, My Sessions, Progress, Payments, and Profile. Localisation supports English, Arabic, and Bahasa Melayu, including right-to-left layout for Arabic.</p>
+<h3>3.2 Recitation submission and audio management</h3>
+<p>The Recitation Studio implements a session-first submission workflow:</p>
+<ol>
+<li>The student selects an <strong>approved enrolment</strong>. Paid sessions additionally require a successful payment before submission is enabled.</li>
+<li>The interface displays the assigned <strong>Surah / portion</strong> for that session, so the recording is always tied to a known lesson.</li>
+<li>The student either <strong>records live</strong> in the browser (MediaRecorder) or <strong>uploads</strong> a previously captured audio file. Multipart upload limits accommodate typical recitation lengths (application-level file-size caps, with a stricter bound applied later by the assessment engine).</li>
+<li>Audio is stored (Cloudinary or local <code>/uploads</code>) and a recitation record is created against the enrolment.</li>
+<li>The student receives confirmation that the instructor will review the submission. Subsequent visits show history: portion, session, submission date, and whether the recitation has been evaluated.</li>
+</ol>
+<p>This design preserves the traditional pairing of <em>assignment → recitation → teacher hearing</em>, while making the audio artefact durable, replayable, and independently reviewable.</p>
+<h3>3.3 Progress tracking and history</h3>
+<p>The Progress view aggregates a learning snapshot:</p>
+<ul>
+<li><strong>Completion rate</strong> persisted per student and displayed as a percentage bar.</li>
+<li><strong>Enrolments:</strong> total vs. approved; completed sessions.</li>
+<li><strong>Recitations:</strong> number submitted vs. number already evaluated.</li>
+<li><strong>Attendance:</strong> marked sessions and present rate.</li>
+<li><strong>Payments:</strong> pending vs. successful, where the session is paid.</li>
+</ul>
+<p>The dashboard and recitation history together give the student a longitudinal record of attempts and outcomes. Official scores and written feedback appear only after the instructor has saved an evaluation; preliminary AI drafts are not published as student-facing grades.</p>
+<h3>3.4 Qur&#39;an Library as study context</h3>
+<p>The Qur&#39;an Library is the student&#39;s reading and listening surface: chapter list, verse text, reciter audio, translations, and tafsir resources. When the assistant is open, the currently displayed Surah and Ayah can be passed as <strong>reading context</strong>. Vague queries such as “what does this mean?” or “how do I pronounce this word?” are therefore resolved against the verse on screen rather than requiring the student to re-specify chapter and verse numbers.</p>
+<h3>3.5 AI chatbot assistant: role</h3>
+<p>The e-Tasmi&#39; Qur&#39;an Assistant is an interactive study companion embedded in the student view (floating panel with text chat and optional voice). It is not a grader. Its role is to provide immediate, lesson-relevant guidance so that practice between live Tasmi&#39; sessions remains structured. Supported task modes include:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Pedagogical focus</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tafsir</td>
+<td>Meaning, context, and key scholarly points</td>
+</tr>
+<tr>
+<td>Tajweed</td>
+<td>Applicable rules (e.g., <em>madd</em>, <em>noon sakinah</em>, <em>tanween</em>, <em>makharij</em>), common mistakes, and practice steps</td>
+</tr>
+<tr>
+<td>Meaning</td>
+<td>Concise translation and deeper sense of the ayah</td>
+</tr>
+<tr>
+<td>Memorization (<em>hifz</em>)</td>
+<td>Chunking, repetition schedules, similar-ayah traps, revision tips</td>
+</tr>
+<tr>
+<td>Word analysis</td>
+<td>Root, morphology, Qur&#39;anic usage, and a simple gloss</td>
+</tr>
+<tr>
+<td>Asbab al-Nuzul</td>
+<td>Historical context of revelation where known</td>
+</tr>
+<tr>
+<td>Tips</td>
+<td>Study habits and recitation practice advice</td>
+</tr>
+<tr>
+<td>General</td>
+<td>In-scope Qur&#39;anic learning support</td>
+</tr>
+</tbody></table>
+<p>The assistant mirrors the language of the student&#39;s latest message (English, Arabic, or Bahasa Melayu), may cite Arabic script with diacritics, and declines off-topic requests (unrelated homework, general chat, non-Qur&#39;anic domains) with a short invitation to return to Qur&#39;an study. It is instructed not to invent ayah text, hadith, or chains of narration, and to recommend consulting a qualified teacher when uncertain. Formal assessment remains the instructor&#39;s responsibility.</p>
+<h3>3.6 Chatbot technology and models</h3>
+<p>The assistant is implemented as a server-side NLP service over the OpenAI Chat Completions API. The default conversational model is <strong><code>gpt-4o-mini</code></strong>, a GPT-4-family Transformer decoder, overridable by environment configuration. This places the student assistant in the class of large language models (for example, OpenAI GPT-4 and related fine-tuned Transformer architectures) integrated via API to produce context-aware replies.</p>
+<p><strong>Text path.</strong> The browser posts the student message, selected mode, a bounded recent history window (up to 12 messages), and optional Surah/Ayah context to an authenticated servlet. The service composes a domain-scoped system prompt plus a contextual user payload, calls the LLM (temperature 0.35 for precise written answers; higher token budget for structured Markdown), and returns the reply. Chat history is client-supplied for the turn window; the server does not persist long-term conversational memory in the database.</p>
+<p><strong>Voice path.</strong> A turn-based pipeline provides hands-free study: microphone capture with silence detection → speech-to-text (<code>gpt-4o-transcribe</code>, Whisper-family ASR) → the same assistant service in a spoken-tutor persona (short, markdown-free replies) → text-to-speech (<code>gpt-4o-mini-tts</code>) playback. This is sequential turn-taking, not continuous streaming speech-to-speech. Language hints (e.g., Arabic) may be passed to the transcriber.</p>
+<p><strong>Controls.</strong> Message length is capped; API credentials never leave the server; replies that the service classifies as off-topic refusals are flagged for the client. Temperature, token limits, and persona differ between text (detailed, structured) and voice (brief, oral) so that latency and pedagogical tone match the channel.</p>
+<hr>
+<h2>4. Instructor Module and AI Integration (Assessment Engine and Models)</h2>
+<h3>4.1 Instructor dashboard and class management</h3>
+<p>The instructor workspace centres on Tasmi&#39; session ownership. Instructors create sessions with schedule, duration, assigned Qur&#39;an portion, capacity, and delivery mode; they view a calendar of upcoming classes; they host live Zoom sessions; and they inspect enrolments per session. Roster views distinguish students who have submitted recitations from <strong>pending</strong> students (approved enrolments with no submission yet), which supports follow-up before a live or asynchronous deadline.</p>
+<p>Group and individual progress are visible through session grouping, evaluation counts, and the evaluation portal&#39;s active/reviewed split. Instructors can mark a session as reviewed (moving it out of the active queue) or reopen it. Attendance and session materials complete the class-management surface.</p>
+<h3>4.2 Evaluation portal</h3>
+<p>The evaluation portal (<code>/instructor/evaluations</code>) is the operational grading workspace. Recitations belonging to the instructor are loaded with student identity, session title, assigned portion, audio location, and existing evaluation state. The portal is organised as:</p>
+<ul>
+<li><strong>Active sessions</strong> — submissions still in the review queue.</li>
+<li><strong>Reviewed sessions</strong> — sessions the instructor has marked complete, reopenable if needed.</li>
+<li><strong>Per-recitation drawer</strong> — audio player, assigned portion, AI analysis action, score field, and qualitative feedback.</li>
+</ul>
+<p>The instructor listens to the original recording, optionally runs automated analysis, edits any suggested score and comments, and saves. Persistence of score and feedback is performed only through the instructor&#39;s save action. A successful save clears the in-session AI draft for that recitation so that the stored evaluation is unambiguously the instructor&#39;s.</p>
+<h3>4.3 AI assessment assistant: role</h3>
+<p>The instructor-facing assessment engine processes submitted audio together with the session&#39;s expected Qur&#39;an text. It is designed to:</p>
+<ul>
+<li>Transcribe the recitation into text using ASR suited to Arabic and Qur&#39;anic diction.</li>
+<li>Classify whether the audio is Qur&#39;anic recitation at all (as opposed to noise, song, or unrelated speech).</li>
+<li>Determine whether the recited content <strong>matches the assigned passage</strong>, independently of whether it is Qur&#39;an (a student who recites <em>Al-Ikhlas</em> when <em>Al-Baqarah</em> was assigned is still reciting Qur&#39;an, but fails the assignment match).</li>
+<li>Align heard tokens against a reference text: correct, missing, substituted (<code>expected → heard</code>), and extra words (ordinary <em>basmala</em> / <em>isti&#39;adha</em> ignored).</li>
+<li>Surface pronunciation and tajweed notes only where the transcript supports a lexical observation; acoustic rules that a plain transcript cannot prove (madd length, ghunna, qalqalah, makhraj quality) are marked unverified or omitted.</li>
+<li>Produce a preliminary score (0–100), a one-sentence instructor summary, and short student-facing feedback.</li>
+</ul>
+<p>The engine therefore analyses tajweed and pronunciation <strong>to the extent recoverable from ASR plus alignment</strong>, and flags discrepancies for the instructor&#39;s ear. It does not publish a grade.</p>
+<h3>4.4 Assessment technology and models</h3>
+<p>The pipeline is a two-call, server-side service (<code>RecitationAiAnalysisService</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Model (default)</th>
+<th>Technology class</th>
+<th>Input</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. Transcription</td>
+<td><code>gpt-4o-transcribe</code></td>
+<td>ASR / large audio models in the OpenAI Whisper family; the same architectural class as Whisper and wav2vec 2.0 systems specialised for Arabic phonetics</td>
+<td>Recitation audio bytes (size-bounded)</td>
+<td>Transcript text</td>
+</tr>
+<tr>
+<td>2. Evaluation</td>
+<td><code>gpt-4o</code> (env-overridable)</td>
+<td>GPT-4-family Transformer LLM</td>
+<td>Expected passage + transcript</td>
+<td>Structured JSON report</td>
+</tr>
+</tbody></table>
+<p>Both models are invoked over HTTPS from the application server. The transcriber uses the OpenAI <code>/v1/audio/transcriptions</code> endpoint (the same family historically associated with Whisper). The evaluator uses Chat Completions with <code>response_format: json_object</code>, <strong>temperature 0</strong>, and a <strong>fixed seed</strong> so that identical inputs tend to yield repeatable drafts.</p>
+<p><strong>Guardrails at intake.</strong> Expected text is mandatory (taken from the session&#39;s Qur&#39;an portion). Audio shorter than a conservative minimum (~3 s) is rejected as unevaluable; files above 25 MB are refused at the analysis layer. Empty transcripts yield a cannot-evaluate outcome. Non-Qur&#39;an audio is rejected only when the evaluator reports high confidence (≥ 0.85) that the content is not Qur&#39;an <strong>and</strong> no Qur&#39;anic passages were identified—passage mismatch never triggers rejection.</p>
+<p><strong>Local fallback.</strong> If the LLM evaluation call fails, a deterministic Arabic tokenisation and word-diff alignment still produces a useful discrepancy list so the instructor is not blocked by an upstream outage.</p>
+<p><strong>Structured report fields.</strong> <code>is_quran</code>, <code>is_quran_confidence</code>, <code>matches_expected_passage</code>, <code>detected_passages</code>, <code>mixed_passages</code>, <code>reference_text</code>, <code>correct_words</code>, <code>missing_words</code>, <code>incorrect_words</code>, <code>extra_words</code>, <code>pronunciation_notes</code>, <code>score</code>, <code>summary</code>, <code>feedback</code>. Accuracy percentage for the UI is derived from the word lists:<br><span class="math">accuracy = 100 × N<sub>correct</sub> / (N<sub>correct</sub> + N<sub>missing</sub> + N<sub>incorrect</sub>)</span>.</p>
+<p>The evaluator is contractually forbidden from inventing Qur&#39;an text: when the passage matches, <code>reference_text</code> must be a verbatim copy of the assigned lesson text. Word-level “incorrect” flags are allowed only when the transcript clearly shows a different token; plausible ASR artefacts of the correct word are counted as correct. This combination of ASR, pattern matching, and phonetic/lexical alignment is what the instructor sees as the preliminary recommendation.</p>
+<hr>
+<h2>5. Hybrid Evaluation Pipeline and Quality Verification</h2>
+<p>e-Tasmi&#39; produces assessments through a <strong>dual-stage hybrid mechanism</strong>. Automated analysis handles transcription, passage matching, and first-pass scoring; a qualified instructor performs auditory review, correction, and the binding educational decision.</p>
+<h3>5.1 Stage 1 — Automated pre-evaluation</h3>
+<p>When a student submits a recitation, the audio is stored against the enrolment and the assigned Surah/portion. From the evaluation portal, analysis proceeds as follows:</p>
+<ol>
+<li><strong>Media retrieval.</strong> The service loads the recording (remote URL or local file) and validates duration/size constraints.</li>
+<li><strong>Speech recognition.</strong> ASR (<code>gpt-4o-transcribe</code>) converts the waveform to a transcript. Classical Arabic, tajweed-influenced pronunciation, and speaker variation make this step inherently noisy; the rest of the pipeline is designed around that fact.</li>
+<li><strong>Classification and alignment.</strong> A single evaluator call receives the expected lesson text and the transcript. It jointly decides Qur&#39;an vs. non-Qur&#39;an, assigned-passage match vs. mismatch (including mixed-surah recitation), and the word-level diff against a declared reference text.</li>
+<li><strong>Preliminary artefacts.</strong> The instructor is shown: transcript; expected text; accuracy; suggested score; lists of correct, missing, incorrect, and extra words; pronunciation notes (lexical only, acoustic claims labelled unverified); a passage-match note; a short summary; and draft student feedback.</li>
+<li><strong>Outcome states.</strong> <code>OK</code> (report ready, possibly with a passage-mismatch prefix); <code>REJECTED</code> (high-confidence non-Qur&#39;an); <code>CANNOT_EVALUATE</code> (no speech, transcription failure); <code>FAILED</code> (configuration or missing expected text). Drafts are held in the instructor&#39;s HTTP session keyed by recitation identifier; they are not written as the official evaluation.</li>
+</ol>
+<p>Stage 1 therefore performs the labour-intensive acoustic-to-text conversion and a first alignment against the assigned ayahs. It highlights likely substitutions and omissions so the instructor&#39;s listening can be targeted rather than exhaustive from a blank page.</p>
+<h3>5.2 Stage 2 — Expert validation and final decision</h3>
+<p>The AI report is a <strong>preliminary recommendation</strong>, not a published grade. In Stage 2 the instructor:</p>
+<ol>
+<li><strong>Replays the original audio</strong> in the evaluation drawer—the ground-truth signal that ASR cannot fully capture (madd, ghunna, qalqalah, makhraj, rhythm, and pedagogical tone).</li>
+<li><strong>Reads the AI flags</strong> (word lists, passage mismatch, unverified pronunciation notes) as a checklist against what is heard.</li>
+<li><strong>Corrects</strong> false ASR artefacts, adjusts the score, and rewrites or replaces the feedback with personalised, teacher-authored comments.</li>
+<li><strong>Saves</strong> score and feedback through the evaluation service. Only this write creates the durable evaluation record. The session-held AI draft is then discarded.</li>
+<li>Optionally <strong>marks the session reviewed</strong>, moving the class cohort out of the active queue, or reopens it later.</li>
+</ol>
+<p>Students see the instructor-approved result: score, qualitative feedback, and updated progress. They do not receive an unreviewed machine grade.</p>
+<p>Quality is thus verified at two complementary layers. Stage 1 verifies <em>textual correspondence</em> (was the assigned passage recited, and which tokens appear to differ?). Stage 2 verifies <em>oral and pedagogical quality</em> (was the recitation correct to the teacher&#39;s standard of tajweed and memorization, and what should the student practise next?). Empty or non-Qur&#39;an submissions are stopped or clearly labelled before they consume grading time; wrong-passage recitations remain visible as Qur&#39;an with an explicit mismatch flag so the instructor can respond proportionately.</p>
+<h3>5.3 Value of the hybrid architecture</h3>
+<p>The hybrid pipeline assigns work according to comparative advantage. ASR and the evaluator absorb transcription, token alignment, and first-draft commentary—tasks that scale poorly when an instructor must grade many recordings by ear alone. The instructor retains <strong>strict pedagogical integrity</strong> (rubric, encouragement, next-step advice), <strong>theological precision</strong> (no unsupervised machine claim over sacred text), and <strong>absolute final authority</strong> over the recorded score. Repeatable evaluator settings (temperature 0, fixed seed, JSON schema) make drafts inspectable and comparable across similar submissions, while the local word-diff fallback keeps the portal usable if the language-model call is unavailable.</p>
+<hr>
+<h2>6. Technical and Pedagogical Value</h2>
+<h3>6.1 Technical value</h3>
+<p>e-Tasmi&#39; demonstrates a complete, operational stack for digital Tasmi&#39; rather than a standalone speech demo or a generic chatbot:</p>
+<ul>
+<li><strong>Enrolment-bound recitation</strong> couples every audio file to a lesson, a student, and an instructor, which is the prerequisite for accountable assessment.</li>
+<li><strong>Server-side model orchestration</strong> keeps credentials, prompts, and scoring logic off the client. Student chat, voice turns, and recitation analysis share the same API boundary and domain constraints.</li>
+<li><strong>Model specialisation by task.</strong> A lighter GPT-4-family model (<code>gpt-4o-mini</code>) serves low-latency tutoring; a stronger evaluator (<code>gpt-4o</code>) performs structured grading drafts; Whisper-family ASR (<code>gpt-4o-transcribe</code>) serves both voice tutoring and recitation transcription; TTS closes the spoken study loop.</li>
+<li><strong>Structured, auditable drafts.</strong> JSON fields, independent <code>is_quran</code> vs. <code>matches_expected_passage</code> signals, verbatim reference-text rules, and ASR-artefact caution reduce opaque, uneditable machine judgements.</li>
+<li><strong>Resilience.</strong> Size/duration checks, cannot-evaluate and rejection states, and a local alignment fallback prevent silent failure in the grading queue.</li>
+<li><strong>Institutional completeness.</strong> Live Zoom Tasmi&#39;, asynchronous studio submission, payments, attendance, notifications, and a Qur&#39;an Library sit on the same identity and session model, so AI features attach to real classes rather than to anonymous files.</li>
+</ul>
+<h3>6.2 Pedagogical value</h3>
+<p>For <strong>students</strong>, the platform restores continuity between class and independent practice. Recitation Studio captures the oral performance that Tasmi&#39; requires; progress and history make completion visible; the Qur&#39;an Assistant answers tafsir, tajweed, and hifz questions in the student&#39;s language, optionally anchored to the ayah currently on screen; voice turns allow practice without typing. Formal grades arrive only from the teacher, which keeps the assistant in a tutoring role and avoids confusing a draft score with a certified result.</p>
+<p>For <strong>instructors</strong>, the evaluation portal replaces ad hoc audio collection with a single queue. Automated pre-evaluation shortens the path from “open file” to “know where to listen,” especially for missing verses, substitutions, and wrong-passage submissions. The teacher still hears the student, still writes the feedback, and still owns the mark—the traditional Tasmi&#39; relationship, supported by software rather than displaced by it.</p>
+<p>For <strong>the programme as a whole</strong>, hybrid evaluation is the mechanism that makes scale compatible with quality. Acoustic analysis is delegated to ASR and alignment algorithms; authenticity of Qur&#39;anic text, fairness of scoring, and the spiritual–pedagogical character of feedback remain under expert review. e-Tasmi&#39; thus digitalizes the Tasmi&#39; workflow end to end while keeping the qualified instructor as the final arbiter of recitation quality.</p>
+<hr>
+<p><em>This section describes the e-Tasmi&#39; platform as implemented: Java Servlet/JSP on Tomcat, MySQL, OpenAI-hosted GPT-4-family and Whisper-family models, Zoom live sessions, and an instructor-confirmed evaluation record. Model identifiers are defaults and may be overridden by deployment configuration.</em></p>
+
+</body>
+</html>

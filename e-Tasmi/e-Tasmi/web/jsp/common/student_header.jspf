@@ -1,0 +1,154 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page import="util.LocaleSupport" %>
+<%
+  Object headerDisplayNameObj = session.getAttribute("displayName");
+  String headerDisplayName = (headerDisplayNameObj == null) ? "Student" : String.valueOf(headerDisplayNameObj);
+  String photoUrl = request.getContextPath() + "/student/profile-photo";
+  boolean studentDashboardHeaderExpanded = Boolean.TRUE.equals(request.getAttribute("studentDashboardHeaderExpanded"));
+
+  String initials = "S";
+  String dn = headerDisplayName == null ? "" : headerDisplayName.trim();
+  if (!dn.isEmpty()) {
+    String[] parts = dn.split("\\s+");
+    if (parts.length == 1) {
+      initials = parts[0].substring(0, 1).toUpperCase();
+    } else {
+      String a = parts[0].trim().isEmpty() ? "" : parts[0].substring(0, 1).toUpperCase();
+      String b = parts[parts.length - 1].trim().isEmpty() ? "" : parts[parts.length - 1].substring(0, 1).toUpperCase();
+      initials = (a + b).trim().isEmpty() ? "S" : (a + b);
+    }
+  }
+
+  int notificationCount = 0;
+  Object recentNotificationsObj = request.getAttribute("recentNotifications");
+  Object notificationsObj = request.getAttribute("notifications");
+  if (recentNotificationsObj instanceof List) {
+    notificationCount = ((List) recentNotificationsObj).size();
+  } else if (notificationsObj instanceof List) {
+    notificationCount = ((List) notificationsObj).size();
+  }
+%>
+<header class="student-shell-topbar" role="banner">
+  <div class="student-shell-topbar__inner">
+    <div class="student-shell-topbar__brandbar">
+      <button class="student-shell-topbar__menu" type="button"
+        data-i18n="nav.toggleNav" data-i18n-attr="aria-label|title"
+        aria-label="Toggle navigation" title="Toggle navigation"
+        aria-controls="studentWorkspaceSidebar" aria-expanded="false" data-student-nav-toggle>
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <a class="student-shell-topbar__brand" href="<%= LocaleSupport.localizedUrl(request, "/student/dashboard") %>"
+        data-i18n="header.openStudentDashboard" data-i18n-attr="aria-label" aria-label="Open student dashboard">
+        <span class="student-shell-topbar__brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.75 6.75A1.75 1.75 0 0 1 6.5 5h4.75c1.1 0 2.13.48 2.84 1.3.71-.82 1.74-1.3 2.84-1.3h.57a1.75 1.75 0 0 1 1.75 1.75v10.5A1.75 1.75 0 0 1 18.5 19h-1.07a3.5 3.5 0 0 0-2.48 1.02l-.45.45a.7.7 0 0 1-.99 0l-.45-.45A3.5 3.5 0 0 0 10.57 19H6.5a1.75 1.75 0 0 1-1.75-1.75V6.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M12 6.75v11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <strong class="student-shell-topbar__brand-name">e-Tasmi</strong>
+      </a>
+    </div>
+
+    <div class="student-shell-topbar__spacer" aria-hidden="true"></div>
+
+    <div class="student-shell-topbar__actions">
+      <%@ include file="/jsp/common/etasmi_language_switcher.jspf" %>
+
+      <button class="student-shell-topbar__iconbtn etasmi-theme-toggle" type="button" data-etasmi-theme-toggle
+        aria-label="Switch to dark mode" title="Switch to dark mode">
+        <svg class="etasmi-theme-toggle__moon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M20 15.5A7.5 7.5 0 0 1 8.5 4a8.5 8.5 0 1 0 11.5 11.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+        <svg class="etasmi-theme-toggle__sun" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <a class="student-shell-topbar__iconbtn student-shell-topbar__iconbtn--notify"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/notifications") %>"
+        data-i18n="header.openNotifications" data-i18n-attr="aria-label" aria-label="Open notifications">
+        <% if (notificationCount > 0) { %>
+        <span class="student-shell-topbar__badge"><%= notificationCount > 9 ? "9+" : String.valueOf(notificationCount) %></span>
+        <% } %>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 17H9m9-1.5V10a6 6 0 1 0-12 0v5.5L4.5 17v1h15v-1L18 15.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </a>
+
+      <div class="student-shell-profilemenu" data-profilemenu>
+        <button type="button" class="student-shell-profilemenu__trigger" data-profilemenu-trigger
+          aria-haspopup="true" aria-expanded="false"
+          data-i18n="header.openProfile" data-i18n-attr="aria-label" aria-label="Open profile">
+          <span class="student-shell-profile__avatar" aria-hidden="true">
+            <img class="student-shell-profile__image" src="<%= photoUrl %>" alt="" width="96" height="96" loading="eager" decoding="async" onerror="this.style.display='none'" />
+            <span class="student-shell-profile__fallback"><%= initials %></span>
+          </span>
+          <span class="student-shell-profilemenu__name"><%= headerDisplayName %></span>
+          <svg class="student-shell-profilemenu__chevron" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="student-shell-profilemenu__panel" data-profilemenu-panel role="menu" aria-label="Profile menu" hidden>
+          <a class="student-shell-profilemenu__item" role="menuitem"
+            href="<%= LocaleSupport.localizedUrl(request, "/student/profile") %>">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <span data-i18n="student.nav.profile">Profile</span>
+          </a>
+          <a class="student-shell-profilemenu__item" role="menuitem"
+            href="<%= LocaleSupport.localizedUrl(request, "/student/enrollments") %>">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <span data-i18n="student.nav.mySessions">My Sessions</span>
+          </a>
+          <div class="student-shell-profilemenu__divider" role="separator"></div>
+          <a class="student-shell-profilemenu__item student-shell-profilemenu__item--danger" role="menuitem"
+            href="<%= LocaleSupport.localizedUrl(request, "/auth/logout") %>">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="m10 17-5-5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <span data-i18n="student.nav.logout">Logout</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<script>
+(function () {
+  "use strict";
+  var root = document.querySelector('[data-profilemenu]');
+  if (!root) return;
+  var trigger = root.querySelector('[data-profilemenu-trigger]');
+  var panel = root.querySelector('[data-profilemenu-panel]');
+  if (!trigger || !panel) return;
+
+  function open() {
+    root.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    panel.hidden = false;
+    document.addEventListener('click', onOutside, true);
+    document.addEventListener('keydown', onKey, true);
+  }
+  function close() {
+    root.classList.remove('is-open');
+    trigger.setAttribute('aria-expanded', 'false');
+    panel.hidden = true;
+    document.removeEventListener('click', onOutside, true);
+    document.removeEventListener('keydown', onKey, true);
+  }
+  function onOutside(e) {
+    if (!root.contains(e.target)) close();
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') { close(); trigger.focus(); }
+  }
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (root.classList.contains('is-open')) { close(); } else { open(); }
+  });
+})();
+</script>
+<%@ include file="/jsp/common/student_quran_assistant.jspf" %>

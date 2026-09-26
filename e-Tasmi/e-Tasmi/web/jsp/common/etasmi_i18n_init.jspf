@@ -1,0 +1,21 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ page import="util.LocaleSupport" %>
+<%-- Server-side locale bootstrap: prevents RTL/LTR flash before client bundle loads. --%>
+<%
+  String currentLocale = LocaleSupport.getLocale(request);
+  String currentDir = LocaleSupport.getDirection(request);
+%>
+<script>
+  (function () {
+    var locale = '<%= currentLocale %>';
+    var dir = '<%= currentDir %>';
+    var root = document.documentElement;
+    root.setAttribute('lang', locale);
+    root.setAttribute('dir', dir);
+    root.setAttribute('data-locale', locale);
+    root.setAttribute('data-dir', dir);
+    if (dir === 'rtl') {
+      root.classList.add('etasmi-rtl-root');
+    }
+  })();
+</script>

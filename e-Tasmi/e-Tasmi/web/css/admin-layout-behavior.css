@@ -1,0 +1,250 @@
+/*
+ * Admin shell — flex column wrapper + flex row sidebar/content.
+ * Sidebar width authority: --admin-sidebar-width (260px expanded / 70px collapsed).
+ * Overrides etasmi-shell-layout.css grid for admin module pages (loads after that file).
+ */
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) {
+  --admin-sidebar-width: 260px;
+  --admin-sidebar-width-expanded: 260px;
+  --admin-sidebar-width-collapsed: 70px;
+  --admin-sidenav-gutter: var(--admin-sidebar-width);
+  --admin-sidenav-gutter-expanded: var(--admin-sidebar-width-expanded);
+  --admin-sidenav-gutter-collapsed: var(--admin-sidebar-width-collapsed);
+}
+
+@media (min-width: 1101px) {
+  :root[data-admin-nav="collapsed"] html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal),
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) {
+    --admin-sidebar-width: var(--admin-sidebar-width-collapsed);
+    --admin-sidenav-gutter: var(--admin-sidebar-width-collapsed);
+  }
+}
+
+/* ── Outer shell: column flex, full viewport height ── */
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-topbar {
+  flex: 0 0 auto;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  gap: 0;
+  overflow: hidden;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__scrim {
+  position: fixed;
+  inset: 0;
+  flex: none;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
+  flex: 0 0 var(--admin-sidebar-width, 260px);
+  width: var(--admin-sidebar-width, 260px);
+  max-width: var(--admin-sidebar-width, 260px);
+  min-width: 0;
+  box-sizing: border-box;
+  transition:
+    flex-basis 0.3s ease-in-out,
+    width 0.3s ease-in-out,
+    max-width 0.3s ease-in-out;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  max-width: none;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view {
+  flex: 1 0 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main > .footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Topbar brand column tracks sidebar width */
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-topbar__brandbar {
+  flex: 0 0 var(--admin-sidebar-width, 260px);
+  transition: flex-basis 0.3s ease-in-out;
+}
+
+/* Dashboard cards, tables, grids — stretch with layout shifts */
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main > *,
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view > *,
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view .ar-stats,
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view table,
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view .admin-panel,
+html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view .admin-table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1101px) {
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) {
+    overflow: hidden;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell {
+    height: calc(100vh - 18px);
+    min-height: calc(100vh - 18px);
+    overflow: hidden;
+  }
+
+  /* Override grid rules from etasmi-shell-layout.css */
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    top: auto;
+    inset-inline-start: auto;
+    z-index: 2;
+    height: 100%;
+    min-height: 0;
+    align-self: stretch;
+    grid-area: unset !important;
+    grid-column: unset !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__panel {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__footer {
+    flex-shrink: 0;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    width: auto !important;
+    max-width: none !important;
+    margin-inline-start: 0 !important;
+    grid-area: unset !important;
+    grid-column: unset !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    gap: 20px;
+    padding: 24px clamp(28px, 3.2vw, 44px) 12px;
+    background: var(--admin-main-bg, #f5faf7);
+    align-items: stretch;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-workspace-view {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-inline: 0;
+    padding: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    flex-direction: column;
+    padding: 12px 16px 0;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
+    flex: none;
+    width: auto;
+    max-width: none;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-topbar__brandbar {
+    flex: 0 0 auto;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
+    padding-inline-start: 0;
+    padding-inline-end: 0;
+    padding-bottom: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    padding-inline-start: 12px;
+    padding-inline-end: 12px;
+  }
+}
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-topbar__brandbar,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>e-Tasmi Class Diagram</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #f4f6f8;
+      color: #1a1a1a;
+      padding: 1rem;
+    }
+    .toolbar {
+      max-width: 100%;
+      margin: 0 auto 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .toolbar h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-right: auto;
+    }
+    .toolbar button {
+      border: 1px solid #c5cdd6;
+      background: #fff;
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .toolbar button:hover { background: #eef2f6; }
+    .canvas-wrap {
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #d8dee4;
+      border-radius: 8px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    svg { display: block; }
+    .hint {
+      max-width: 100%;
+      margin: 0.75rem auto 0;
+      font-size: 0.8rem;
+      color: #5a6570;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <h1>e-Tasmi — Class Diagram</h1>
+    <button type="button" id="btn-svg">Download SVG</button>
+    <button type="button" id="btn-png">Download PNG</button>
+    <button type="button" id="btn-print">Print / Save PDF</button>
+  </div>
+
+  <div class="canvas-wrap">
+    <svg id="diagram" xmlns="http://www.w3.org/2000/svg"
+         width="3400" height="2400" viewBox="0 0 3400 2400"
+         font-family="Segoe UI, system-ui, sans-serif" font-size="13">
+
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#333" />
+        </marker>
+        <marker id="arrow-open" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8" fill="none" stroke="#333" stroke-width="1.2" />
+        </marker>
+        <marker id="diamond" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+          <path d="M6,0 L12,6 L6,12 L0,6 Z" fill="#333" stroke="#333" stroke-width="1" />
+        </marker>
+      </defs>
+
+      <!-- background -->
+      <rect width="100%" height="100%" fill="#ffffff" />
+
+      <!-- title -->
+      <text x="1700" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="#111">e-Tasmi Class Diagram</text>
+      <text x="1700" y="68" text-anchor="middle" font-size="13" fill="#555">Full class model with enumerations, associations, compositions, and cardinalities</text>
+
+      <!-- ═══════════ ENUMERATIONS ═══════════ -->
+      <text x="30" y="110" font-size="15" font-weight="700" fill="#333">Enumerations</text>
+
+      <!-- enum helper positions -->
+      <g id="enums">
+        <g transform="translate(30,125)">
+          <rect width="200" height="72" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» UserRole</text>
+          <text x="12" y="40" fill="#333">STUDENT</text>
+          <text x="12" y="56" fill="#333">INSTRUCTOR</text>
+          <text x="110" y="56" fill="#333">ADMIN</text>
+        </g>
+        <g transform="translate(30,210)">
+          <rect width="200" height="72" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» UserStatus</text>
+          <text x="12" y="40" fill="#333">ACTIVE</text>
+          <text x="90" y="40" fill="#333">INACTIVE</text>
+          <text x="12" y="56" fill="#333">DELETED</text>
+        </g>
+        <g transform="translate(30,295)">
+          <rect width="200" height="88" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» StudentLevel</text>
+          <text x="12" y="40" fill="#333">PRIMARY_SCHOOL</text>
+          <text x="12" y="56" fill="#333">SECONDARY_SCHOOL</text>
+          <text x="12" y="72" fill="#333">HIGH_SCHOOL · UNIVERSITY</text>
+        </g>
+        <g transform="translate(30,396)">
+          <rect width="200" height="72" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» InstructorVerificationStatus</text>
+          <text x="12" y="44" fill="#333">PENDING</text>
+          <text x="90" y="44" fill="#333">APPROVED</text>
+          <text x="12" y="60" fill="#333">REJECTED</text>
+        </g>
+        <g transform="translate(30,481)">
+          <rect width="200" height="88" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» TasmiSessionStatus</text>
+          <text x="12" y="40" fill="#333">SCHEDULED</text>
+          <text x="110" y="40" fill="#333">ONGOING</text>
+          <text x="12" y="56" fill="#333">COMPLETED</text>
+          <text x="110" y="56" fill="#333">CANCELLED</text>
+        </g>
+        <g transform="translate(30,582)">
+          <rect width="200" height="56" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» SessionMode</text>
+          <text x="12" y="40" fill="#333">ONLINE</text>
+          <text x="100" y="40" fill="#333">PHYSICAL</text>
+        </g>
+        <g transform="translate(30,651)">
+          <rect width="200" height="88" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» EnrollmentStatus</text>
+          <text x="12" y="40" fill="#333">PENDING</text>
+          <text x="100" y="40" fill="#333">APPROVED</text>
+          <text x="12" y="56" fill="#333">REJECTED</text>
+          <text x="100" y="56" fill="#333">CANCELLED</text>
+        </g>
+        <g transform="translate(30,752)">
+          <rect width="200" height="72" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» PaymentStatus</text>
+          <text x="12" y="44" fill="#333">PENDING</text>
+          <text x="90" y="44" fill="#333">SUCCESS</text>
+          <text x="12" y="60" fill="#333">FAILED</text>
+        </g>
+        <g transform="translate(30,837)">
+          <rect width="200" height="56" rx="4" fill="#f0f3f6" stroke="#8a96a3" stroke-width="1.2" />
+          <text x="100" y="20" text-anchor="middle" font-weight="700" fill="#222">«enum» AttendanceStatus</text>
+          <text x="12" y="40" fill="#333">PRESENT</text>
+          <text x="100" y="40" fill="#333">ABSENT</text>
+        </g>
+      </g>
+
+      <!-- ═══════════ CORE ROLES ═══════════ -->
+      <text x="700" y="110" font-size="15" font-weight="700" fill="#333">Core Roles</text>
+
+      <!-- User -->
+      <g id="class-User" transform="translate(560,125)">
+        <rect width="260" height="178" rx="4" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <rect width="260" height="28" rx="4" fill="#2c5282" />
+        <rect y="22" width="260" height="6" fill="#2c5282" />
+        <text x="130" y="19" text-anchor="middle" fill="#fff" font-weight="700">User</text>
+        <text x="12" y="48" fill="#333">- userId: long</text>
+        <text x="12" y="66" fill="#333">- fullName: String</text>
+        <text x="12" y="84" fill="#333">- email: String</text>
+        <text x="12" y="102" fill="#333">- phone: String</text>
+        <text x="12" y="120" fill="#333">- role: UserRole</text>
+        <text x="12" y="138" fill="#333">- status: UserStatus</text>
+        <text x="12" y="156" fill="#333">- emailVerified: boolean</text>
+        <text x="12" y="174" fill="#333">- createdAt: Instant</text>
+      </g>
+
+      <!-- Student -->
+      <g id="class-Student" transform="translate(300,400)">
+        <rect width="240" height="108" rx="4" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <rect width="240" height="28" rx="4" fill="#2c5282" />
+        <rect y="22" width="240" height="6" fill="#2c5282" />
+        <text x="120" y="19" text-anchor="middle" fill="#fff" font-weight="700">Student</text>
+        <text x="12" y="48" fill="#333">- studentId: long</text>
+        <text x="12" y="66" fill="#333">- userId: long</text>
+        <text x="12" y="84" fill="#333">- registrationNumber: String</text>
+        <text x="12" y="102" fill="#333">- level: StudentLevel</text>
+      </g>
+
+      <!-- Instructor -->
+      <g id="class-Instructor" transform="translate(570,400)">
+        <rect width="260" height="126" rx="4" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <rect width="260" height="28" rx="4" fill="#2c5282" />
+        <rect y="22" width="260" height="6" fill="#2c5282" />
+        <text x="130" y="19" text-anchor="middle" fill="#fff" font-weight="700">Instructor</text>
+        <text x="12" y="48" fill="#333">- instructorId: long</text>
+        <text x="12" y="66" fill="#333">- userId: long</text>
+        <text x="12" y="84" fill="#333">- verificationStatus: InstructorVerificationStatus</text>
+        <text x="12" y="102" fill="#333">- qualification: String</text>
+        <text x="12" y="120" fill="#333">- bio: String</text>
+      </g>
+
+      <!-- Admin -->
+      <g id="class-Admin" transform="translate(880,400)">
+        <rect width="200" height="72" rx="4" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <rect width="200" height="28" rx="4" fill="#2c5282" />
+        <rect y="22" width="200" height="6" fill="#2c5282" />
+        <text x="100" y="19" text-anchor="middle" fill="#fff" font-weight="700">Admin</text>
+        <text x="12" y="48" fill="#333">- adminId: long</text>
+        <text x="12" y="66" fill="#333">- userId: long</text>
+      </g>
+
+      <!-- Notification -->
+      <g id="class-Notification" transform="translate(920,125)">
+        <rect width="240" height="90" rx="4" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <rect width="240" height="28" rx="4" fill="#2c5282" />
+        <rect y="22" width="240" height="6" fill="#2c5282" />
+        <text x="120" y="19" text-anchor="middle" fill="#fff" font-weight="700">Notification</text>
+        <text x="12" y="48" fill="#333">- notificationId: long</text>
+        <text x="12" y="66" fill="#333">- userId: long</text>
+        <text x="12" y="84" fill="#333">- message: String</text>
+      </g>
+
+      <!-- Progress -->
+      <g id="class-Progress" transform="translate(300,600)">
+        <rect width="240" height="90" rx="4" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <rect width="240" height="28" rx="4" fill="#2c5282" />
+        <rect y="22" width="240" height="6" fill="#2c5282" />
+        <text x="120" y="19" text-anchor="middle" fill="#fff" font-weight="700">Progress</text>
+        <text x="12" y="48" fill="#333">- studentId: long</text>
+        <text x="12" y="66" fill="#333">- completionRate: BigDecimal</text>
+        <text x="12" y="84" fill="#333">- lastUpdated: Instant</text>
+      </g>
+
+      <!-- ═══════════ SESSION DOMAIN ═══════════ -->
+      <text x="1200" y="110" font-size="15" font-weight="700" fill="#333">Session Domain</text>
+
+      <!-- TasmiSession -->
+      <g id="class-TasmiSession" transform="translate(700,620)">
+        <rect width="280" height="180" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="280" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="280" height="6" fill="#276749" />
+        <text x="140" y="19" text-anchor="middle" fill="#fff" font-weight="700">TasmiSession</text>
+        <text x="12" y="48" fill="#333">- sessionId: long</text>
+        <text x="12" y="66" fill="#333">- instructorId: long</text>
+        <text x="12" y="84" fill="#333">- title: String</text>
+        <text x="12" y="102" fill="#333">- sessionDate: LocalDate</text>
+        <text x="12" y="120" fill="#333">- fee: BigDecimal</text>
+        <text x="12" y="138" fill="#333">- status: TasmiSessionStatus</text>
+        <text x="12" y="156" fill="#333">- evaluationReviewedAt: Instant</text>
+        <text x="12" y="174" fill="#333">+ isEvaluationReviewed(): boolean</text>
+      </g>
+
+      <!-- Enrollment -->
+      <g id="class-Enrollment" transform="translate(1080,620)">
+        <rect width="260" height="108" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="260" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="260" height="6" fill="#276749" />
+        <text x="130" y="19" text-anchor="middle" fill="#fff" font-weight="700">Enrollment</text>
+        <text x="12" y="48" fill="#333">- enrollmentId: long</text>
+        <text x="12" y="66" fill="#333">- studentId: long</text>
+        <text x="12" y="84" fill="#333">- sessionId: long</text>
+        <text x="12" y="102" fill="#333">- enrollmentStatus: EnrollmentStatus</text>
+      </g>
+
+      <!-- Recitation -->
+      <g id="class-Recitation" transform="translate(1420,620)">
+        <rect width="260" height="108" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="260" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="260" height="6" fill="#276749" />
+        <text x="130" y="19" text-anchor="middle" fill="#fff" font-weight="700">Recitation</text>
+        <text x="12" y="48" fill="#333">- recitationId: long</text>
+        <text x="12" y="66" fill="#333">- enrollmentId: long</text>
+        <text x="12" y="84" fill="#333">- audioFilePath: String</text>
+        <text x="12" y="102" fill="#333">- submissionDate: Instant</text>
+      </g>
+
+      <!-- Evaluation -->
+      <g id="class-Evaluation" transform="translate(1760,620)">
+        <rect width="260" height="126" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="260" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="260" height="6" fill="#276749" />
+        <text x="130" y="19" text-anchor="middle" fill="#fff" font-weight="700">Evaluation</text>
+        <text x="12" y="48" fill="#333">- evaluationId: long</text>
+        <text x="12" y="66" fill="#333">- recitationId: long</text>
+        <text x="12" y="84" fill="#333">- instructorId: long</text>
+        <text x="12" y="102" fill="#333">- score: int</text>
+        <text x="12" y="120" fill="#333">- feedback: String</text>
+      </g>
+
+      <!-- Payment -->
+      <g id="class-Payment" transform="translate(1420,380)">
+        <rect width="280" height="126" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="280" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="280" height="6" fill="#276749" />
+        <text x="140" y="19" text-anchor="middle" fill="#fff" font-weight="700">Payment</text>
+        <text x="12" y="48" fill="#333">- paymentId: long</text>
+        <text x="12" y="66" fill="#333">- enrollmentId: long</text>
+        <text x="12" y="84" fill="#333">- amount: BigDecimal</text>
+        <text x="12" y="102" fill="#333">- paymentStatus: PaymentStatus</text>
+        <text x="12" y="120" fill="#333">- verifiedByInstructorId: Long</text>
+      </g>
+
+      <!-- SessionMaterial -->
+      <g id="class-SessionMaterial" transform="translate(700,880)">
+        <rect width="260" height="108" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="260" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="260" height="6" fill="#276749" />
+        <text x="130" y="19" text-anchor="middle" fill="#fff" font-weight="700">SessionMaterial</text>
+        <text x="12" y="48" fill="#333">- materialId: long</text>
+        <text x="12" y="66" fill="#333">- sessionId: long</text>
+        <text x="12" y="84" fill="#333">- title: String</text>
+        <text x="12" y="102" fill="#333">- filePath: String</text>
+      </g>
+
+      <!-- SessionAttendance -->
+      <g id="class-SessionAttendance" transform="translate(1080,880)">
+        <rect width="280" height="108" rx="4" fill="#fff" stroke="#276749" stroke-width="2" />
+        <rect width="280" height="28" rx="4" fill="#276749" />
+        <rect y="22" width="280" height="6" fill="#276749" />
+        <text x="140" y="19" text-anchor="middle" fill="#fff" font-weight="700">SessionAttendance</text>
+        <text x="12" y="48" fill="#333">- attendanceId: long</text>
+        <text x="12" y="66" fill="#333">- sessionId: long</text>
+        <text x="12" y="84" fill="#333">- studentId: long</text>
+        <text x="12" y="102" fill="#333">- attendanceStatus: AttendanceStatus</text>
+      </g>
+
+      <!-- ═══════════ VIEW CLASSES ═══════════ -->
+      <text x="700" y="1080" font-size="15" font-weight="700" fill="#333">View Classes</text>
+
+      <g id="class-ReportSummary" transform="translate(560,1100)">
+        <rect width="280" height="90" rx="4" fill="#fff" stroke="#805ad5" stroke-width="2" stroke-dasharray="6 4" />
+        <rect width="280" height="28" rx="4" fill="#805ad5" />
+        <rect y="22" width="280" height="6" fill="#805ad5" />
+        <text x="140" y="19" text-anchor="middle" fill="#fff" font-weight="700">«view» ReportSummary</text>
+        <text x="12" y="48" fill="#333">- totalUsers: long</text>
+        <text x="12" y="66" fill="#333">- totalSessions: long</text>
+        <text x="12" y="84" fill="#333">- avgEvaluationScore: BigDecimal</text>
+      </g>
+
+      <g id="class-AdminReportResult" transform="translate(920,1100)">
+        <rect width="280" height="108" rx="4" fill="#fff" stroke="#805ad5" stroke-width="2" stroke-dasharray="6 4" />
+        <rect width="280" height="28" rx="4" fill="#805ad5" />
+        <rect y="22" width="280" height="6" fill="#805ad5" />
+        <text x="140" y="19" text-anchor="middle" fill="#fff" font-weight="700">«view» AdminReportResult</text>
+        <text x="12" y="48" fill="#333">- type: String</text>
+        <text x="12" y="66" fill="#333">- title: String</text>
+        <text x="12" y="84" fill="#333">+ addMetric(): void</text>
+        <text x="12" y="102" fill="#333">+ addRow(): void</text>
+      </g>
+
+      <!-- ═══════════ RELATIONSHIPS ═══════════ -->
+      <g id="relationships" fill="none" stroke="#333" stroke-width="1.5">
+
+        <!-- User 1 -- 0..1 Student -->
+        <line x1="620" y1="303" x2="480" y2="400" marker-end="url(#arrow-open)" />
+        <text x="520" y="340" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="560" y="385" font-size="12" fill="#111" stroke="none">0..1</text>
+
+        <!-- User 1 -- 0..1 Instructor -->
+        <line x1="690" y1="303" x2="700" y2="400" marker-end="url(#arrow-open)" />
+        <text x="668" y="340" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="710" y="385" font-size="12" fill="#111" stroke="none">0..1</text>
+
+        <!-- User 1 -- 0..1 Admin -->
+        <line x1="760" y1="303" x2="920" y2="400" marker-end="url(#arrow-open)" />
+        <text x="800" y="340" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="900" y="385" font-size="12" fill="#111" stroke="none">0..1</text>
+
+        <!-- User 1 -- * Notification -->
+        <line x1="820" y1="214" x2="920" y2="170" marker-end="url(#arrow-open)" />
+        <text x="848" y="178" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="900" y="168" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- Instructor 1 -- * TasmiSession -->
+        <path d="M 700 526 L 700 580 L 840 620" marker-end="url(#arrow-open)" />
+        <text x="678" y="560" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="810" y="612" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- Student 1 -- 1 Progress -->
+        <line x1="420" y1="508" x2="420" y2="600" marker-end="url(#arrow-open)" />
+        <text x="430" y="540" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="430" y="590" font-size="12" fill="#111" stroke="none">1</text>
+
+        <!-- Student 1 -- * Enrollment -->
+        <path d="M 540 454 L 1000 454 L 1080 670" marker-end="url(#arrow-open)" />
+        <text x="560" y="446" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1060" y="648" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- TasmiSession 1 -- * Enrollment -->
+        <line x1="980" y1="701" x2="1080" y2="674" marker-end="url(#arrow-open)" />
+        <text x="990" y="698" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1060" y="668" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- Student * -- * TasmiSession via Enrollment -->
+        <path d="M 540 470 L 620 470 L 620 520 L 700 520" stroke="#666" stroke-dasharray="8 5" marker-end="url(#arrow-open)" />
+        <text x="555" y="462" font-size="12" fill="#444" stroke="none">*</text>
+        <text x="680" y="512" font-size="12" fill="#444" stroke="none">*</text>
+        <text x="590" y="500" font-size="11" fill="#444" stroke="none" font-style="italic">via Enrollment</text>
+
+        <!-- Enrollment 1 -- 0..1 Payment -->
+        <path d="M 1340 620 L 1340 506 L 1420 443" marker-end="url(#arrow-open)" />
+        <text x="1348" y="560" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1410" y="450" font-size="12" fill="#111" stroke="none">0..1</text>
+
+        <!-- Enrollment 1 *-- * Recitation (composition) -->
+        <line x1="1340" y1="674" x2="1420" y2="674" marker-start="url(#diamond)" marker-end="url(#arrow-open)" />
+        <text x="1350" y="666" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1400" y="666" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- Recitation 1 -- 0..1 Evaluation -->
+        <line x1="1680" y1="674" x2="1760" y2="674" marker-end="url(#arrow-open)" />
+        <text x="1690" y="666" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1740" y="666" font-size="12" fill="#111" stroke="none">0..1</text>
+
+        <!-- Instructor 1 -- * Evaluation -->
+        <path d="M 830 526 L 1890 526 L 1890 620" marker-end="url(#arrow-open)" />
+        <text x="850" y="518" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1875" y="612" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- Instructor 0..1 -- * Payment verifies -->
+        <path d="M 830 460 L 1300 460 L 1300 420 L 1420 420" stroke="#555" stroke-dasharray="6 4" marker-end="url(#arrow-open)" />
+        <text x="1000" y="452" font-size="12" fill="#444" stroke="none" font-style="italic">verifies</text>
+        <text x="840" y="452" font-size="12" fill="#444" stroke="none">0..1</text>
+        <text x="1400" y="412" font-size="12" fill="#444" stroke="none">*</text>
+
+        <!-- TasmiSession 1 *-- * SessionMaterial (composition) -->
+        <line x1="840" y1="782" x2="840" y2="880" marker-start="url(#diamond)" marker-end="url(#arrow-open)" />
+        <text x="848" y="820" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="848" y="872" font-size="12" fill="#111" stroke="none">*</text>
+
+        <!-- TasmiSession 1 *-- * SessionAttendance (composition) -->
+        <path d="M 920 782 L 1080 840 L 1080 880" marker-start="url(#diamond)" marker-end="url(#arrow-open)" />
+        <text x="930" y="800" font-size="12" fill="#111" stroke="none">1</text>
+        <text x="1065" y="872" font-size="12" fill="#111" stroke="none">*</text>
+
+      </g>
+
+      <!-- legend -->
+      <g transform="translate(2100,125)" font-size="12" fill="#333">
+        <text x="0" y="0" font-size="15" font-weight="700">Legend</text>
+        <line x1="0" y1="24" x2="60" y2="24" stroke="#333" stroke-width="1.5" />
+        <text x="70" y="28">Association</text>
+        <line x1="0" y1="48" x2="60" y2="48" stroke="#333" stroke-width="1.5" stroke-dasharray="8 5" />
+        <text x="70" y="52">Derived / labeled association</text>
+        <line x1="0" y1="72" x2="60" y2="72" stroke="#333" stroke-width="1.5" marker-start="url(#diamond)" />
+        <text x="70" y="76">Composition (parent owns children)</text>
+        <rect x="0" y="92" width="60" height="24" fill="#f0f3f6" stroke="#8a96a3" />
+        <text x="70" y="108">Enumeration</text>
+        <rect x="0" y="128" width="60" height="24" fill="#fff" stroke="#2c5282" stroke-width="2" />
+        <text x="70" y="144">Core role class</text>
+        <rect x="0" y="164" width="60" height="24" fill="#fff" stroke="#276749" stroke-width="2" />
+        <text x="70" y="180">Session domain class</text>
+        <rect x="0" y="200" width="60" height="24" fill="#fff" stroke="#805ad5" stroke-width="2" stroke-dasharray="6 4" />
+        <text x="70" y="216">View class «view»</text>
+      </g>
+
+      <!-- relationship table -->
+      <g transform="translate(2100,380)" font-size="12" fill="#333">
+        <text x="0" y="0" font-size="15" font-weight="700">All Relationships</text>
+        <text x="0" y="28" fill="#444">User → Student (1 : 0..1)</text>
+        <text x="0" y="48" fill="#444">User → Instructor (1 : 0..1)</text>
+        <text x="0" y="68" fill="#444">User → Admin (1 : 0..1)</text>
+        <text x="0" y="88" fill="#444">User → Notification (1 : *)</text>
+        <text x="0" y="108" fill="#444">Instructor → TasmiSession (1 : *)</text>
+        <text x="0" y="128" fill="#444">Student → Progress (1 : 1)</text>
+        <text x="0" y="148" fill="#444">Student → Enrollment (1 : *)</text>
+        <text x="0" y="168" fill="#444">TasmiSession → Enrollment (1 : *)</text>
+        <text x="0" y="188" fill="#444">Student ↔ TasmiSession (* : *) via Enrollment</text>
+        <text x="0" y="208" fill="#444">Enrollment → Payment (1 : 0..1)</text>
+        <text x="0" y="228" fill="#444">Enrollment ◆→ Recitation (1 : *)</text>
+        <text x="0" y="248" fill="#444">Recitation → Evaluation (1 : 0..1)</text>
+        <text x="0" y="268" fill="#444">Instructor → Evaluation (1 : *)</text>
+        <text x="0" y="288" fill="#444">Instructor → Payment verifies (0..1 : *)</text>
+        <text x="0" y="308" fill="#444">TasmiSession ◆→ SessionMaterial (1 : *)</text>
+        <text x="0" y="328" fill="#444">TasmiSession ◆→ SessionAttendance (1 : *)</text>
+      </g>
+
+    </svg>
+  </div>
+
+  <p class="hint">Open this file in any browser. Use <strong>Download SVG</strong> for a vector file, <strong>Download PNG</strong> for an image, or <strong>Print / Save PDF</strong> for a document.</p>
+
+  <script>
+    const svg = document.getElementById('diagram');
+
+    function cloneSvg() {
+      const copy = svg.cloneNode(true);
+      copy.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      return copy;
+    }
+
+    document.getElementById('btn-svg').addEventListener('click', () => {
+      const blob = new Blob([new XMLSerializer().serializeToString(cloneSvg())], { type: 'image/svg+xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'e-tasmi-class-diagram.svg';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('btn-png').addEventListener('click', () => {
+      const copy = cloneSvg();
+      const xml = new XMLSerializer().serializeToString(copy);
+      const img = new Image();
+      const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 3400;
+        canvas.height = 2400;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'e-tasmi-class-diagram.png';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }, 'image/png');
+      };
+      img.src = url;
+    });
+
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
+  </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+/**
+ * Admin sidebar — collapsed (icon rail) state only.
+ * Expanded sidebar is unchanged. Scoped: desktop + module admin + not brutal theme.
+ */
+@media (min-width: 1101px) {
+  :root {
+    --admin-rail-hit: 44px;
+    --admin-rail-gap: 4px;
+    --admin-rail-radius: 12px;
+  }
+
+  /* Aside width is driven by --admin-sidenav-gutter in admin-layout-behavior.css; panel fills the track. */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar {
+    background: transparent;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 8px 12px;
+    margin: 0;
+    box-sizing: border-box;
+    gap: 0;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: 16px;
+    transition: max-width 0.22s ease, padding 0.22s ease, box-shadow 0.22s ease, border-color 0.2s ease;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--admin-rail-gap);
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    scrollbar-gutter: stable;
+  }
+
+  /* Hide labels completely in collapsed (cleaner than max-width: 0) */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    clip-path: inset(50%) !important;
+  }
+
+  /* Icon rows: one vertical axis, perfect centering */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link {
+    position: relative;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: var(--admin-rail-hit) !important;
+    max-width: var(--admin-rail-hit) !important;
+    height: var(--admin-rail-hit) !important;
+    min-height: var(--admin-rail-hit) !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    border-radius: var(--admin-rail-radius) !important;
+    gap: 0 !important;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link::before,
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link.is-active::before {
+    display: none !important;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__icon {
+    position: static;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link:hover {
+    background: rgba(15, 118, 110, 0.1) !important;
+    border-color: rgba(15, 118, 110, 0.12) !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
+
+  /* Compact, centered active “pill” */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link.is-active {
+    background: #0f766e !important;
+    border-color: rgba(15, 118, 110, 0.45) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.22) !important;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link.is-active .admin-shell-sidebar__icon {
+    color: #ffffff !important;
+  }
+
+  /* Tooltips: links */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    inset-inline-start: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-2px);
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.18s ease;
+    z-index: 200;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link:hover::after,
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link:focus-visible::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* Footer + logout: same width stack as nav */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__footer {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 8px;
+    margin-bottom: 0;
+    border-top: 1px solid var(--admin-border, #e5e7eb);
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout {
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--admin-rail-hit) !important;
+    min-height: var(--admin-rail-hit) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: var(--admin-rail-radius) !important;
+    gap: 0 !important;
+    border: 1px solid rgba(220, 38, 38, 0.2) !important;
+    background: rgba(254, 242, 242, 0.95) !important;
+    color: var(--admin-danger, #dc2626) !important;
+    font-size: 0 !important;
+    /* kill text metrics */
+    line-height: 0 !important;
+    box-shadow: none;
+    flex-shrink: 0;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout .admin-shell-sidebar__icon {
+    width: 22px !important;
+    height: 22px !important;
+    display: flex !important;
+    margin: 0 !important;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout .admin-shell-sidebar__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout:hover {
+    background: #fecaca !important;
+    border-color: rgba(220, 38, 38, 0.35) !important;
+    color: #b91c1c !important;
+  }
+
+  /* Logout tooltip (replaces legacy display:none on ::after) */
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout::after {
+    content: attr(data-tooltip);
+    display: block;
+    position: absolute;
+    inset-inline-start: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-2px);
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 200;
+    transition: opacity 0.15s ease, transform 0.18s ease;
+  }
+
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout:hover::after,
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout:focus-visible::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* Dark mode: same rail, readable tooltips and panel */
+@media (min-width: 1101px) {
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__panel {
+    background: var(--theme-surface, #0f172a) !important;
+    border-color: var(--theme-border, rgba(148, 163, 184, 0.2)) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link:hover {
+    background: rgba(45, 212, 191, 0.1) !important;
+    color: var(--theme-text, #f1f5f9) !important;
+  }
+
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link.is-active {
+    background: var(--theme-primary-soft, rgba(45, 212, 191, 0.2)) !important;
+    color: var(--theme-primary, #2dd4bf) !important;
+    box-shadow: none !important;
+    border-color: rgba(45, 212, 191, 0.35) !important;
+  }
+
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link.is-active .admin-shell-sidebar__icon {
+    color: var(--theme-primary, #2dd4bf) !important;
+  }
+
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__footer {
+    border-top-color: var(--theme-border) !important;
+  }
+
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout {
+    background: rgba(127, 29, 29, 0.25) !important;
+    border-color: rgba(248, 113, 113, 0.3) !important;
+    color: #fca5a5 !important;
+  }
+
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__link::after,
+  :root[data-theme="dark"] body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-shell-sidebar__logout::after {
+    background: #1e293b;
+    color: #f1f5f9;
+  }
+}

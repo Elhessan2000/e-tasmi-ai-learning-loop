@@ -1,0 +1,428 @@
+/*
+ * e-Tasmi — Student Interface Unified Dark Mode
+ * ------------------------------------------------
+ * Single source of truth for student BEM modules in dark mode.
+ * Activation: <html data-theme="dark"> (global, persisted via localStorage).
+ *
+ * Semantic tokens are mapped from the platform --theme-* system so every
+ * student page inherits consistent surfaces, text, and borders without
+ * per-page scattered patches.
+ */
+
+/* ============================================================
+ * 0. STUDENT SEMANTIC TOKENS (dark)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page {
+  --student-bg-primary: var(--theme-bg);
+  --student-bg-surface: var(--theme-surface);
+  --student-bg-elevated: var(--theme-surface-muted);
+  --student-bg-hover: var(--theme-surface-hover);
+  --student-text-primary: var(--theme-text);
+  --student-text-secondary: var(--theme-text-soft);
+  --student-text-muted: var(--theme-text-muted);
+  --student-border: var(--theme-border);
+  --student-border-strong: var(--theme-border-strong);
+  --student-primary: var(--theme-primary);
+  --student-primary-soft: var(--theme-primary-soft);
+  --student-shadow-sm: var(--theme-shadow-sm);
+  --student-shadow-md: var(--theme-shadow-md);
+  /* Elevated card system (see student-surface-unified.css) */
+  --student-card-bg: var(--theme-surface);
+  --student-card-bg-raised: var(--theme-surface-raised);
+  --student-card-bg-hover: var(--theme-surface-hover);
+  --student-card-border: var(--theme-border);
+  --student-card-radius: 14px;
+}
+
+/* Dashboard page-local tokens (student-dashboard-layout.css) */
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page {
+  --sd-bg: var(--theme-bg);
+  --sd-text: var(--theme-text);
+  --sd-muted: var(--theme-text-muted);
+  --sd-teal-50: rgba(45, 212, 191, 0.12);
+  --sd-teal-100: rgba(45, 212, 191, 0.22);
+  --sd-emerald-50: rgba(16, 185, 129, 0.12);
+  --sd-blue-50: rgba(59, 130, 246, 0.12);
+  --sd-violet-50: rgba(139, 92, 246, 0.12);
+  --sd-amber-50: rgba(245, 158, 11, 0.12);
+  --sd-card-border: var(--theme-border);
+  --sd-shadow-sm: var(--theme-shadow-sm);
+  --sd-shadow-md: var(--theme-shadow-md);
+}
+
+/* QR payment page tokens (qr-payment.css) */
+:root[data-theme="dark"] body.student-premium-page .qrpay-page {
+  --qrp-text: var(--theme-text);
+  --qrp-muted: var(--theme-text-muted);
+  --qrp-line: var(--theme-border);
+  --qrp-border: var(--theme-border);
+  --qrp-soft: var(--theme-surface-muted);
+  --qrp-green-soft: rgba(45, 212, 191, 0.1);
+  --qrp-shadow: var(--theme-shadow-md);
+}
+
+/* ============================================================
+ * 1. NOTIFICATIONS (.notif-*)
+ * Card chrome, typography, badges — student-surface-unified.css
+ * ============================================================ */
+/* ============================================================
+ * 2. PROFILE (.profile-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page .profile-actions-row {
+  background: var(--student-bg-surface) !important;
+  border-top-color: var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .profile-form-card,
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card,
+:root[data-theme="dark"] body.student-package-page .profile-stat-card {
+  background: var(--student-bg-surface) !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card .profile-sidebar-name,
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card .profile-sidebar-info .info-value,
+:root[data-theme="dark"] body.student-package-page .profile-stat-card .stat-value,
+:root[data-theme="dark"] body.student-package-page .form-section-title,
+:root[data-theme="dark"] body.student-package-page .pf-label {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card .profile-sidebar-info .info-label,
+:root[data-theme="dark"] body.student-package-page .profile-stat-card .stat-label,
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card .profile-upload-btn {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card .profile-upload-btn:hover {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .profile-sidebar-card .profile-sidebar-info {
+  border-top-color: var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .pf-field input,
+:root[data-theme="dark"] body.student-package-page .pf-field select,
+:root[data-theme="dark"] body.student-package-page .pf-field textarea {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .pbtn-outline {
+  background: transparent !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .pbtn-outline:hover {
+  background: var(--student-bg-hover) !important;
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .pbtn-ghost {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .pbtn-ghost:hover {
+  background: var(--student-bg-hover) !important;
+  color: var(--student-text-primary) !important;
+}
+
+/* ============================================================
+ * 3. DASHBOARD (.student-dashboard-clean__*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__figma-panel,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__action-card {
+  background: var(--student-bg-surface) !important;
+  border-color: var(--student-border) !important;
+  box-shadow: var(--student-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-kicker,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-desc,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__action-copy p,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__figma-meta {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-value,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__figma-title h3,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__action-copy strong {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-icon-wrap {
+  box-shadow: 0 0 0 2px var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__session-card--figma {
+  background: var(--student-bg-elevated) !important;
+  border-color: var(--student-border) !important;
+}
+
+/* ============================================================
+ * 4. BROWSE / ENROLL MODAL (.browse-ss-modal__*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__title,
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__subtitle {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__subtitle {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__panel {
+  background: var(--student-bg-elevated) !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__session-title {
+  color: var(--student-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__about {
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__dl dt {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__dl dd {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__close {
+  background: var(--student-bg-hover) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-browse-sessions-page .browse-ss-modal__pay-row {
+  border-color: var(--student-border) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+/* ============================================================
+ * 5. MY SESSIONS (.mys-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page .mys-tabs {
+  background: var(--student-bg-elevated) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-tabs__btn {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-tabs__btn:hover {
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-tabs__btn[aria-selected="true"] {
+  background: var(--student-bg-surface) !important;
+  color: var(--student-text-primary) !important;
+  box-shadow: var(--student-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-card,
+:root[data-theme="dark"] body.student-package-page .mys-card--upcoming,
+:root[data-theme="dark"] body.student-package-page .mys-card--completed,
+:root[data-theme="dark"] body.student-package-page .mys-card--join-ready {
+  background: var(--student-bg-surface) !important;
+  border-color: rgba(45, 212, 191, 0.22) !important;
+  box-shadow: var(--student-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-card--completed {
+  border-color: var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-card__title {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-card__instructor,
+:root[data-theme="dark"] body.student-package-page .mys-meta-row,
+:root[data-theme="dark"] body.student-package-page .mys-meta-row__label {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-meta-row time {
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-meta-row svg,
+:root[data-theme="dark"] body.student-package-page .mys-card__instructor svg {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-empty,
+:root[data-theme="dark"] body.student-package-page .mys-tab-empty {
+  background: var(--student-bg-surface) !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-badge--upcoming {
+  background: rgba(251, 191, 36, 0.12) !important;
+  border-color: rgba(251, 191, 36, 0.28) !important;
+  color: #fbbf24 !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-badge--ready {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border-color: rgba(96, 165, 250, 0.28) !important;
+  color: #93c5fd !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .mys-badge--slot-confirmed,
+:root[data-theme="dark"] body.student-package-page .mys-badge--completed {
+  background: var(--student-primary-soft) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  color: var(--student-primary) !important;
+}
+
+/* ============================================================
+ * 6. PAYMENTS (.pay-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-payments-page .pay-stat,
+:root[data-theme="dark"] body.student-payments-page .pay-table-card {
+  background: var(--student-bg-surface) !important;
+  border-color: var(--student-border) !important;
+  box-shadow: var(--student-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-stat__label,
+:root[data-theme="dark"] body.student-payments-page .pay-table-card__head svg {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-stat__value,
+:root[data-theme="dark"] body.student-payments-page .pay-table-card__title {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-table thead th {
+  color: var(--student-text-muted) !important;
+  border-bottom-color: var(--student-border) !important;
+  background: var(--student-bg-elevated) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-table tbody td {
+  color: var(--student-text-secondary) !important;
+  border-bottom-color: var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-table tbody tr:hover td {
+  background: var(--student-bg-hover) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-badge--pending {
+  background: var(--student-bg-elevated) !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-payments-page .pay-badge--paid {
+  background: var(--student-primary-soft) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  color: var(--student-primary) !important;
+}
+
+/* ============================================================
+ * 7. QR PAYMENT (.qrpay-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-card,
+:root[data-theme="dark"] body.student-premium-page .qrpay-card--pay,
+:root[data-theme="dark"] body.student-premium-page .qrpay-card--details {
+  background: var(--student-bg-surface) !important;
+  border-color: var(--student-border) !important;
+  box-shadow: var(--student-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-card__title {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-card__subtitle,
+:root[data-theme="dark"] body.student-premium-page .qrpay-secure {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-card__head {
+  border-bottom-color: var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-qr__img {
+  background: var(--student-bg-elevated) !important;
+  border-color: var(--student-border) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-upload-box,
+:root[data-theme="dark"] body.student-premium-page .qrpay-amount-section {
+  background: var(--student-bg-elevated) !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-btn--ghost {
+  background: transparent !important;
+  border-color: var(--student-border) !important;
+  color: var(--student-text-secondary) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-btn--ghost:hover {
+  background: var(--student-bg-hover) !important;
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-detail-row dt {
+  color: var(--student-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-detail-row dd {
+  color: var(--student-text-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-amount-section {
+  background: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme="dark"] body.student-premium-page .qrpay-chip {
+  background: var(--student-primary-soft) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  color: var(--student-primary) !important;
+}
+
+/* ============================================================
+ * 8. SIDEBAR LOGOUT (student-figma-shell.css)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page .student-shell-sidebar__logout--solid {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .student-shell-sidebar__logout--solid:hover {
+  background: rgba(248, 113, 113, 0.2) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+  color: #fecaca !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .student-shell-sidebar__logout--solid .student-shell-sidebar__icon,
+:root[data-theme="dark"] body.student-package-page .student-shell-sidebar__logout--solid:hover .student-shell-sidebar__icon {
+  color: inherit !important;
+}

@@ -1,0 +1,1086 @@
+/**
+ * Student dashboard (dashboard.jsp) — Figma / React reference visual layer.
+ * Theme aligns with src/styles/theme.css from design export (teal primary, slate surfaces).
+ *
+ * Shell column alignment matches other student module pages (student-module-page):
+ * do NOT add dashboard-only padding on .student-shell-content — that shifted the main
+ * column vs Browse / My Sessions / Payments / Profile (student_ui_head only).
+ *
+ * Upcoming session uses My Sessions markup (.mys-*); neutralize legacy dashboard-only
+ * .student-dashboard-clean__panel--upcoming rules from student-ui-refine.css so the card
+ * is not wrapped in extra padding/min-height.
+ */
+
+body.student-dashboard-page.student-package-page {
+  --sd-bg: #f8fafc;
+  --sd-text: #1e293b;
+  --sd-muted: #64748b;
+  --sd-teal-50: #f0fdfa;
+  --sd-teal-100: #ccfbf1;
+  --sd-teal-600: #0d9488;
+  --sd-teal-700: #0f766e;
+  --sd-emerald-50: #ecfdf5;
+  --sd-emerald-500: #10b981;
+  --sd-emerald-600: #059669;
+  --sd-blue-50: #eff6ff;
+  --sd-blue-600: #2563eb;
+  --sd-violet-50: #f5f3ff;
+  --sd-violet-600: #7c3aed;
+  --sd-amber-50: #fffbeb;
+  --sd-amber-500: #f59e0b;
+  --sd-card-border: #e2e8f0;
+  --sd-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --sd-shadow-md: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* Shared shell: same flex scroll/sticky sidebar as student-module-page (student-package.css). */
+
+/* Neutralize legacy dashboard-only upcoming panel chrome from student-ui-refine.css /
+   student-module-polish.css (min-height ~405px, extra padding) so the embedded My Sessions
+   card (.mys-card) matches enrollments.jsp visually. */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel.student-dashboard-clean__panel--upcoming {
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__panel-head {
+  padding: 0 !important;
+  margin-bottom: 10px !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__panel-head h3 {
+  margin: 0 !important;
+}
+
+/* Breadcrumb matches other student modules via .mys-crumb (student-my-sessions.css). */
+
+/* ------- Kill legacy hero padding / chrome from shared rules ------- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero {
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  grid-template-columns: 1fr !important;
+  align-items: stretch !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-banner-copy h2,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-banner-copy p {
+  color: #fff !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-banner-copy p {
+  color: rgba(204, 251, 241, 0.95) !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-eyebrow,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-eyebrow span {
+  color: rgba(204, 251, 241, 0.95) !important;
+  background: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  min-height: 0 !important;
+}
+
+/* ------- Welcome banner (gradient — StudentDashboard.tsx) ------- */
+.student-dashboard-clean__welcome-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 24px 28px;
+    background: linear-gradient(90deg, #004d40 0%, #0d9488 48%, #22c55e 100%);
+  box-shadow: 0 12px 28px rgba(15, 118, 110, 0.28);
+}
+
+.student-dashboard-clean__welcome-banner-bg {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.student-dashboard-clean__welcome-banner-bg--a {
+  width: 160px;
+  height: 160px;
+  top: -48px;
+  inset-inline-end: -40px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.student-dashboard-clean__welcome-banner-bg--b {
+  width: 112px;
+  height: 112px;
+  bottom: -56px;
+  inset-inline-end: 96px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.student-dashboard-clean__welcome-banner-bg--c {
+  width: 32px;
+  height: 32px;
+  top: 20px;
+  inset-inline-end: 148px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.student-dashboard-clean__welcome-banner-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.student-dashboard-clean__welcome-banner-copy h2 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.student-dashboard-clean__welcome-banner-copy p {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: rgba(204, 251, 241, 0.95);
+}
+
+.student-dashboard-clean__welcome-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(204, 251, 241, 0.95);
+}
+
+.student-dashboard-clean__welcome-spark {
+  flex-shrink: 0;
+  color: #99f6e4;
+}
+
+/* ------- Stats row (StatsCard.tsx) ------- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stats {
+  gap: 16px;
+}
+
+.student-dashboard-clean__stat-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  min-height: auto !important;
+  border-radius: 14px !important;
+  border: none !important;
+  border-top: 2px solid transparent !important;
+  padding: 20px 20px 18px !important;
+  box-shadow: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06) !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.student-dashboard-clean__stat-card:hover {
+  box-shadow: var(--sd-shadow-md) !important;
+}
+
+.student-dashboard-clean__stat-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.student-dashboard-clean__stat-kicker {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--sd-muted);
+}
+
+.student-dashboard-clean__stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-dashboard-clean__stat-icon-wrap svg {
+  width: 22px;
+  height: 22px;
+}
+
+.student-dashboard-clean__stat-card--teal {
+  border-top-color: var(--sd-teal-600) !important;
+}
+
+.student-dashboard-clean__stat-card--teal .student-dashboard-clean__stat-icon-wrap {
+  background: var(--sd-teal-50);
+  box-shadow: 0 0 0 2px var(--sd-teal-100);
+  color: var(--sd-teal-600);
+}
+
+.student-dashboard-clean__stat-card--emerald {
+  border-top-color: var(--sd-emerald-500) !important;
+}
+
+.student-dashboard-clean__stat-card--emerald .student-dashboard-clean__stat-icon-wrap {
+  background: var(--sd-emerald-50);
+  box-shadow: 0 0 0 2px #d1fae5;
+  color: var(--sd-emerald-600);
+}
+
+.student-dashboard-clean__stat-card--blue {
+  border-top-color: #3b82f6 !important;
+}
+
+.student-dashboard-clean__stat-card--blue .student-dashboard-clean__stat-icon-wrap {
+  background: var(--sd-blue-50);
+  box-shadow: 0 0 0 2px #dbeafe;
+  color: var(--sd-blue-600);
+}
+
+.student-dashboard-clean__stat-card--violet {
+  border-top-color: #8b5cf6 !important;
+}
+
+.student-dashboard-clean__stat-card--violet .student-dashboard-clean__stat-icon-wrap {
+  background: var(--sd-violet-50);
+  box-shadow: 0 0 0 2px #ede9fe;
+  color: var(--sd-violet-600);
+}
+
+.student-dashboard-clean__stat-value {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--sd-text);
+  line-height: 1.1;
+}
+
+.student-dashboard-clean__stat-desc {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--sd-muted);
+}
+
+.student-dashboard-clean__stat-desc::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-inline-end: 6px;
+  vertical-align: middle;
+  background: var(--sd-muted);
+  opacity: 0.65;
+}
+
+/* ------- Figma-style panels ------- */
+.student-dashboard-clean__figma-panel {
+  position: relative;
+  overflow: hidden;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 0 0 22px !important;
+  background: #fff !important;
+  box-shadow: var(--sd-shadow-sm) !important;
+}
+
+.student-dashboard-clean__figma-accent {
+  height: 4px;
+  width: 100%;
+}
+
+.student-dashboard-clean__figma-accent--teal {
+  background: linear-gradient(90deg, #14b8a6, #34d399);
+}
+
+.student-dashboard-clean__figma-panel-head {
+  padding: 18px 22px 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.student-dashboard-clean__figma-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.student-dashboard-clean__figma-title h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sd-text);
+}
+
+.student-dashboard-clean__figma-title-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.student-dashboard-clean__figma-title-icon--teal {
+  background: var(--sd-teal-50);
+  box-shadow: 0 0 0 1px var(--sd-teal-100);
+  color: var(--sd-teal-600);
+}
+
+.student-dashboard-clean__empty--figma {
+  padding: 8px 22px 4px;
+}
+
+.student-dashboard-clean__session-card--figma {
+  margin: 12px 22px 0;
+  padding: 18px 20px !important;
+  border-radius: 14px !important;
+  border: 1px solid #f1f5f9 !important;
+  background: #fafafa !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.student-dashboard-clean__session-meta-row--figma {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px 14px !important;
+  margin-top: 10px !important;
+}
+
+.student-dashboard-clean__session-meta-row--figma span {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px !important;
+  color: var(--sd-muted) !important;
+}
+
+.student-dashboard-clean__meta-emoji {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: var(--sd-teal-50);
+}
+
+.student-dashboard-clean__session-meta-row--figma span:nth-child(2) .student-dashboard-clean__meta-emoji {
+  background: var(--sd-blue-50);
+}
+
+.student-dashboard-clean__session-meta-row--figma span:nth-child(3) .student-dashboard-clean__meta-emoji {
+  background: #fffbeb;
+}
+
+.student-dashboard-clean__session-meta-row--figma span:nth-child(4) .student-dashboard-clean__meta-emoji {
+  background: #f5f3ff;
+}
+
+.student-dashboard-clean__cta-gradient {
+  border: none !important;
+  background: linear-gradient(90deg, #0d9488, #059669) !important;
+  color: #fff !important;
+  box-shadow: var(--sd-shadow-sm) !important;
+  padding-inline-start: 18px !important;
+  padding-inline-end: 18px !important;
+  white-space: nowrap;
+}
+
+.student-dashboard-clean__cta-gradient:hover {
+  filter: brightness(1.05);
+}
+
+/* ------- Quick actions ------- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__actions {
+  gap: 16px;
+}
+
+.student-dashboard-clean__action-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 18px 20px !important;
+  border-radius: 14px !important;
+  text-decoration: none !important;
+  border: none !important;
+  box-shadow: var(--sd-shadow-sm) !important;
+  transition: box-shadow 0.2s ease !important;
+}
+
+.student-dashboard-clean__action-card:hover {
+  box-shadow: var(--sd-shadow-md) !important;
+}
+
+.student-dashboard-clean__action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-dashboard-clean__action-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.student-dashboard-clean__action-icon--teal {
+  background: var(--sd-teal-50);
+  box-shadow: 0 0 0 2px var(--sd-teal-100);
+  color: var(--sd-teal-600);
+}
+
+.student-dashboard-clean__action-icon--violet {
+  background: var(--sd-violet-50);
+  box-shadow: 0 0 0 2px #ede9fe;
+  color: var(--sd-violet-600);
+}
+
+.student-dashboard-clean__action-icon--amber {
+  background: var(--sd-amber-50);
+  box-shadow: 0 0 0 2px #fde68a;
+  color: #d97706;
+}
+
+.student-dashboard-clean__action-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.student-dashboard-clean__action-text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sd-text);
+}
+
+.student-dashboard-clean__action-text span {
+  font-size: 12px;
+  color: var(--sd-muted);
+}
+
+.student-dashboard-clean__action-arrow {
+  flex-shrink: 0;
+  color: var(--sd-muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.student-dashboard-clean__action-card--teal:hover .student-dashboard-clean__action-arrow {
+  color: var(--sd-teal-600);
+  transform: translateX(3px);
+}
+
+.student-dashboard-clean__action-card--violet:hover .student-dashboard-clean__action-arrow {
+  color: var(--sd-violet-600);
+  transform: translateX(3px);
+}
+
+.student-dashboard-clean__action-card--amber:hover .student-dashboard-clean__action-arrow {
+  color: #d97706;
+  transform: translateX(3px);
+}
+
+/* ------- Session badges & CTA ------- */
+.student-dashboard-clean__session-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.student-dashboard-clean__pill--upcoming {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.student-dashboard-clean__cta-gradient--join {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.student-dashboard-clean__cta-icon {
+  flex-shrink: 0;
+}
+
+/* ------- Footer below dashboard workspace (same shell column as My Sessions) ------- */
+body.student-dashboard-page.student-package-page .student-shell-content > .footer {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--sd-card-border);
+  color: var(--sd-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ------- Dark theme ------- */
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-banner {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__figma-panel {
+  background: var(--theme-surface, #1e293b) !important;
+  box-shadow: var(--theme-shadow-sm, 0 8px 24px rgba(0, 0, 0, 0.35)) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-value,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__figma-title h3 {
+  color: var(--theme-text, #f8fafc) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__session-card--figma {
+  background: var(--theme-surface-muted, #334155) !important;
+  border-color: var(--theme-border, #475569) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__action-card {
+  background: var(--theme-surface, #1e293b) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .mys-crumb__muted,
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .mys-crumb__sep {
+  color: var(--theme-text-muted, #94a3b8) !important;
+}
+
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .mys-crumb__current {
+  color: var(--theme-text, #f8fafc) !important;
+}
+
+/**
+ * Dashboard vertical stack (overrides student-package.css 2-column grid and
+ * student-ui-refine legacy grid / tall upcoming panel).
+ * Order: greeting → summary stats → upcoming session → quick actions → footer.
+ */
+body.student-dashboard-page.student-package-page .student-dashboard-clean {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto !important;
+  grid-template-areas:
+    "hero"
+    "stats"
+    "upcoming"
+    "actions" !important;
+  gap: 24px !important;
+  align-content: start !important;
+  align-items: start !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero {
+  grid-area: hero !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 0 !important;
+}
+
+/* Match spacing rhythm with stacked dashboard grid (gap handles separation below hero row). */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero .mys-banner {
+  margin-bottom: 0 !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stats {
+  grid-area: stats !important;
+  display: grid !important;
+  width: 100% !important;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: auto !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel.student-dashboard-clean__panel--upcoming {
+  grid-area: upcoming !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  z-index: auto !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .mys-grid,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-mys-upcoming-empty {
+  min-height: 0 !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__actions {
+  grid-area: actions !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+@media (min-width: 1101px) {
+  body.student-dashboard-page.student-package-page .student-dashboard-clean {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas:
+      "hero"
+      "stats"
+      "upcoming"
+      "actions" !important;
+  }
+}
+
+/* Upcoming session — My Sessions card stack inside dashboard panel */
+.student-dashboard-mys-upcoming-empty__cta {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+/* =====================================================================
+ * COMPACT DASHBOARD TWEAKS (May 2026)
+ * Scoped to body.student-dashboard-page so other pages using .mys-banner
+ * or the .student-dashboard-clean__stat-card classes are untouched.
+ *
+ *   1. Compact greeting card  — two-line "Welcome Back" + NAME, no chrome,
+ *      no animation, much smaller height than the previous banner.
+ *   2. Compact stat cards     — reduced padding / value font / icon size
+ *      so the row consumes ~⅔ of its old height and Upcoming Session
+ *      sits visibly above the fold.
+ *   3. Tighter grid gap       — 24px → 16px between dashboard sections.
+ * ===================================================================== */
+
+/* --- 1. Greeting hero (premium SaaS-style) ---------------------------- *
+ * Deep teal aurora background, gradient-text name as the focal point,
+ * gentle one-shot fade-up on load + slow ambient glow drift, hover lift.
+ * Compact vertical footprint so the rest of the dashboard stays visible. */
+body.student-dashboard-page.student-package-page .student-dashboard-greet {
+  position: relative;
+  padding: 26px 32px !important;
+  margin-bottom: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  border-radius: 20px !important;
+  /* Three-layer aurora wash on a deep emerald base */
+  background:
+    radial-gradient(120% 140% at 110% -10%, rgba(94, 234, 212, 0.34), transparent 55%),
+    radial-gradient(90% 100% at -10% 110%, rgba(45, 212, 191, 0.22), transparent 60%),
+    linear-gradient(120deg, #02312c 0%, #064e46 38%, #0a7268 100%) !important;
+  border: 1px solid rgba(94, 234, 212, 0.18) !important;
+  box-shadow:
+    0 14px 40px rgba(2, 49, 44, 0.38),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset !important;
+  isolation: isolate;
+  animation: dashGreetFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.45s ease !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-greet:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 56px rgba(2, 49, 44, 0.45),
+    0 0 0 1px rgba(94, 234, 212, 0.28) inset !important;
+}
+
+/* Soft drifting glow behind the text — pure decoration */
+body.student-dashboard-page.student-package-page .student-dashboard-greet__glow {
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(45% 55% at 70% 40%, rgba(94, 234, 212, 0.22), transparent 70%),
+    radial-gradient(35% 45% at 30% 70%, rgba(167, 243, 208, 0.14), transparent 75%);
+  filter: blur(28px);
+  opacity: 0.85;
+  animation: dashGreetDrift 14s ease-in-out infinite alternate;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-greet__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-greet__eyebrow {
+  position: relative;
+  margin: 0;
+  padding-inline-start: 28px;
+  color: rgba(186, 230, 253, 0.9);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(94, 234, 212, 0.18);
+}
+body.student-dashboard-page.student-package-page .student-dashboard-greet__eyebrow::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.85));
+  transform: translateY(-1px);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-greet__name {
+  margin: 0;
+  font-size: clamp(1.7rem, 3.6vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  font-family: inherit;
+  text-transform: none;
+  /* Gradient text fill: white → cream → soft mint */
+  background: linear-gradient(120deg, #ffffff 0%, #ecfdf5 40%, #99f6e4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  /* Soft ambient glow around the text without making it blurry */
+  text-shadow: 0 0 28px rgba(94, 234, 212, 0.18);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.45s ease;
+  will-change: transform;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-greet:hover .student-dashboard-greet__name {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 8px 24px rgba(94, 234, 212, 0.28));
+}
+
+/* One-shot intro: fade & slide the whole banner up gently */
+@keyframes dashGreetFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Slow ambient drift for the decorative glow only — never the text */
+@keyframes dashGreetDrift {
+  0%   { transform: translate3d(-4%, -3%, 0) scale(1); }
+  100% { transform: translate3d(4%,  3%, 0) scale(1.05); }
+}
+
+/* Respect users who asked for less motion: kill all animations,
+   keep the static gradient look. */
+@media (prefers-reduced-motion: reduce) {
+  body.student-dashboard-page.student-package-page .student-dashboard-greet,
+  body.student-dashboard-page.student-package-page .student-dashboard-greet__glow,
+  body.student-dashboard-page.student-package-page .student-dashboard-greet__name {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* --- 2. Compact stat cards -------------------------------------------- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card {
+  padding: 14px 16px 12px !important;
+  border-radius: 12px !important;
+  min-height: 0 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card-top {
+  margin-bottom: 8px !important;
+  gap: 10px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-icon-wrap {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-icon-wrap svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-kicker {
+  font-size: 0.75rem !important;
+  line-height: 1.25 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-value {
+  font-size: 1.375rem !important;
+  font-weight: 600 !important;
+  line-height: 1.15 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-trend {
+  margin-top: 4px !important;
+  font-size: 0.75rem !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-desc {
+  margin-top: 4px !important;
+  font-size: 0.75rem !important;
+}
+/* The .mt-1 / .small Bootstrap utilities on the trend row add extra space —
+   tighten them when nested inside our stat card. */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card .mt-1 {
+  margin-top: 4px !important;
+}
+
+/* --- 3. Tighter overall section spacing ------------------------------- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean {
+  gap: 16px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stats {
+  gap: 12px !important;
+}
+
+/* --- 4. Mobile polish (keep the greeting compact even on narrow screens) - */
+@media (max-width: 720px) {
+  body.student-dashboard-page.student-package-page .student-dashboard-greet {
+    padding: 20px 22px !important;
+    border-radius: 18px !important;
+  }
+  body.student-dashboard-page.student-package-page .student-dashboard-greet__eyebrow {
+    padding-inline-start: 22px;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+  }
+  body.student-dashboard-page.student-package-page .student-dashboard-greet__eyebrow::before {
+    width: 14px;
+  }
+  body.student-dashboard-page.student-package-page .student-dashboard-greet__name {
+    font-size: clamp(1.85rem, 8vw, 2.6rem);
+    line-height: 1.12;
+  }
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-value {
+    font-size: 20px !important;
+  }
+}
+
+/* =====================================================================
+ * SPATIAL POLISH & TYPOGRAPHIC REFACTOR (Jun 2026)
+ * Strict 4/8px spacing scale, balanced card geometry, premium empty state.
+ * Loaded last → these rules win for the dashboard view only.
+ * ===================================================================== */
+
+/* --- Section rhythm: lock the inter-section gap to an 8px multiple (24px) - */
+body.student-dashboard-page.student-package-page .student-dashboard-clean {
+  gap: 24px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stats {
+  gap: 16px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__actions {
+  gap: 16px !important;
+}
+
+/* --- 1. Stat cards: less vertical padding, more horizontal breathing room - *
+ * Top row is vertically centred so the kicker label sits on the same optical
+ * line as the top-right badge icon; value + desc stay tightly stacked. */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card {
+  padding: 16px 22px !important;
+  border-radius: 14px !important;
+  gap: 0 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-card-top {
+  align-items: center !important;
+  margin-bottom: 12px !important;
+  gap: 12px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-kicker {
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-icon-wrap {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-icon-wrap svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-value {
+  font-size: 1.625rem !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.02em !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-desc {
+  margin-top: 6px !important;
+  font-size: 0.75rem !important;
+  line-height: 1.35 !important;
+}
+
+/* --- 2. Section header: elegant secondary "+" button -------------------- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__panel-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__panel-head h3 {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--sd-text) !important;
+}
+.student-dashboard-clean__panel-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  color: var(--sd-teal-700);
+  background: var(--sd-teal-50);
+  border: 1px solid var(--sd-teal-100);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.student-dashboard-clean__panel-add:hover {
+  background: var(--sd-teal-100);
+  color: var(--sd-teal-700);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.22);
+}
+.student-dashboard-clean__panel-add:focus-visible {
+  outline: 2px solid var(--sd-teal-600);
+  outline-offset: 2px;
+}
+
+/* --- 3. Premium empty state -------------------------------------------- *
+ * Soft dashed teal frame, compact height, generous breathing room, CTA with
+ * a clean drop-shadow glow on hover. */
+.student-dashboard-clean__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 24px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fcfefe 0%, #f8fafc 100%);
+}
+.student-dashboard-clean__empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  margin-bottom: 16px;
+  color: var(--sd-teal-600);
+  background: var(--sd-teal-50);
+  box-shadow: 0 0 0 6px rgba(204, 251, 241, 0.45);
+}
+.student-dashboard-clean__empty-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--sd-text);
+}
+.student-dashboard-clean__empty-sub {
+  margin: 6px 0 0;
+  max-width: 380px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--sd-muted);
+}
+.student-dashboard-clean__empty-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 11px 22px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, var(--sd-teal-600), var(--sd-emerald-600));
+  border: none;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+}
+.student-dashboard-clean__empty-cta:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+  box-shadow: 0 10px 24px rgba(13, 148, 136, 0.32), 0 0 0 4px rgba(45, 212, 191, 0.18);
+}
+.student-dashboard-clean__empty-cta:focus-visible {
+  outline: 2px solid var(--sd-teal-700);
+  outline-offset: 3px;
+}
+
+/* --- 4. Bottom navigation (quick action) cards: balanced, equal height -- */
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-card {
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 18px 20px !important;
+  min-height: 80px !important;
+  border-radius: 14px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-icon {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 14px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-icon svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-text {
+  gap: 3px !important;
+  justify-content: center !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-text strong {
+  font-size: 0.9375rem !important;
+  line-height: 1.25 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-text span {
+  font-size: 0.8125rem !important;
+  line-height: 1.3 !important;
+}
+body.student-dashboard-page.student-package-page .student-dashboard-clean__action-arrow {
+  align-self: center !important;
+}
+
+/* --- 5. Shell symmetry: equal outer padding around the workspace canvas -- *
+ * Keeps the dashboard card edges from crowding/clipping against the sidebar
+ * without shifting the shared main column used by other student modules. */
+body.student-dashboard-page.student-package-page .student-workspace-view {
+  padding-bottom: 8px;
+}
+
+/* --- 6. Dark theme parity for the new components ----------------------- */
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__empty-state {
+  background: var(--theme-surface, #1e293b);
+  border-color: var(--theme-border, #475569);
+}
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__empty-title {
+  color: var(--theme-text, #f8fafc);
+}
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__empty-sub {
+  color: var(--theme-text-muted, #94a3b8);
+}
+:root[data-theme="dark"] body.student-dashboard-page.student-package-page .student-dashboard-clean__panel-add {
+  background: rgba(13, 148, 136, 0.16);
+  border-color: rgba(45, 212, 191, 0.28);
+  color: #5eead4;
+}

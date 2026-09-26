@@ -1,0 +1,4589 @@
+/*
+ * eTasmi Quran Library — clean, focused redesign.
+ * Design tokens follow the existing student shell variables but introduce a calm, paper-like reading
+ * surface tuned for Arabic typography and audio-driven reading.
+ */
+
+.qlx-root {
+  --qlx-ink: #102a2c;
+  --qlx-ink-soft: #3f5b5d;
+  --qlx-mute: #6f8487;
+  --qlx-bg: #fdfcf7;
+  --qlx-paper: #ffffff;
+  --qlx-line: #e7ece8;
+  --qlx-line-strong: #d6ddd9;
+  --qlx-accent: #0a7d6b;
+  --qlx-accent-deep: #075d4f;
+  --qlx-accent-soft: #e6f4ee;
+  --qlx-accent-ghost: rgba(10, 125, 107, .08);
+  --qlx-warn: #c4623f;
+  --qlx-error: #b53939;
+  --qlx-shadow-sm: 0 1px 2px rgba(16, 42, 44, .05);
+  --qlx-shadow-md: 0 6px 24px -10px rgba(16, 42, 44, .15);
+  --qlx-shadow-lg: 0 18px 48px -16px rgba(16, 42, 44, .25);
+  --qlx-radius-sm: 8px;
+  --qlx-radius-md: 14px;
+  --qlx-radius-lg: 22px;
+  --qlx-radius-pill: 999px;
+  --qlx-arabic: 'Amiri Quran', 'Scheherazade New', 'Noto Naskh Arabic', 'Times New Roman', serif;
+  --qlx-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --qlx-arabic-size: 2.05rem;
+  --qlx-arabic-leading: 2.55;
+  font-family: var(--qlx-sans);
+  color: var(--qlx-ink);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Height now comes from the parent grid (.quran-library-page .student-shell-content)
+     using grid-template-rows: 1fr auto so this row always fills available space.
+     The old `min-height: calc(100vh - 220px)` magic-number caused the footer to
+     appear in the middle of tall viewports. */
+  min-height: 0;
+}
+
+.quran-library-page .qlx-main {
+  background: #f8fafc;
+}
+
+/* Align with student shell: workspace-view carries padding; qlx-root fills the pane. */
+body.quran-library-page .student-shell-content.qlx-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 !important;
+  gap: 0;
+  overflow-y: auto;
+}
+
+body.quran-library-page .student-workspace-view--quran {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  padding: 28px 28px 48px;
+}
+
+body.quran-library-page .student-workspace-view--quran > .etasmi-bc {
+  flex: 0 0 auto;
+  margin-bottom: 18px;
+}
+
+body.quran-library-page .student-workspace-view--quran > .qlx-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body.quran-library-page .student-shell-content.qlx-main > .qlx-root {
+  flex: 0 1 auto;
+  min-height: min-content;
+}
+
+/* -------- Top bar — minimalist header (matches .browse-ss-head on Browse Sessions) -------- */
+
+@keyframes qlxFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.qlx-topbar {
+  position: relative;
+  z-index: auto;
+  isolation: isolate;
+  /* overflow MUST stay visible: hidden both clips the search/pick dropdowns and
+     lets flex shrink the bar below its content (min-height:auto → 0). */
+  overflow: visible;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  height: auto;
+  min-height: min-content;
+  margin: 0 0 24px;
+  padding: 24px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--qlx-radius-lg);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 52%),
+    linear-gradient(135deg, #064e46 0%, #0b6b5a 48%, #16a34a 100%);
+  box-shadow:
+    0 10px 32px -12px rgba(6, 78, 70, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  color: #ffffff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  animation: qlxFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.qlx-root > .qlx-topbar {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
+/* Islamic-inspired geometric accent — subtle white pattern on the green hero */
+.qlx-topbar::before {
+  display: block;
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: 0;
+  width: 220px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 0 var(--qlx-radius-lg) var(--qlx-radius-lg) 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1' opacity='0.22'%3E%3Cpath d='M30 2l8 8-8 8-8-8z'/%3E%3Cpath d='M30 42l8 8-8 8-8-8z'/%3E%3Cpath d='M2 30l8-8 8 8-8 8z'/%3E%3Cpath d='M42 30l8-8 8 8-8 8z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 56px 56px;
+  -webkit-mask-image: linear-gradient(to left, #000 25%, transparent);
+  mask-image: linear-gradient(to left, #000 25%, transparent);
+}
+
+[dir="rtl"] .qlx-topbar::before {
+  border-radius: var(--qlx-radius-lg) 0 0 var(--qlx-radius-lg);
+  -webkit-mask-image: linear-gradient(to right, #000 30%, transparent);
+  mask-image: linear-gradient(to right, #000 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qlx-topbar { animation: none; }
+}
+
+.qlx-topbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.qlx-topbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.qlx-topbar__brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.qlx-topbar__title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  font-family: "Poppins", var(--qlx-sans);
+}
+
+.qlx-topbar__title small {
+  display: block;
+  margin-top: 6px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: normal;
+}
+
+.qlx-topbar__nav {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--qlx-radius-pill);
+  padding: 4px;
+  gap: 2px;
+  box-shadow: 0 4px 14px -8px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.qlx-topbar__nav button {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  padding: 8px 16px;
+  border-radius: var(--qlx-radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.qlx-topbar__nav button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.qlx-topbar__nav button.is-active {
+  background: #ffffff;
+  color: #064e46;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.35);
+}
+
+.qlx-topbar__spacer {
+  flex: 1 1 auto;
+  min-width: 12px;
+}
+
+.qlx-topbar__pick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.95);
+  color: #064e46;
+  font: 600 0.875rem var(--qlx-sans);
+  cursor: pointer;
+  box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.35);
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.qlx-topbar__pick svg {
+  flex-shrink: 0;
+}
+
+.qlx-topbar__pick:hover {
+  background: #ffffff;
+  color: #0b6b5a;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+.qlx-topbar__pick:active {
+  transform: translateY(0);
+}
+
+.qlx-topbar__search {
+  position: relative;
+  min-width: 220px;
+  flex: 0 1 320px;
+}
+
+.qlx-topbar__search input {
+  width: 100%;
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-paper);
+  border-radius: var(--qlx-radius-pill);
+  padding: 9px 14px 9px 38px;
+  font: 500 14px/1.2 var(--qlx-sans);
+  color: var(--qlx-ink);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.qlx-topbar__search input:focus {
+  outline: 0;
+  border-color: var(--qlx-accent);
+  box-shadow: 0 0 0 3px var(--qlx-accent-ghost);
+}
+
+.qlx-topbar__search svg {
+  position: absolute;
+  inset-inline-start: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--qlx-mute);
+  pointer-events: none;
+}
+
+.qlx-topbar__search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  box-shadow: var(--qlx-shadow-lg);
+  padding: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 40;
+}
+
+.qlx-topbar__search-results[hidden] { display: none; }
+
+.qlx-search-row {
+  display: block;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  background: transparent;
+  padding: 9px 12px;
+  border-radius: var(--qlx-radius-sm);
+  cursor: pointer;
+  color: var(--qlx-ink);
+  font-size: 14px;
+}
+
+.qlx-search-row:hover { background: var(--qlx-accent-ghost); }
+.qlx-search-row strong { color: var(--qlx-ink); }
+.qlx-search-row small { color: var(--qlx-mute); margin-inline-start: 6px; }
+
+/* -------- Sidebar + main workspace -------- */
+
+.qlx-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 12px 16px 120px 18px;
+}
+
+body.quran-library-page .qlx-root > .qlx-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 0;
+}
+
+.qlx-workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+@media (max-width: 960px) {
+  .qlx-workspace {
+    grid-template-columns: 1fr;
+  }
+  .qlx-sidebar {
+    position: relative !important;
+    top: auto !important;
+    max-height: 260px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+}
+
+.qlx-sidebar {
+  position: sticky;
+  top: 60px;
+  align-self: start;
+  max-height: calc(100vh - 148px);
+  display: flex;
+  flex-direction: column;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  overflow: hidden;
+}
+
+.qlx-sidebar__hdr {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--qlx-line);
+}
+
+.qlx-sidebar__title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--qlx-mute);
+}
+
+.qlx-sidebar__filter {
+  width: calc(100% - 24px);
+  margin: 10px 12px 8px;
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-pill);
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.qlx-sidebar__filter:focus {
+  outline: 0;
+  border-color: var(--qlx-accent);
+}
+
+.qlx-sidebar__list {
+  margin: 0;
+  padding: 6px 8px 10px;
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.qlx-sidebar__item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: center;
+  text-align: start;
+  border: 0;
+  border-radius: var(--qlx-radius-sm);
+  background: transparent;
+  padding: 8px 8px;
+  cursor: pointer;
+  color: var(--qlx-ink);
+  transition: background .12s ease;
+}
+
+.qlx-sidebar__item:hover { background: var(--qlx-accent-ghost); }
+
+.qlx-sidebar__item.is-active {
+  background: var(--qlx-accent-soft);
+  font-weight: 600;
+}
+
+.qlx-sidebar__num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--qlx-accent-deep);
+  font-feature-settings: "tnum" 1;
+}
+
+.qlx-sidebar__txt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.qlx-sidebar__en {
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qlx-sidebar__ar {
+  font-family: var(--qlx-arabic);
+  font-size: 0.95rem;
+  direction: rtl;
+  line-height: 1.2;
+  color: var(--qlx-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qlx-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* -------- Page intro (home right panel) -------- */
+
+.qlx-home-intro {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 20px 22px;
+  margin-bottom: 12px;
+}
+
+.qlx-home-intro h1 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.qlx-home-intro p {
+  margin: 0;
+  font-size: 0.93rem;
+  color: var(--qlx-mute);
+  line-height: 1.45;
+}
+
+.qlx-home-continue {
+  display: inline-block;
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--qlx-accent-deep);
+  text-decoration: none;
+}
+
+.qlx-home-continue:hover { text-decoration: underline; }
+
+/* Mushaf continuous stream -------------------------------- */
+
+.qlx-mushaf-body {
+  position: relative;
+}
+
+.qlx-mushaf-stream {
+  font-family: var(--qlx-arabic);
+  font-size: var(--qlx-arabic-size);
+  line-height: var(--qlx-arabic-leading);
+  text-align: center;
+  direction: rtl;
+  color: var(--qlx-ink);
+  max-width: 58rem;
+  margin: 0 auto;
+  hyphens: none;
+  padding: 6px 4px;
+}
+
+.qlx-mushaf--compact {
+  --qlx-arabic-size: 1.72rem !important;
+  --qlx-arabic-leading: 2.15 !important;
+}
+
+.qlx-mushaf--compact.is-compact-strong {
+  --qlx-arabic-size: 1.52rem !important;
+  --qlx-arabic-leading: 1.92 !important;
+}
+
+.qlx-mushaf-stream .qlx-mushaf-space {
+  display: inline;
+  white-space: normal;
+}
+
+.qlx-mushaf-ayah {
+  display: inline;
+  border-radius: 4px;
+  padding: 0 1px;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+
+.qlx-mushaf-ayah.is-playing {
+  background: rgba(10, 125, 107, .12);
+  box-shadow: inset 0 -1px 0 rgba(10, 125, 107, .25);
+}
+
+.qlx-end-ayah {
+  display: inline-block;
+  font-family: inherit;
+  font-feature-settings: "tnum" 1;
+  color: var(--qlx-accent-deep);
+  vertical-align: middle;
+  margin: 0 2px;
+  unicode-bidi: isolate;
+}
+
+.qlx-mushaf-translations {
+  max-width: 42rem;
+  margin: 28px auto 0;
+  text-align: start;
+  direction: ltr;
+}
+
+.qlx-mushaf-tr {
+  margin: 0 0 14px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--qlx-line);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--qlx-ink-soft);
+}
+
+.qlx-mushaf-tr__num {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--qlx-accent-deep);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.qlx-mushaf-tr__text { margin: 0; }
+
+.qlx-mushaf-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.qlx-mushaf-tools button {
+  border: 0;
+  background: transparent;
+  color: var(--qlx-mute);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qlx-mushaf-tools button:hover { color: var(--qlx-accent-deep); background: var(--qlx-accent-ghost); }
+
+.qlx-hint-heading {
+  margin: 10px 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--qlx-mute);
+  letter-spacing: 0.02em;
+}
+
+/* Reciter card image */
+.qlx-reciter-card__img {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin: 0 auto 10px;
+  display: block;
+  background: var(--qlx-accent-soft);
+}
+
+@media (max-width: 720px) {
+  .qlx-topbar {
+    margin: 14px 16px 20px;
+    padding: 22px 16px;
+    gap: 10px 12px;
+  }
+
+  .qlx-topbar__brand {
+    flex: 1 1 100%;
+  }
+
+  .qlx-topbar__spacer {
+    display: none;
+  }
+
+  .qlx-topbar__nav {
+    flex: 1 1 auto;
+  }
+
+  .qlx-topbar__pick {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+  .qlx-stage { padding: 18px 16px 130px 16px; }
+}
+
+/* -------- Home view -------- */
+
+.qlx-hero {
+  background: linear-gradient(135deg, #0a7d6b 0%, #075d4f 70%, #04342d 100%);
+  color: #fff;
+  padding: 40px 36px;
+  border-radius: var(--qlx-radius-lg);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--qlx-shadow-lg);
+  margin-bottom: 28px;
+}
+
+.qlx-hero::after {
+  content: '';
+  position: absolute;
+  inset: -40px -40px auto auto;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(closest-side, rgba(255,255,255,.18), transparent 70%);
+  pointer-events: none;
+}
+
+.qlx-hero__bismillah {
+  font-family: var(--qlx-arabic);
+  font-size: 2.1rem;
+  display: block;
+  text-align: end;
+  direction: rtl;
+  margin-bottom: 18px;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.qlx-hero__title {
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.qlx-hero__sub {
+  margin: 0 0 22px;
+  max-width: 56ch;
+  color: rgba(255, 255, 255, .8);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.qlx-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: var(--qlx-accent-deep);
+  padding: 11px 18px;
+  border-radius: var(--qlx-radius-pill);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.qlx-hero__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+}
+
+.qlx-hero__cta--ghost {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.28);
+  margin-inline-start: 10px;
+}
+
+.qlx-hero__cta--ghost:hover { background: rgba(255,255,255,.2); }
+
+/* Section heading */
+.qlx-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 32px 0 14px;
+  gap: 12px;
+}
+
+.qlx-section-head h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--qlx-ink);
+  margin: 0;
+}
+
+.qlx-section-head a {
+  font-size: 13px;
+  color: var(--qlx-accent-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+.qlx-section-head a:hover { text-decoration: underline; }
+
+/* Continue reading + recents */
+.qlx-recents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.qlx-recent-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+  cursor: pointer;
+}
+
+.qlx-recent-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--qlx-line-strong);
+  box-shadow: var(--qlx-shadow-md);
+}
+
+.qlx-recent-card__num {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.qlx-recent-card__name {
+  font-weight: 700;
+  font-size: 0.96rem;
+  line-height: 1.2;
+  margin: 0 0 2px;
+}
+
+.qlx-recent-card__meta {
+  font-size: 12px;
+  color: var(--qlx-mute);
+  line-height: 1.3;
+}
+
+/* Surah grid */
+.qlx-surah-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  gap: 12px;
+}
+
+.qlx-surah-card {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.qlx-surah-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--qlx-line-strong);
+  box-shadow: var(--qlx-shadow-md);
+}
+
+.qlx-surah-card__num {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(135deg, var(--qlx-accent-soft), #fff 60%);
+  color: var(--qlx-accent-deep);
+  border-radius: 12px;
+  font-weight: 700;
+  font-feature-settings: "tnum" 1;
+  position: relative;
+}
+
+.qlx-surah-card__num::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed rgba(10, 125, 107, .35);
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.qlx-surah-card__body { min-width: 0; }
+
+.qlx-surah-card__name {
+  font-weight: 700;
+  font-size: 0.97rem;
+  line-height: 1.2;
+  margin: 0 0 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qlx-surah-card__meta {
+  font-size: 12px;
+  color: var(--qlx-mute);
+  line-height: 1.3;
+}
+
+.qlx-surah-card__arabic {
+  font-family: var(--qlx-arabic);
+  font-size: 1.4rem;
+  color: var(--qlx-ink);
+  direction: rtl;
+  letter-spacing: 0;
+}
+
+/* Loading + error blocks */
+.qlx-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  gap: 12px;
+}
+
+.qlx-skeleton {
+  height: 78px;
+  border-radius: var(--qlx-radius-md);
+  background: linear-gradient(90deg, #f3f1ea 25%, #ece9dd 37%, #f3f1ea 63%);
+  background-size: 400% 100%;
+  animation: qlx-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes qlx-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.qlx-empty {
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--qlx-mute);
+  font-size: 14px;
+}
+
+.qlx-error {
+  background: #fff7f4;
+  border: 1px solid #f3d3c3;
+  color: var(--qlx-warn);
+  padding: 14px 16px;
+  border-radius: var(--qlx-radius-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.qlx-error button {
+  margin-inline-start: auto;
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  border-radius: var(--qlx-radius-pill);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* -------- Reader view -------- */
+
+.qlx-reader {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+}
+
+.qlx-reader__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 10px 14px;
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  box-shadow: var(--qlx-shadow-sm);
+}
+
+.qlx-reader__back {
+  background: transparent;
+  border: 0;
+  color: var(--qlx-ink-soft);
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.qlx-reader__back:hover { background: var(--qlx-accent-ghost); }
+
+.qlx-reader__pick {
+  position: relative;
+}
+
+.qlx-reader__pick-btn {
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-paper);
+  padding: 7px 14px;
+  border-radius: var(--qlx-radius-pill);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--qlx-ink);
+}
+
+.qlx-reader__pick-btn:hover { border-color: var(--qlx-line-strong); }
+
+.qlx-reader__head-spacer { flex: 1; }
+
+.qlx-toggle {
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-paper);
+  padding: 7px 12px;
+  border-radius: var(--qlx-radius-pill);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--qlx-ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qlx-toggle:hover { color: var(--qlx-ink); }
+
+.qlx-toggle.is-on {
+  background: var(--qlx-accent);
+  color: #fff;
+  border-color: var(--qlx-accent);
+}
+
+.qlx-toggle--play.is-on { background: var(--qlx-accent-deep); border-color: var(--qlx-accent-deep); }
+
+.qlx-toggle__icon { width: 14px; height: 14px; }
+
+/* Mushaf surface */
+.qlx-mushaf {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-lg);
+  padding: 38px clamp(20px, 4vw, 56px) 56px;
+  box-shadow: var(--qlx-shadow-md);
+  position: relative;
+}
+
+.qlx-mushaf__header {
+  text-align: center;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--qlx-line);
+}
+
+.qlx-mushaf__crest {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.qlx-mushaf__name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.qlx-mushaf__meaning {
+  margin: 0 0 6px;
+  color: var(--qlx-mute);
+  font-size: 14px;
+}
+
+.qlx-mushaf__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--qlx-mute);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.qlx-mushaf__meta span { display: inline-flex; align-items: center; gap: 4px; }
+.qlx-mushaf__meta i { width: 4px; height: 4px; background: currentColor; border-radius: 50%; }
+
+.qlx-mushaf__bismillah {
+  font-family: var(--qlx-arabic);
+  font-size: 1.85rem;
+  text-align: center;
+  direction: rtl;
+  margin: 16px 0 26px;
+  color: var(--qlx-ink);
+  letter-spacing: 0.02em;
+}
+
+/* Verse blocks */
+.qlx-verses { display: flex; flex-direction: column; gap: 6px; }
+
+.qlx-verse {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  padding: 18px 14px;
+  border-radius: var(--qlx-radius-md);
+  transition: background .25s ease;
+  align-items: start;
+}
+
+.qlx-verse + .qlx-verse {
+  border-top: 1px solid var(--qlx-line);
+  border-radius: 0;
+}
+
+.qlx-verse.is-playing {
+  background: linear-gradient(180deg, rgba(10,125,107,.05) 0%, rgba(10,125,107,.0) 100%);
+  border-radius: var(--qlx-radius-md);
+}
+
+.qlx-verse.is-playing .qlx-verse__num { background: var(--qlx-accent); color: #fff; }
+.qlx-verse.is-playing .qlx-verse__num::before { border-color: rgba(255,255,255,.5); }
+
+.qlx-verse__num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  font-feature-settings: "tnum" 1;
+  position: relative;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.qlx-verse__num::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(10,125,107,.25);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.qlx-verse__body { min-width: 0; }
+
+.qlx-verse__arabic {
+  font-family: var(--qlx-arabic);
+  font-size: var(--qlx-arabic-size);
+  line-height: var(--qlx-arabic-leading);
+  text-align: end;
+  direction: rtl;
+  color: var(--qlx-ink);
+  word-spacing: 4px;
+  letter-spacing: 0;
+}
+
+.qlx-verse__marker {
+  font-family: var(--qlx-arabic);
+  display: inline-block;
+  margin-inline-end: 6px;
+  margin-inline-start: 6px;
+  font-size: 0.85em;
+  color: var(--qlx-accent-deep);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.qlx-verse__translation {
+  margin-top: 10px;
+  font-size: 0.96rem;
+  line-height: 1.7;
+  color: var(--qlx-ink-soft);
+  font-family: var(--qlx-sans);
+  max-width: 64ch;
+}
+
+.qlx-verse__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.qlx-verse__act {
+  border: 0;
+  background: transparent;
+  color: var(--qlx-mute);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--qlx-radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.qlx-verse__act:hover { background: var(--qlx-accent-ghost); color: var(--qlx-accent-deep); }
+.qlx-verse__act.is-on { color: var(--qlx-accent-deep); background: var(--qlx-accent-ghost); }
+
+.qlx-verse__tafsir {
+  margin-top: 10px;
+  background: #fbfbf5;
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 14px 16px;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--qlx-ink-soft);
+  white-space: pre-wrap;
+  display: none;
+}
+
+.qlx-verse__tafsir.is-open { display: block; }
+.qlx-verse__tafsir h4 { margin: 0 0 6px; font-size: 13px; color: var(--qlx-accent-deep); letter-spacing: .02em; text-transform: uppercase; }
+
+/* Density toggle for tighter reading */
+.qlx-mushaf.is-compact .qlx-verse { padding: 12px 10px; }
+.qlx-mushaf.is-compact .qlx-verse__arabic { line-height: 2.1; font-size: calc(var(--qlx-arabic-size) * .92); }
+
+/* -------- Surah picker (modal/dialog inside reader) -------- */
+
+.qlx-picker {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;
+  width: min(420px, 92vw);
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-lg);
+  box-shadow: var(--qlx-shadow-lg);
+  padding: 12px;
+  z-index: 60;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.qlx-picker[hidden] { display: none; }
+
+.qlx-picker__filter {
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-pill);
+  padding: 8px 14px;
+  font-size: 13px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.qlx-picker__list {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.qlx-picker__row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--qlx-radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  background: transparent;
+  color: var(--qlx-ink);
+}
+
+.qlx-picker__row:hover, .qlx-picker__row.is-current { background: var(--qlx-accent-ghost); }
+.qlx-picker__row[aria-selected="true"] { background: var(--qlx-accent-soft); color: var(--qlx-accent-deep); font-weight: 700; }
+
+.qlx-picker__row .num {
+  font-weight: 700; color: var(--qlx-accent-deep); font-feature-settings: "tnum" 1;
+}
+
+.qlx-picker__row .ar {
+  font-family: var(--qlx-arabic); font-size: 1rem; direction: rtl; color: var(--qlx-ink);
+}
+
+/* -------- Reciters view -------- */
+
+.qlx-reciters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.qlx-reciter-card {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.qlx-reciter-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--qlx-line-strong);
+  box-shadow: var(--qlx-shadow-md);
+}
+
+.qlx-reciter-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qlx-accent-soft) 0%, #fff 75%);
+  margin: 0 auto 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--qlx-accent-deep);
+  font-size: 22px;
+}
+
+.qlx-reciter-card__name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+
+.qlx-reciter-card__style {
+  font-size: 12px;
+  color: var(--qlx-mute);
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+/* Reciter detail (chapter chooser) */
+.qlx-reciter-detail__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.qlx-reciter-detail__avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qlx-accent), var(--qlx-accent-deep));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.qlx-reciter-detail__photo {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-accent-soft);
+}
+
+.qlx-reciter-detail__name { margin: 0; font-size: 1.2rem; }
+.qlx-reciter-detail__sub { margin: 2px 0 0; color: var(--qlx-mute); font-size: 13px; }
+
+/* -------- My Quran -------- */
+
+.qlx-my-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.qlx-my-card {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 18px 20px;
+}
+
+.qlx-my-card h3 {
+  margin: 0 0 6px;
+  font-size: 0.96rem;
+  letter-spacing: -0.01em;
+}
+
+.qlx-my-card p { margin: 0 0 10px; color: var(--qlx-mute); font-size: 13px; }
+
+.qlx-my-card ul {
+  margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px;
+}
+
+.qlx-my-card li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: var(--qlx-radius-sm);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.qlx-my-card li:hover { background: var(--qlx-accent-ghost); }
+.qlx-my-card li small { color: var(--qlx-mute); font-size: 12px; }
+
+.qlx-my-empty { color: var(--qlx-mute); font-size: 13px; padding: 6px 0; }
+
+/* -------- Audio dock (sticky bottom player) -------- */
+
+.qlx-dock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  width: min(820px, calc(100vw - 32px));
+  z-index: 55;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line-strong);
+  border-radius: var(--qlx-radius-pill);
+  box-shadow: var(--qlx-shadow-lg);
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.qlx-dock[hidden] { display: none; }
+
+.qlx-dock__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.qlx-dock__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qlx-accent), var(--qlx-accent-deep));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.qlx-dock__title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  margin: 0;
+}
+
+.qlx-dock__sub {
+  font-size: 11px;
+  color: var(--qlx-mute);
+  line-height: 1.2;
+  margin: 2px 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.qlx-dock__center {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.qlx-dock__buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qlx-dock__btn {
+  border: 0;
+  background: transparent;
+  color: var(--qlx-ink-soft);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qlx-dock__btn:hover { background: var(--qlx-accent-ghost); color: var(--qlx-ink); }
+
+.qlx-dock__play {
+  width: 38px;
+  height: 38px;
+  background: var(--qlx-accent);
+  color: #fff;
+  border-radius: 50%;
+}
+
+.qlx-dock__play:hover { background: var(--qlx-accent-deep); color: #fff; }
+
+.qlx-dock__progress {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--qlx-mute);
+  font-feature-settings: "tnum" 1;
+}
+
+.qlx-dock__bar {
+  flex: 1;
+  position: relative;
+  height: 4px;
+  background: var(--qlx-line);
+  border-radius: 999px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.qlx-dock__bar-fill {
+  position: absolute; inset-inline-start: 0; top: 0; bottom: 0;
+  background: var(--qlx-accent);
+  width: 0%;
+  border-radius: 999px;
+  transition: width 0.12s linear;
+}
+
+.qlx-dock__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qlx-dock__close {
+  border: 0;
+  background: transparent;
+  color: var(--qlx-mute);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.qlx-dock__close:hover { color: var(--qlx-error); background: rgba(181,57,57,.08); }
+
+@media (max-width: 540px) {
+  .qlx-dock { grid-template-columns: 1fr auto; padding: 6px 10px; }
+  .qlx-dock__info { grid-column: 1 / 3; }
+  .qlx-dock__center { grid-column: 1; }
+  .qlx-dock__right { grid-column: 2; }
+}
+
+/* -------- Toast -------- */
+
+.qlx-toast {
+  position: fixed;
+  bottom: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--qlx-ink);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--qlx-radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.qlx-toast.is-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* -------- Settings popover -------- */
+
+.qlx-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-end: 0;
+  width: 320px;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-lg);
+  box-shadow: var(--qlx-shadow-lg);
+  padding: 14px;
+  z-index: 60;
+}
+
+.qlx-popover[hidden] { display: none; }
+
+.qlx-popover h4 {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--qlx-mute);
+}
+
+.qlx-popover label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  padding: 6px 0;
+}
+
+.qlx-popover input[type="range"] {
+  width: 130px; accent-color: var(--qlx-accent);
+}
+
+.qlx-popover select {
+  border: 1px solid var(--qlx-line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--qlx-paper);
+  color: var(--qlx-ink);
+  max-width: 180px;
+}
+
+.qlx-pop-divider {
+  border: 0;
+  border-top: 1px solid var(--qlx-line);
+  margin: 10px 0;
+}
+
+/* -------- Utility -------- */
+
+.qlx-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+.qlx-bismillah-line {
+  font-family: var(--qlx-arabic);
+  font-size: 1.25em;
+  color: var(--qlx-ink);
+}
+
+@media (max-width: 720px) {
+  .qlx-mushaf { padding: 22px 14px 36px; }
+  .qlx-verse { grid-template-columns: 36px 1fr; gap: 10px; }
+  .qlx-verse__arabic { font-size: 1.6rem; line-height: 2.3; }
+  .qlx-reader__head { top: 56px; }
+  .qlx-hero { padding: 28px 22px; }
+  .qlx-hero__bismillah { font-size: 1.7rem; }
+}
+
+/* =====================================================================
+ * FINAL POLISH — full-width layout, modal, profile, animations.
+ * Wins specificity by being later in the cascade.
+ * ===================================================================== */
+
+/* Honour the HTML `hidden` attribute even when a class sets `display: flex`
+ * (otherwise translate-toggle had no visible effect). */
+.qlx-root [hidden],
+.qlx-root .qlx-is-hidden,
+.qlx-mushaf-translations[hidden],
+.qlx-mushaf-translations.qlx-is-hidden { display: none !important; }
+
+/* Inline-SVG avatar — always sized + clipped to a circle. */
+svg.qlx-avatar-svg {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--qlx-accent-soft);
+}
+
+.qlx-root .qlx-sidebar,
+.qlx-root .qlx-workspace > aside { display: none !important; }
+
+.qlx-root .qlx-workspace {
+  display: block !important;
+  max-width: none;
+  gap: 0;
+}
+
+.qlx-root .qlx-stage {
+  padding: 18px 28px 140px;
+  max-width: none;
+}
+
+.qlx-root .qlx-content,
+.qlx-content--full {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: block;
+  animation: qlxFadeIn .22s ease-out both;
+}
+
+@keyframes qlxFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes qlxModalIn {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes qlxOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Modal (Surah picker) */
+.qlx-modal {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(8, 22, 25, .55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: qlxOverlayIn .14s ease-out;
+}
+.qlx-modal[hidden] { display: none; }
+
+.qlx-modal__dialog {
+  width: min(560px, 100%);
+  max-height: min(80vh, 720px);
+  background: var(--qlx-paper);
+  border-radius: var(--qlx-radius-lg);
+  box-shadow: var(--qlx-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: qlxModalIn .2s cubic-bezier(.2, .8, .25, 1);
+}
+
+.qlx-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--qlx-line);
+}
+.qlx-modal__head h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.qlx-modal__close {
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--qlx-mute); padding: 6px;
+  border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .12s ease, color .12s ease;
+}
+.qlx-modal__close:hover { background: var(--qlx-line); color: var(--qlx-ink); }
+
+.qlx-modal__filter {
+  margin: 12px 18px 0;
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-pill);
+  padding: 10px 14px;
+  font: 500 14px var(--qlx-sans);
+  background: var(--qlx-bg);
+}
+.qlx-modal__filter:focus {
+  outline: 0;
+  border-color: var(--qlx-accent);
+  box-shadow: 0 0 0 3px var(--qlx-accent-ghost);
+  background: var(--qlx-paper);
+}
+
+.qlx-modal__list {
+  margin: 10px 8px 14px;
+  overflow-y: auto;
+  padding: 4px 8px;
+  display: grid;
+  gap: 2px;
+}
+
+.qlx-modal__row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  text-align: start;
+  border: 0; background: transparent;
+  padding: 10px 12px;
+  border-radius: var(--qlx-radius-md);
+  cursor: pointer;
+  color: var(--qlx-ink);
+  transition: background .12s ease, transform .12s ease;
+}
+.qlx-modal__row:hover { background: var(--qlx-accent-ghost); transform: translateX(2px); }
+.qlx-modal__num {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: var(--qlx-accent-soft); color: var(--qlx-accent-deep);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.qlx-modal__txt { display: flex; flex-direction: column; min-width: 0; }
+.qlx-modal__en { font-weight: 600; font-size: 14px; }
+.qlx-modal__txt small { color: var(--qlx-mute); font-size: 12px; }
+.qlx-modal__ar {
+  font-family: var(--qlx-arabic); font-size: 18px; color: var(--qlx-ink);
+}
+.qlx-modal__empty { padding: 22px; text-align: center; color: var(--qlx-mute); font-size: 14px; }
+
+/* HomePanel hero (green theme, animated) */
+.qlx-home-hero {
+  position: relative;
+  text-align: center;
+  padding: 44px 28px 36px;
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,.18), transparent 70%) -60px -60px / 320px 320px no-repeat,
+    radial-gradient(closest-side, rgba(255,255,255,.10), transparent 70%) calc(100% + 40px) calc(100% + 40px) / 360px 360px no-repeat,
+    linear-gradient(135deg, #0a7d6b 0%, #075d4f 70%, #04342d 100%);
+  color: #fff;
+  border-radius: var(--qlx-radius-lg);
+  box-shadow: var(--qlx-shadow-lg);
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.qlx-home-hero__bismillah {
+  font-family: var(--qlx-arabic);
+  font-size: 1.85rem;
+  margin-bottom: 14px;
+  letter-spacing: .02em;
+  opacity: .96;
+}
+.qlx-home-hero__title {
+  font-size: clamp(1.7rem, 3vw, 2.1rem);
+  margin: 0 0 8px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.qlx-home-hero__lead {
+  margin: 0 auto 14px;
+  max-width: 56ch;
+  opacity: .92;
+  font-size: .96rem;
+  line-height: 1.6;
+}
+.qlx-home-hero__hint {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: .03em;
+  color: rgba(255,255,255,.78);
+}
+.qlx-home-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  color: var(--qlx-accent-deep);
+  padding: 13px 24px;
+  border-radius: var(--qlx-radius-pill);
+  font-weight: 700;
+  font-size: 14px;
+  border: 0; cursor: pointer;
+  box-shadow: 0 6px 14px -4px rgba(0,0,0,.25);
+  transition: transform .15s ease, box-shadow .15s ease, color .15s ease;
+}
+.qlx-home-hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -6px rgba(0,0,0,.3);
+}
+.qlx-home-hero__cta:active { transform: translateY(0); }
+
+/* Continue reading — minimal card */
+.qlx-home-continue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 18px 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--qlx-shadow-sm);
+}
+
+.qlx-home-continue__copy {
+  min-width: 0;
+}
+
+.qlx-home-continue__label {
+  margin: 0 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--qlx-mute);
+}
+
+.qlx-home-continue__name {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--qlx-ink);
+}
+
+.qlx-home-continue__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--qlx-paper);
+  color: #0f766e;
+  text-decoration: none;
+  padding: 9px 18px;
+  border-radius: var(--qlx-radius-pill);
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid rgba(13, 148, 136, 0.32);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qlx-home-continue__btn:hover {
+  background: #f0fdf9;
+  border-color: rgba(13, 148, 136, 0.48);
+  color: #115e59;
+  box-shadow: 0 2px 8px rgba(6, 78, 59, 0.08);
+}
+
+.qlx-home-section-title {
+  font-size: 1rem;
+  margin: 22px 0 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--qlx-ink);
+}
+
+.qlx-home-recents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.qlx-recent-card {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  text-decoration: none;
+  color: var(--qlx-ink);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.qlx-recent-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--qlx-shadow-md);
+  border-color: #bfe4d8;
+}
+.qlx-recent-card__num {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--qlx-accent), var(--qlx-accent-deep));
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-feature-settings: 'tnum' 1;
+  box-shadow: 0 8px 16px -10px rgba(10, 125, 107, 0.8);
+}
+.qlx-recent-card__txt { min-width: 0; }
+.qlx-recent-card__name { margin: 0; font-weight: 700; font-size: 14px; }
+.qlx-recent-card__meta { margin: 3px 0 0; color: var(--qlx-mute); font-size: 12px; }
+.qlx-recent-card__ar { font-family: var(--qlx-arabic); font-size: 22px; color: var(--qlx-ink); }
+
+/* Pillars (3-up explainers below hero) */
+.qlx-home-pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+.qlx-pillar {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 18px 18px 16px;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.qlx-pillar:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--qlx-shadow-md);
+  border-color: #c8e6dc;
+}
+.qlx-pillar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  margin-bottom: 10px;
+}
+.qlx-pillar__title { margin: 0 0 4px; font-size: 1rem; font-weight: 700; }
+.qlx-pillar__desc { margin: 0; color: var(--qlx-mute); font-size: 13px; line-height: 1.5; }
+
+/* Reader header — back + simplified controls. Non-sticky to avoid overlap with the global student header. */
+.qlx-reader__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  margin-bottom: 16px;
+  position: relative;
+  z-index: auto;
+}
+.qlx-reader__head-spacer { flex: 1 1 auto; }
+.qlx-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--qlx-line);
+  color: var(--qlx-ink);
+  padding: 7px 12px;
+  border-radius: var(--qlx-radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.qlx-back:hover {
+  background: var(--qlx-accent-ghost);
+  border-color: #c8e6dc;
+  color: var(--qlx-accent-deep);
+}
+.qlx-toggle--ghost { background: transparent; }
+.qlx-toggle--ghost:hover {
+  background: var(--qlx-accent-ghost);
+  border-color: #c8e6dc;
+}
+
+/* Mushaf — centered, full-width container */
+.qlx-mushaf-body {
+  max-width: 980px;
+  margin: 0 auto;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-lg);
+  padding: 32px 36px 44px;
+  box-shadow: var(--qlx-shadow-sm);
+}
+.qlx-mushaf-stream {
+  text-align: justify;
+  text-align-last: center;
+  font-family: var(--qlx-arabic);
+  color: var(--qlx-ink);
+}
+.qlx-mushaf-translations {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--qlx-line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.qlx-mushaf-tr {
+  background: var(--qlx-bg);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 12px 14px;
+}
+.qlx-mushaf-tr__num {
+  display: inline-block;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  font-feature-settings: 'tnum' 1;
+}
+.qlx-mushaf-tr__text { margin: 0; line-height: 1.55; font-size: 14px; }
+.qlx-mushaf-ayah.is-playing {
+  background: linear-gradient(180deg, transparent 60%, var(--qlx-accent-soft) 60%);
+  border-radius: 4px;
+  transition: background .25s ease;
+}
+.qlx-end-ayah {
+  font-family: var(--qlx-arabic);
+  color: var(--qlx-accent-deep);
+  font-size: .9em;
+  margin: 0 4px;
+}
+
+/* Reciters grid (cards) */
+.qlx-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.qlx-section-head h2 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.qlx-section-sub { margin: 0; color: var(--qlx-mute); font-size: 14px; }
+
+.qlx-reciters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.qlx-reciter-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  color: var(--qlx-ink);
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 22px 16px 18px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  position: relative;
+  overflow: hidden;
+}
+.qlx-reciter-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 64px;
+  background: linear-gradient(135deg, var(--qlx-accent-soft), #fff);
+  z-index: 0;
+}
+.qlx-reciter-card > * { position: relative; z-index: 1; }
+.qlx-reciter-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--qlx-shadow-md);
+  border-color: #c8e6dc;
+}
+.qlx-reciter-card__avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qlx-accent), var(--qlx-accent-deep));
+  color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 26px;
+  margin: 8px auto 12px;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px -2px rgba(7,93,79,.35);
+}
+.qlx-reciter-card__img,
+svg.qlx-avatar-svg.qlx-reciter-card__img {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 8px auto 12px;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px -2px rgba(7,93,79,.35);
+  background: var(--qlx-accent-soft);
+  display: block;
+  overflow: hidden;
+}
+.qlx-reciter-card__name {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.qlx-reciter-card__style {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--qlx-mute);
+  text-transform: capitalize;
+}
+.qlx-reciter-card__country {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--qlx-accent-deep);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.qlx-reciter-card__cta {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--qlx-accent-deep);
+  letter-spacing: .02em;
+  transition: transform .15s ease;
+}
+.qlx-reciter-card:hover .qlx-reciter-card__cta { transform: translateX(4px); }
+
+/* Reciter Profile */
+.qlx-profile__hero {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 22px;
+  align-items: center;
+  padding: 24px 26px;
+  margin: 14px 0 18px;
+  background:
+    linear-gradient(135deg, var(--qlx-accent-soft) 0%, #ffffff 70%);
+  border: 1px solid #c8e6dc;
+  border-radius: var(--qlx-radius-lg);
+  box-shadow: var(--qlx-shadow-sm);
+}
+.qlx-profile__photo,
+svg.qlx-avatar-svg.qlx-profile__photo {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 18px -4px rgba(7,93,79,.35);
+  background: var(--qlx-accent-soft);
+  display: block;
+  overflow: hidden;
+}
+.qlx-profile__avatar {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--qlx-accent), var(--qlx-accent-deep));
+  color: #fff;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  font-weight: 700; font-size: 38px;
+  border: 4px solid #fff;
+  box-shadow: 0 6px 18px -4px rgba(7,93,79,.35);
+}
+.qlx-profile__name { margin: 0 0 8px; font-size: 1.6rem; font-weight: 700; letter-spacing: -.01em; }
+.qlx-profile__sub { margin: 0; color: var(--qlx-ink-soft); font-size: 14px; text-transform: capitalize; }
+.qlx-profile__count { margin: 8px 0 0; color: var(--qlx-mute); font-size: 13px; }
+.qlx-profile__pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.qlx-profile__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--qlx-paper);
+  border: 1px solid #c8e6dc;
+  color: var(--qlx-accent-deep);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: capitalize;
+}
+.qlx-profile__bio {
+  margin: 4px 0 6px;
+  color: var(--qlx-ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 60ch;
+}
+
+.qlx-profile__surahs {
+  display: grid;
+  gap: 8px;
+}
+.qlx-profile-surah {
+  display: grid;
+  grid-template-columns: 40px 1fr 80px auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.qlx-profile-surah:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--qlx-shadow-md);
+  border-color: #c8e6dc;
+}
+.qlx-profile-surah__num {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  font-weight: 700;
+  font-feature-settings: 'tnum' 1;
+}
+.qlx-profile-surah__txt { min-width: 0; }
+.qlx-profile-surah__name { margin: 0; font-weight: 700; font-size: 14px; }
+.qlx-profile-surah__meta { margin: 3px 0 0; color: var(--qlx-mute); font-size: 12px; }
+.qlx-profile-surah__ar {
+  font-family: var(--qlx-arabic);
+  font-size: 22px;
+  text-align: end;
+  color: var(--qlx-ink);
+}
+.qlx-profile-surah__actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.qlx-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-paper);
+  color: var(--qlx-ink);
+  padding: 8px 14px;
+  border-radius: var(--qlx-radius-pill);
+  font: 600 12px var(--qlx-sans);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.qlx-action:hover {
+  background: var(--qlx-accent-ghost);
+  border-color: #c8e6dc;
+  color: var(--qlx-accent-deep);
+  transform: translateY(-1px);
+}
+.qlx-action--listen {
+  background: var(--qlx-accent);
+  color: #fff;
+  border-color: var(--qlx-accent);
+}
+.qlx-action--listen:hover {
+  background: var(--qlx-accent-deep);
+  color: #fff;
+  border-color: var(--qlx-accent-deep);
+}
+.qlx-action[disabled] { opacity: .6; cursor: not-allowed; transform: none; }
+
+/* My Quran cards refresh */
+.qlx-my-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.qlx-my-card {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 18px 20px;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  animation: qlxCardIn .35s cubic-bezier(.2,.8,.25,1) both;
+}
+.qlx-my-card:nth-child(1) { animation-delay: 0ms; }
+.qlx-my-card:nth-child(2) { animation-delay: 60ms; }
+.qlx-my-card:nth-child(3) { animation-delay: 120ms; }
+.qlx-my-card:nth-child(4) { animation-delay: 180ms; }
+
+@keyframes qlxCardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.qlx-my-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--qlx-shadow-md);
+  border-color: #c8e6dc;
+}
+.qlx-my-card h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--qlx-ink);
+}
+.qlx-my-card p {
+  margin: 0 0 12px;
+  color: var(--qlx-mute);
+  font-size: 13px;
+}
+.qlx-my-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.qlx-my-card li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--qlx-radius-sm);
+  background: var(--qlx-bg);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .15s ease, transform .15s ease;
+}
+.qlx-my-card li:hover { background: var(--qlx-accent-ghost); transform: translateX(2px); }
+.qlx-my-card li small { color: var(--qlx-accent-deep); font-weight: 600; }
+.qlx-my-empty { padding: 12px; color: var(--qlx-mute); font-size: 13px; text-align: center; }
+
+/* Mushaf-tools (per-ayah) — minimal */
+.qlx-mushaf-tools {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.qlx-mushaf-tools button {
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-paper);
+  color: var(--qlx-mute);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+.qlx-mushaf-tools button:hover {
+  background: var(--qlx-accent-ghost);
+  color: var(--qlx-accent-deep);
+  border-color: #c8e6dc;
+}
+
+/* Toggle buttons (Listen / Translate / Switch surah) */
+.qlx-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--qlx-line);
+  background: var(--qlx-paper);
+  color: var(--qlx-ink);
+  padding: 8px 14px;
+  border-radius: var(--qlx-radius-pill);
+  font: 600 13px var(--qlx-sans);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.qlx-toggle:hover {
+  background: var(--qlx-accent-ghost);
+  border-color: #c8e6dc;
+  color: var(--qlx-accent-deep);
+  transform: translateY(-1px);
+}
+.qlx-toggle.is-on {
+  background: var(--qlx-accent);
+  color: #fff;
+  border-color: var(--qlx-accent);
+}
+.qlx-toggle--play.is-on {
+  background: var(--qlx-accent-deep);
+  border-color: var(--qlx-accent-deep);
+}
+.qlx-toggle__icon { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* Read title in reader header */
+.qlx-read-title { font-size: 14px; line-height: 1.2; }
+.qlx-read-title strong { font-weight: 700; color: var(--qlx-ink); }
+.qlx-read-sub { color: var(--qlx-mute); font-weight: 500; font-size: 13px; }
+
+/* Mobile tweaks */
+@media (max-width: 720px) {
+  .qlx-root .qlx-stage { padding: 14px 16px 130px; }
+  .qlx-mushaf-body { padding: 22px 18px 30px; border-radius: var(--qlx-radius-md); }
+  .qlx-home-hero { padding: 32px 22px 28px; }
+  .qlx-home-continue {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px 18px;
+  }
+  .qlx-home-continue__btn { width: 100%; }
+  .qlx-profile__hero { grid-template-columns: 84px 1fr; gap: 14px; padding: 18px 18px; }
+  .qlx-profile__photo, .qlx-profile__avatar { width: 84px; height: 84px; font-size: 30px; }
+  .qlx-profile-surah {
+    grid-template-columns: 36px 1fr;
+    grid-template-rows: auto auto;
+    gap: 6px 12px;
+  }
+  .qlx-profile-surah__ar { display: none; }
+  .qlx-profile-surah__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+  .qlx-reader__head { position: relative; top: auto; }
+}
+
+/* =====================================================================
+ * FINAL FIX (May 2026) — translation always works + sticky controls +
+ * footer breathing room + compact hero + bulletproof CSS avatar.
+ * Last in the cascade so it wins specificity ties.
+ * ===================================================================== */
+
+/* --- 1. Always-visible Listen + Translate controls ----------------------- */
+.qlx-root .qlx-reader__head {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(253, 252, 247, .96);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--qlx-line);
+  box-shadow: 0 6px 18px -14px rgba(8, 22, 25, .4);
+  margin-bottom: 14px;
+}
+
+/* --- 2. Page chrome (footer removed) + dock breathing room -------------- */
+/*
+ * The shared site footer (`<%@ include file="app_footer.jspf" %>`) is
+ * intentionally NOT rendered on Quran Library pages — see quran_library.jsp.
+ * We keep the page workspace immersive so the fixed audio dock is the only
+ * thing at the bottom edge.
+ *
+ * AUDIO DOCK breathing room:
+ *   The dock is `position: fixed` at the bottom (~85px tall incl. shadow).
+ *   We give the qlx-stage extra padding-bottom so the last card never sits
+ *   under the dock.
+ */
+body.quran-library-page .qlx-main { padding-bottom: 0; }
+body.quran-library-page .qlx-root { padding-bottom: 0; }
+.qlx-root .qlx-stage { padding-bottom: 140px !important; }
+
+/* --- 3. Compact home hero ----------------------------------------------- */
+.qlx-home-hero.qlx-home-hero--compact {
+  padding: 18px 22px;
+  margin-bottom: 18px;
+  border-radius: var(--qlx-radius-lg);
+  text-align: start;
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,.18), transparent 70%) -40px -50px / 280px 280px no-repeat,
+    linear-gradient(135deg, #0a7d6b 0%, #075d4f 70%, #04342d 100%);
+  color: #fff;
+  box-shadow: var(--qlx-shadow-sm);
+}
+.qlx-home-hero--compact .qlx-home-hero__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.qlx-home-hero--compact .qlx-home-hero__title {
+  margin: 0 0 4px;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.qlx-home-hero--compact .qlx-home-hero__lead {
+  margin: 0;
+  opacity: .9;
+  font-size: .92rem;
+  line-height: 1.45;
+  max-width: 60ch;
+}
+.qlx-home-hero--compact .qlx-home-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #0f766e;
+  padding: 9px 16px;
+  border-radius: var(--qlx-radius-pill);
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid rgba(13, 148, 136, 0.32);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.qlx-home-hero--compact .qlx-home-hero__cta:hover {
+  background: #f0fdf9;
+  border-color: rgba(13, 148, 136, 0.48);
+  color: #115e59;
+  box-shadow: 0 2px 8px rgba(6, 78, 59, 0.08);
+}
+
+/* --- 4. Bulletproof CSS gradient avatar (replaces SVG approach) --------- */
+.qlx-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a7d6b 0%, #075d4f 60%, #04342d 100%);
+  color: #fff;
+  font-weight: 800;
+  font-family: var(--qlx-sans);
+  border-radius: 50%;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  flex: 0 0 auto;
+}
+.qlx-avatar.qlx-reciter-card__img {
+  width: 76px;
+  height: 76px;
+  font-size: 28px;
+  margin: 8px auto 12px;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px -2px rgba(7,93,79,.4);
+}
+.qlx-avatar.qlx-profile__photo {
+  width: 110px;
+  height: 110px;
+  font-size: 40px;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 22px -4px rgba(7,93,79,.4);
+}
+
+/* --- 5. AI translation pending state ------------------------------------ */
+.qlx-mushaf-tr__text--pending {
+  opacity: .55;
+  font-style: italic;
+  position: relative;
+}
+.qlx-mushaf-tr__text--pending::after {
+  content: '…';
+  display: inline-block;
+  margin-inline-start: 4px;
+  animation: qlxPulse 1.4s ease-in-out infinite;
+}
+.qlx-mushaf-tr--ai .qlx-mushaf-tr__num::after {
+  content: '· AI';
+  margin-inline-start: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  color: var(--qlx-accent-deep);
+  background: var(--qlx-accent-soft);
+  padding: 1px 6px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+@keyframes qlxPulse {
+  0%, 100% { opacity: .35; }
+  50%      { opacity: 1; }
+}
+
+/* --- 6. Mobile tweaks --------------------------------------------------- */
+@media (max-width: 720px) {
+  .qlx-root .qlx-reader__head {
+    position: relative;
+    top: auto;
+    background: var(--qlx-paper);
+  }
+  .qlx-home-hero.qlx-home-hero--compact { padding: 16px 18px; }
+  .qlx-home-hero--compact .qlx-home-hero__row { gap: 10px; }
+  .qlx-avatar.qlx-reciter-card__img { width: 64px; height: 64px; font-size: 24px; }
+  .qlx-avatar.qlx-profile__photo { width: 84px; height: 84px; font-size: 30px; }
+}
+
+/* =====================================================================
+ * Paired Arabic + Translation layout (Translate toggle ON).
+ * Each ayah is a self-contained card: Arabic on top, English directly
+ * below. Audio sync still flows through the existing .qlx-mushaf-ayah
+ * span inside the Arabic block, so highlight + scroll behaviour remain
+ * unchanged when listening while reading translations.
+ * ===================================================================== */
+
+.qlx-mushaf-paired {
+  --qlx-paired-arabic-size: 2.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.qlx-mushaf-paired[hidden],
+.qlx-mushaf-paired.qlx-is-hidden { display: none !important; }
+
+.qlx-ayah-pair {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-md);
+  padding: 18px 22px 16px;
+  box-shadow: var(--qlx-shadow-sm);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  scroll-margin-top: 96px; /* keeps highlighted card clear of sticky header */
+}
+
+.qlx-ayah-pair:hover {
+  border-color: #c8e6dc;
+  box-shadow: var(--qlx-shadow-md);
+}
+
+.qlx-ayah-pair--playing {
+  border-color: var(--qlx-accent);
+  box-shadow: 0 14px 28px -16px rgba(10, 125, 107, .55);
+}
+
+.qlx-ayah-pair__arabic {
+  font-family: var(--qlx-arabic);
+  font-size: var(--qlx-paired-arabic-size);
+  line-height: 2.2;
+  text-align: end;
+  direction: rtl;
+  color: var(--qlx-ink);
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--qlx-line);
+  word-spacing: 4px;
+  letter-spacing: 0;
+}
+
+.qlx-ayah-pair__arabic .qlx-mushaf-ayah {
+  display: inline;
+  border-radius: 4px;
+  padding: 0 1px;
+  transition: background .25s ease;
+}
+
+.qlx-ayah-pair__arabic .qlx-mushaf-ayah.is-playing {
+  background: linear-gradient(180deg, transparent 60%, var(--qlx-accent-soft) 60%);
+}
+
+.qlx-ayah-pair__arabic .qlx-end-ayah {
+  font-family: var(--qlx-arabic);
+  font-size: 0.9em;
+  color: var(--qlx-accent-deep);
+  margin: 0 4px;
+  unicode-bidi: isolate;
+}
+
+.qlx-ayah-pair__translation {
+  direction: ltr;
+  text-align: start;
+  font-family: var(--qlx-sans);
+  font-size: 0.97rem;
+  line-height: 1.65;
+  color: var(--qlx-ink-soft);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+}
+
+.qlx-ayah-pair__translation .qlx-mushaf-tr__num {
+  display: inline-block;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  font-feature-settings: 'tnum' 1;
+}
+
+.qlx-ayah-pair__translation .qlx-mushaf-tr__text { margin: 0; }
+
+.qlx-ayah-pair__translation .qlx-mushaf-tools {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--qlx-line);
+}
+
+@media (max-width: 720px) {
+  .qlx-mushaf-paired { gap: 14px; }
+  .qlx-ayah-pair { padding: 14px 16px; scroll-margin-top: 72px; }
+  .qlx-ayah-pair__arabic { font-size: clamp(1.55rem, 5.6vw, 1.85rem); line-height: 2; }
+  .qlx-ayah-pair__translation { font-size: 0.94rem; }
+}
+
+/* =====================================================================
+ * RECITERS DASHBOARD REVAMP (May 2026)
+ * Namespaced under .qlx-rcx-* and layered LAST so it wins specificity
+ * ties against the earlier .qlx-reciter-card / .qlx-profile__* blocks.
+ * Used by RecitersView (#/reciters) and ReciterProfileView (#/reciter/:id).
+ * ===================================================================== */
+
+/* --- Header (compact: eyebrow + title + count chip) ------------------ */
+.qlx-rcx-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  margin: 4px 0 18px;
+  background:
+    radial-gradient(closest-side, rgba(255,255,255,.18), transparent 70%) -40px -40px / 260px 260px no-repeat,
+    linear-gradient(135deg, #0a7d6b 0%, #075d4f 65%, #04342d 100%);
+  color: #fff;
+  border-radius: var(--qlx-radius-lg);
+  box-shadow: var(--qlx-shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.qlx-rcx-head__text { min-width: 0; }
+.qlx-rcx-head__eyebrow {
+  margin: 0 0 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+}
+.qlx-rcx-head__title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 800;
+  letter-spacing: -.015em;
+  color: #fff;
+}
+.qlx-rcx-head__chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  border: 1px solid rgba(255,255,255,.24);
+  backdrop-filter: blur(2px);
+}
+
+/* --- Toolbar (search + chips + sort) -------------------------------- */
+.qlx-rcx-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin: 0 0 16px;
+}
+
+.qlx-rcx-count {
+  margin: 0;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--qlx-rcx-ink-soft, var(--qlx-mute));
+  line-height: 1.35;
+  background: var(--qlx-rcx-surface, var(--qlx-paper));
+  border: 1px solid var(--qlx-rcx-border, var(--qlx-line));
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.qlx-rcx-toolbar__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+}
+.qlx-rcx-search {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-pill);
+  padding: 0 10px 0 36px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.qlx-rcx-search:focus-within {
+  border-color: var(--qlx-accent);
+  box-shadow: 0 0 0 4px rgba(10,125,107,.12);
+}
+.qlx-rcx-search__icon {
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--qlx-mute);
+  pointer-events: none;
+  display: inline-flex;
+}
+.qlx-rcx-search__input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 500 13.5px var(--qlx-sans);
+  color: var(--qlx-ink);
+  padding: 10px 4px;
+  min-width: 0;
+}
+.qlx-rcx-search__input::placeholder { color: var(--qlx-mute); }
+.qlx-rcx-search__clear {
+  border: 0;
+  background: transparent;
+  color: var(--qlx-mute);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.qlx-rcx-search__clear:hover {
+  background: var(--qlx-accent-ghost);
+  color: var(--qlx-accent-deep);
+}
+
+.qlx-rcx-filters {
+  display: inline-flex;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-pill);
+  padding: 4px;
+  gap: 2px;
+}
+.qlx-rcx-chip {
+  border: 0;
+  background: transparent;
+  color: var(--qlx-ink-soft);
+  padding: 6px 14px;
+  border-radius: var(--qlx-radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.qlx-rcx-chip:hover { color: var(--qlx-ink); background: var(--qlx-accent-ghost); }
+.qlx-rcx-chip.is-active {
+  background: var(--qlx-accent);
+  color: #fff;
+  box-shadow: 0 2px 8px -2px rgba(7,93,79,.45);
+}
+
+.qlx-rcx-sort {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--qlx-line);
+  background:
+    var(--qlx-paper)
+    url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236f8487' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")
+    no-repeat right 12px center;
+  padding: 9px 32px 9px 14px;
+  border-radius: var(--qlx-radius-pill);
+  font: 600 12.5px var(--qlx-sans);
+  color: var(--qlx-ink);
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.qlx-rcx-sort:hover { border-color: var(--qlx-line-strong); }
+.qlx-rcx-sort:focus {
+  outline: 0;
+  border-color: var(--qlx-accent);
+  box-shadow: 0 0 0 4px rgba(10,125,107,.12);
+}
+
+/* --- Cards (extends .qlx-reciter-card) ------------------------------ */
+.qlx-rcx-grid {
+  grid-template-columns: repeat(auto-fill, minmax(204px, 1fr));
+  gap: 14px;
+}
+.qlx-reciter-card.qlx-rcx-card {
+  padding: 22px 16px 18px;
+  text-align: center;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-lg);
+  overflow: hidden;
+  position: relative;
+  animation: qlxCardIn .35s cubic-bezier(.2,.8,.25,1) both;
+  isolation: isolate;
+}
+/* Override any earlier .qlx-reciter-card::before gradient strip so no
+   colour wash sits behind the card content (was causing other page text
+   to look like it was bleeding through). */
+.qlx-reciter-card.qlx-rcx-card::before { content: none; }
+.qlx-reciter-card.qlx-rcx-card:hover {
+  border-color: #c8e6dc;
+  box-shadow: 0 14px 30px -16px rgba(7,93,79,.45);
+  transform: translateY(-3px);
+}
+.qlx-rcx-card__avatar-wrap {
+  position: relative;
+  z-index: 1;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+}
+.qlx-rcx-card__avatar-wrap .qlx-reciter-card__img,
+.qlx-rcx-card__avatar-wrap .qlx-avatar.qlx-reciter-card__img,
+.qlx-rcx-card__avatar-wrap svg.qlx-avatar-svg.qlx-reciter-card__img {
+  width: 80px;
+  height: 80px;
+  margin: 0;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 16px -4px rgba(7,93,79,.45);
+  font-size: 30px;
+  display: block;
+}
+.qlx-rcx-card__live {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--qlx-accent);
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: end;
+  gap: 2px;
+  padding: 3px 7px 4px;
+  box-shadow: 0 4px 12px -3px rgba(7,93,79,.5);
+  z-index: 2;
+}
+.qlx-rcx-card__live span,
+.qlx-rcx-prof__live span,
+.qlx-rcx-row__live span {
+  display: inline-block;
+  width: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  animation: qlxEq 1.05s ease-in-out infinite;
+}
+.qlx-rcx-card__live span:nth-child(1) { height: 6px; animation-delay: -.30s; }
+.qlx-rcx-card__live span:nth-child(2) { height: 9px; animation-delay: -.15s; }
+.qlx-rcx-card__live span:nth-child(3) { height: 5px; animation-delay: 0s; }
+
+@keyframes qlxEq {
+  0%, 100% { transform: scaleY(.45); }
+  50%      { transform: scaleY(1); }
+}
+
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -.005em;
+  margin: 0 0 3px;
+  line-height: 1.25;
+}
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__style {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  color: var(--qlx-mute);
+  text-transform: capitalize;
+  letter-spacing: .02em;
+}
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__country {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 3px 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--qlx-accent-deep);
+  background: var(--qlx-accent-soft);
+  border-radius: 999px;
+}
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__country svg { stroke: currentColor; }
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--qlx-accent-deep);
+}
+.qlx-rcx-card__cta-arrow {
+  display: inline-flex;
+  transition: transform .18s ease;
+}
+.qlx-reciter-card.qlx-rcx-card:hover .qlx-rcx-card__cta-arrow {
+  transform: translateX(4px);
+}
+
+/* --- Skeleton card -------------------------------------------------- */
+.qlx-rcx-skel {
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-lg);
+  padding: 28px 16px 22px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.qlx-rcx-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+  animation: qlxShim 1.3s linear infinite;
+}
+.qlx-rcx-skel__avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  background: linear-gradient(135deg, #eef3f0, #dfeae5);
+}
+.qlx-rcx-skel__line {
+  height: 11px;
+  border-radius: 6px;
+  margin: 6px auto;
+  background: linear-gradient(135deg, #eef3f0, #dfeae5);
+}
+.qlx-rcx-skel__line--w70 { width: 70%; }
+.qlx-rcx-skel__line--w40 { width: 40%; }
+.qlx-rcx-skel__line--w30 { width: 30%; }
+@keyframes qlxShim {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* --- Empty / error states ------------------------------------------ */
+.qlx-rcx-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 38px 22px;
+  background: var(--qlx-paper);
+  border: 1px dashed var(--qlx-line-strong);
+  border-radius: var(--qlx-radius-lg);
+  color: var(--qlx-ink-soft);
+}
+.qlx-rcx-empty--inline {
+  background: transparent;
+  border: 0;
+  padding: 26px 8px;
+}
+.qlx-rcx-empty--error {
+  border-color: rgba(181, 57, 57, .25);
+  background: rgba(181, 57, 57, .04);
+  color: var(--qlx-error);
+}
+.qlx-rcx-empty__icon {
+  display: inline-flex;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--qlx-accent-soft);
+  color: var(--qlx-accent-deep);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.qlx-rcx-empty--error .qlx-rcx-empty__icon {
+  background: rgba(181, 57, 57, .1);
+  color: var(--qlx-error);
+}
+.qlx-rcx-empty__title {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--qlx-ink);
+}
+.qlx-rcx-empty--error .qlx-rcx-empty__title { color: var(--qlx-error); }
+.qlx-rcx-empty__hint {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--qlx-mute);
+}
+.qlx-rcx-empty__reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--qlx-accent);
+  color: #fff;
+  border: 0;
+  padding: 8px 16px;
+  border-radius: var(--qlx-radius-pill);
+  font: 700 12.5px var(--qlx-sans);
+  cursor: pointer;
+  transition: background .15s ease, transform .15s ease;
+}
+.qlx-rcx-empty__reset:hover {
+  background: var(--qlx-accent-deep);
+  transform: translateY(-1px);
+}
+
+/* --- Reciter profile page (unified with Reciters green theme) ------ */
+.qlx-rcx-prof-page {
+  margin: 0 -28px;
+  padding: 0 28px 48px;
+  color: var(--qlx-rcx-ink, #0f172a);
+  background: var(--qlx-rcx-bg, #f4faf8);
+  font-family: 'Inter', var(--qlx-sans);
+}
+
+.qlx-rcx-prof-page .qlx-rcx-prof__back {
+  margin: 0 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font: 600 13px 'Inter', var(--qlx-sans);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(13, 148, 136, 0.18);
+  color: #0f766e;
+  box-shadow: 0 2px 10px rgba(6, 78, 59, 0.08);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qlx-rcx-prof-page .qlx-rcx-prof__back:hover {
+  background: #ecfdf5;
+  border-color: rgba(13, 148, 136, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(6, 78, 59, 0.12);
+}
+
+.qlx-profile__hero.qlx-rcx-prof {
+  display: block;
+  margin: 0 0 24px;
+  padding: 0;
+  border: 0;
+  color: #fff;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(255, 255, 255, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(16, 185, 129, 0.32) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 35% at 100% 20%, rgba(45, 212, 191, 0.18) 0%, transparent 45%),
+    linear-gradient(152deg, #059669 0%, #0d9488 42%, #0f766e 78%, #064e3b 100%);
+  box-shadow: 0 12px 36px -10px rgba(6, 78, 59, 0.45);
+}
+
+.qlx-rcx-prof__art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.qlx-rcx-prof__art::before,
+.qlx-rcx-prof__art::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.qlx-rcx-prof__art::before {
+  width: min(38vw, 280px);
+  height: min(24vw, 180px);
+  top: 10%;
+  inset-inline-end: -6%;
+  transform: rotate(-16deg);
+  opacity: 0.5;
+}
+
+.qlx-rcx-prof__art::after {
+  width: min(32vw, 220px);
+  height: min(20vw, 140px);
+  bottom: 10%;
+  inset-inline-start: -5%;
+  transform: rotate(12deg);
+  border-radius: 45% 55% 52% 48%;
+  opacity: 0.45;
+}
+
+.qlx-rcx-prof__geom {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.55'%3E%3Cpath d='M40 0l11 29H80L51 47l11 29-22-17-22 17 11-29L0 29h29z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 64px 64px;
+  animation: qlxHeroPatternDrift 56s linear infinite;
+}
+
+.qlx-rcx-prof__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(6, 78, 59, 0.06) 0%, rgba(6, 78, 59, 0.22) 100%),
+    radial-gradient(ellipse 80% 65% at 30% 50%, rgba(6, 78, 59, 0) 0%, rgba(6, 78, 59, 0.2) 100%);
+  pointer-events: none;
+}
+
+.qlx-rcx-prof__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 24px 28px;
+  align-items: center;
+  padding: 26px 28px;
+  animation: qlxHeroFadeUp 0.5s cubic-bezier(0.22, 0.8, 0.25, 1) both;
+}
+.qlx-rcx-prof__photo-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  justify-self: center;
+}
+.qlx-rcx-prof__photo,
+.qlx-avatar.qlx-rcx-prof__photo,
+svg.qlx-avatar-svg.qlx-rcx-prof__photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 28px rgba(6, 78, 59, 0.35);
+  background: linear-gradient(145deg, #10b981, #0f766e);
+  display: block;
+  font-size: 40px;
+}
+.qlx-rcx-prof__live {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #0d9488;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: end;
+  gap: 3px;
+  padding: 4px 10px 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 16px rgba(6, 78, 59, 0.28);
+  white-space: nowrap;
+}
+.qlx-rcx-prof__live em {
+  font-style: normal;
+  color: #0f766e;
+  margin-inline-start: 4px;
+}
+.qlx-rcx-prof__live span { height: 9px; }
+.qlx-rcx-prof__live span:nth-child(1) { height: 6px; animation-delay: -.30s; }
+.qlx-rcx-prof__live span:nth-child(2) { height: 9px; animation-delay: -.15s; }
+.qlx-rcx-prof__live span:nth-child(3) { height: 5px; animation-delay: 0s; }
+
+.qlx-rcx-prof__body { min-width: 0; }
+.qlx-rcx-prof__eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+.qlx-profile__name.qlx-rcx-prof__name {
+  margin: 0 0 10px;
+  font-family: 'Poppins', 'Inter', var(--qlx-sans);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(6, 78, 59, 0.3);
+}
+.qlx-profile__pills.qlx-rcx-prof__pills {
+  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.qlx-profile__pill.qlx-rcx-prof__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 5px 11px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.qlx-profile__pill.qlx-rcx-prof__pill svg { color: rgba(255, 255, 255, 0.88); flex-shrink: 0; }
+.qlx-profile__bio.qlx-rcx-prof__bio {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  margin: 0 0 14px;
+  max-width: 58ch;
+}
+
+.qlx-rcx-prof__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.qlx-rcx-prof__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font: 600 13px 'Inter', var(--qlx-sans);
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.qlx-rcx-prof__btn--primary {
+  background: #fff;
+  color: #0f766e;
+  box-shadow: 0 4px 16px rgba(6, 78, 59, 0.22);
+}
+
+.qlx-rcx-prof__btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(6, 78, 59, 0.28);
+  background: #f0fdf9;
+}
+
+.qlx-rcx-prof__btn svg {
+  flex-shrink: 0;
+}
+
+/* --- Surah list (search header + rows) ----------------------------- */
+.qlx-rcx-prof-page .qlx-rcx-list__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  max-width: 1280px;
+}
+
+.qlx-rcx-list__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 12px;
+}
+.qlx-rcx-list__title-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+.qlx-rcx-prof-page .qlx-rcx-list__title {
+  margin: 0;
+  font-family: 'Poppins', 'Inter', var(--qlx-sans);
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+.qlx-rcx-list__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--qlx-ink);
+}
+.qlx-rcx-prof-page .qlx-rcx-list__count {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.qlx-rcx-list__count {
+  font-size: 12px;
+  color: var(--qlx-mute);
+  font-weight: 600;
+}
+
+.qlx-rcx-prof-page .qlx-rcx-list__search-wrap {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 380px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(13, 148, 136, 0.15);
+  border-radius: 999px;
+  padding: 0 12px 0 36px;
+  min-height: 42px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qlx-rcx-prof-page .qlx-rcx-list__search-wrap:focus-within {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14), 0 4px 14px rgba(6, 78, 59, 0.1);
+}
+
+.qlx-rcx-list__search-wrap {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 360px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  background: var(--qlx-paper);
+  border: 1px solid var(--qlx-line);
+  border-radius: var(--qlx-radius-pill);
+  padding: 0 12px 0 36px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.qlx-rcx-list__search-wrap:focus-within {
+  border-color: var(--qlx-accent);
+  box-shadow: 0 0 0 4px rgba(10,125,107,.12);
+}
+.qlx-rcx-list__search-icon {
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--qlx-mute);
+  display: inline-flex;
+  pointer-events: none;
+}
+.qlx-rcx-list__search {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 500 13px var(--qlx-sans);
+  color: var(--qlx-ink);
+  padding: 9px 4px;
+  min-width: 0;
+}
+.qlx-rcx-list__search::placeholder { color: var(--qlx-mute); }
+
+.qlx-rcx-prof-page .qlx-profile__surahs.qlx-rcx-list__grid {
+  display: grid;
+  gap: 10px;
+  max-width: 1280px;
+}
+
+.qlx-profile-surah.qlx-rcx-row {
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(13, 148, 136, 0.12);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.qlx-profile-surah.qlx-rcx-row:hover {
+  transform: translateY(-2px);
+  border-color: rgba(13, 148, 136, 0.22);
+  box-shadow: 0 8px 22px rgba(13, 148, 136, 0.1);
+}
+
+.qlx-profile-surah.qlx-rcx-row.is-playing {
+  border-color: #0d9488;
+  background:
+    linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 1) 55%);
+  box-shadow: inset 3px 0 0 #0d9488, 0 6px 18px rgba(13, 148, 136, 0.12);
+}
+.qlx-rcx-row__live {
+  display: inline-flex;
+  align-items: end;
+  gap: 2px;
+  margin-inline-start: 8px;
+  color: var(--qlx-accent);
+  vertical-align: middle;
+}
+.qlx-rcx-row__live span { height: 8px; width: 2px; }
+.qlx-rcx-row__live span:nth-child(1) { height: 5px; animation-delay: -.30s; }
+.qlx-rcx-row__live span:nth-child(2) { height: 9px; animation-delay: -.15s; }
+.qlx-rcx-row__live span:nth-child(3) { height: 6px; animation-delay: 0s; }
+.qlx-rcx-prof-page .qlx-profile-surah__num.qlx-rcx-row__num {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #0f766e;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.qlx-rcx-prof-page .qlx-profile-surah__name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.qlx-rcx-prof-page .qlx-profile-surah__meta {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.qlx-rcx-prof-page .qlx-profile-surah__ar {
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.qlx-rcx-prof-page .qlx-action {
+  padding: 7px 12px;
+  font-size: 11.5px;
+  border-radius: 999px;
+}
+
+.qlx-rcx-prof-page .qlx-action--dl {
+  background: #fff;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.qlx-rcx-prof-page .qlx-action--dl:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f766e;
+}
+
+.qlx-profile-surah.qlx-rcx-row .qlx-action--listen {
+  background: linear-gradient(135deg, #10b981 0%, #0d9488 55%, #0f766e 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+}
+.qlx-profile-surah.qlx-rcx-row.is-playing .qlx-action--listen {
+  background: linear-gradient(135deg, #059669 0%, #0f766e 100%);
+  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.35);
+}
+
+/* --- Mobile tweaks -------------------------------------------------- */
+@media (max-width: 720px) {
+  .qlx-rcx-head {
+    padding: 18px 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    border-radius: var(--qlx-radius-md);
+  }
+  .qlx-rcx-head__chip { align-self: flex-start; }
+  .qlx-rcx-toolbar { flex-direction: column; align-items: stretch; }
+  .qlx-rcx-toolbar__right { margin-inline-start: 0; justify-content: space-between; }
+  .qlx-rcx-filters { flex: 1 1 auto; justify-content: center; }
+  .qlx-rcx-sort { flex: 1 1 auto; }
+  .qlx-rcx-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .qlx-reciter-card.qlx-rcx-card { padding: 18px 12px 14px; border-radius: var(--qlx-radius-md); }
+  .qlx-rcx-card__avatar-wrap { width: 68px; height: 68px; margin: 0 auto 10px; }
+  .qlx-rcx-card__avatar-wrap .qlx-reciter-card__img,
+  .qlx-rcx-card__avatar-wrap .qlx-avatar.qlx-reciter-card__img,
+  .qlx-rcx-card__avatar-wrap svg.qlx-avatar-svg.qlx-reciter-card__img {
+    width: 68px; height: 68px; font-size: 26px;
+  }
+
+  .qlx-rcx-prof-page {
+    margin: 0 -16px;
+    padding: 0 16px 40px;
+  }
+
+  .qlx-rcx-prof__inner {
+    grid-template-columns: 88px 1fr;
+    gap: 16px;
+    padding: 22px 18px;
+  }
+
+  .qlx-rcx-prof__photo-wrap { width: 88px; height: 88px; }
+  .qlx-rcx-prof__photo,
+  .qlx-avatar.qlx-rcx-prof__photo,
+  svg.qlx-avatar-svg.qlx-rcx-prof__photo { width: 88px; height: 88px; font-size: 30px; }
+  .qlx-rcx-prof__live { font-size: 9px; padding: 3px 8px 4px; }
+  .qlx-rcx-prof-page .qlx-rcx-list__head { gap: 8px; }
+  .qlx-rcx-prof-page .qlx-rcx-list__search-wrap { width: 100%; max-width: none; }
+  .qlx-rcx-prof__btn--primary { width: 100%; justify-content: center; }
+}
+
+/* =====================================================================
+ * RECITERS — Quran.com-inspired layout (May 2026)
+ * Portrait cards, hero search, calm teal palette. Wins over earlier rcx
+ * card styles via later cascade + more specific selectors.
+ * ===================================================================== */
+
+.qlx-root .qlx-content.qlx-content--reciters {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  animation: none;
+}
+
+.qlx-rcx-page {
+  /* eTasmi emerald + teal (sidebar #22c55e family + theme #0f766e) */
+  --qlx-rcx-primary: #0d9488;
+  --qlx-rcx-primary-strong: #0f766e;
+  --qlx-rcx-primary-light: #10b981;
+  --qlx-rcx-primary-soft: #ecfdf5;
+  --qlx-rcx-primary-ring: rgba(13, 148, 136, 0.22);
+  --qlx-rcx-bg: #f4faf8;
+  --qlx-rcx-surface: #ffffff;
+  --qlx-rcx-surface-muted: #f8fafc;
+  --qlx-rcx-border: #e2e8f0;
+  --qlx-rcx-border-strong: #cbd5e1;
+  --qlx-rcx-ink: #0f172a;
+  --qlx-rcx-ink-soft: #475569;
+  --qlx-rcx-muted: #64748b;
+  --qlx-rcx-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --qlx-rcx-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --qlx-rcx-gap: 18px;
+  --qlx-rcx-card-media-ratio: 4 / 3;
+  font-family: 'Inter', var(--qlx-sans);
+  margin: 0 -28px;
+  color: var(--qlx-rcx-ink);
+  background: var(--qlx-rcx-bg);
+}
+
+/* -------- Hero — static pattern image + emerald overlay (no motion) -------- */
+.qlx-rcx-hero {
+  --qlx-hero-emerald: #059669;
+  --qlx-hero-teal: #0d9488;
+  --qlx-hero-deep: #0f766e;
+  --qlx-hero-ink: #043d35;
+  --qlx-hero-pattern: url("../assets/img/quran-library/reciters-hero-pattern.png");
+  position: relative;
+  text-align: center;
+  padding: 36px 24px 40px;
+  color: #fff;
+  border-bottom: none;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--qlx-hero-ink);
+  box-shadow:
+    0 20px 50px -18px rgba(4, 47, 46, 0.55),
+    0 8px 24px -12px rgba(6, 78, 59, 0.35);
+}
+
+/* Blend hero into page — dark emerald only (no white band) */
+.qlx-rcx-hero::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  bottom: 0;
+  height: 36px;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(4, 47, 46, 0.55) 65%,
+    var(--qlx-rcx-bg, #f4faf8) 100%
+  );
+}
+
+/* Pattern image — static cover, centered */
+.qlx-rcx-hero__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--qlx-hero-pattern) center center / cover no-repeat;
+  animation: none;
+}
+
+/* Readability overlay — single static layer */
+.qlx-rcx-hero__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  animation: none;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(4, 47, 46, 0.74) 0%,
+      rgba(6, 78, 59, 0.5) 40%,
+      rgba(4, 47, 46, 0.8) 100%
+    ),
+    radial-gradient(
+      ellipse 95% 70% at 50% 22%,
+      rgba(6, 78, 59, 0.15) 0%,
+      rgba(4, 47, 46, 0.72) 55%,
+      rgba(2, 32, 28, 0.9) 100%
+    );
+}
+
+.qlx-rcx-hero__veil::before,
+.qlx-rcx-hero__veil::after {
+  content: none;
+}
+
+.qlx-rcx-hero__inner {
+  position: relative;
+  z-index: 3;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+@keyframes qlxHeroFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.qlx-rcx-hero__eyebrow {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 8px rgba(2, 24, 22, 0.65);
+}
+
+.qlx-rcx-hero__title {
+  margin: 0 0 8px;
+  font-family: 'Poppins', 'Inter', var(--qlx-sans);
+  font-size: clamp(1.375rem, 2.2vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: #fff;
+  text-shadow:
+    0 2px 4px rgba(2, 24, 22, 0.45),
+    0 8px 28px rgba(4, 47, 46, 0.55);
+}
+
+.qlx-rcx-hero__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fff;
+  line-height: 1.35;
+  background: rgba(4, 47, 46, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 2px 12px rgba(2, 24, 22, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.qlx-rcx-hero__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 420px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  padding: 0 6px 0 42px;
+  min-height: 42px;
+  box-shadow:
+    0 8px 32px rgba(6, 78, 59, 0.22),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.qlx-rcx-hero__search:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 36px rgba(6, 78, 59, 0.28),
+    0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.qlx-rcx-hero__search:focus-within {
+  transform: translateY(-2px);
+  border-color: #fff;
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.35),
+    0 14px 40px rgba(6, 78, 59, 0.32);
+}
+
+.qlx-rcx-hero__search-icon {
+  position: absolute;
+  inset-inline-start: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--qlx-hero-teal);
+  display: inline-flex;
+  pointer-events: none;
+}
+
+.qlx-rcx-hero__search-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.qlx-rcx-hero__search-input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 500 14px 'Inter', var(--qlx-sans);
+  color: #0f172a;
+  padding: 11px 6px;
+  min-width: 0;
+}
+
+.qlx-rcx-hero__search-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.qlx-rcx-hero__search-clear {
+  border: 0;
+  background: #f1f5f9;
+  color: #64748b;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.qlx-rcx-hero__search-clear:hover {
+  background: #ecfdf5;
+  color: var(--qlx-hero-deep);
+}
+
+/* -------- Body + controls -------- */
+.qlx-rcx-body {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 28px 48px;
+  background: transparent;
+}
+
+.qlx-rcx-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-bottom: 22px;
+}
+
+.qlx-rcx-controls .qlx-rcx-filters {
+  background: var(--qlx-rcx-surface);
+  border: 1px solid var(--qlx-rcx-border);
+  padding: 4px;
+  box-shadow: var(--qlx-rcx-shadow-sm);
+}
+
+.qlx-rcx-controls .qlx-rcx-chip {
+  padding: 7px 16px;
+  font-size: 13px;
+  color: var(--qlx-rcx-ink-soft);
+  font-weight: 600;
+  border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.qlx-rcx-controls .qlx-rcx-chip:hover {
+  color: var(--qlx-rcx-ink);
+  background: var(--qlx-rcx-surface-muted);
+}
+
+.qlx-rcx-controls .qlx-rcx-chip.is-active {
+  background: var(--qlx-rcx-primary);
+  color: #fff;
+  box-shadow: none;
+}
+
+.qlx-rcx-controls .qlx-rcx-chip.is-active:hover {
+  background: var(--qlx-rcx-primary-strong);
+  color: #fff;
+}
+
+/* -------- Grid (compact, streaming-style rhythm) -------- */
+.qlx-rcx-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--qlx-rcx-gap);
+  align-items: stretch;
+}
+
+/* -------- Card (portrait + refined depth) -------- */
+.qlx-rcx-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: var(--qlx-rcx-ink);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fdfb 100%);
+  border: 1px solid rgba(13, 148, 136, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(13, 148, 136, 0.04),
+    0 4px 14px rgba(15, 23, 42, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.qlx-rcx-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(13, 148, 136, 0.22);
+  box-shadow:
+    0 10px 28px rgba(13, 148, 136, 0.12),
+    0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.qlx-rcx-card__media {
+  position: relative;
+  aspect-ratio: var(--qlx-rcx-card-media-ratio);
+  overflow: hidden;
+  background: linear-gradient(145deg, #eef2f7 0%, #e2e8f0 100%);
+  flex-shrink: 0;
+}
+
+.qlx-rcx-card__media .qlx-rcx-card__img,
+.qlx-rcx-card__media img.qlx-rcx-card__img,
+.qlx-rcx-card__media .qlx-avatar.qlx-rcx-card__img {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  object-fit: cover;
+  display: block;
+  font-size: clamp(2rem, 8vw, 3rem);
+}
+
+/* Elegant placeholder for reciters without a portrait */
+.qlx-rcx-card__media--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(15, 118, 110, 0.08), transparent 55%),
+    radial-gradient(circle at 78% 82%, rgba(15, 118, 110, 0.05), transparent 55%),
+    linear-gradient(145deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.qlx-rcx-card__placeholder-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--qlx-rcx-primary-strong);
+  font-family: 'Poppins', 'Inter', var(--qlx-sans);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--qlx-rcx-border);
+  box-shadow: var(--qlx-rcx-shadow-sm);
+  user-select: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.qlx-rcx-card--placeholder:hover .qlx-rcx-card__placeholder-mark {
+  background: var(--qlx-rcx-primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+.qlx-rcx-card__play--soft {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--qlx-rcx-primary-strong);
+}
+
+.qlx-rcx-card__play--soft svg {
+  background: var(--qlx-rcx-primary);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  padding: 10px;
+  box-shadow: 0 6px 14px rgba(15, 118, 110, 0.3);
+}
+
+.qlx-rcx-card__play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0) 30%, rgba(15, 23, 42, 0.28) 100%);
+  color: var(--qlx-rcx-primary-strong);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.qlx-rcx-card__play svg {
+  width: 40px;
+  height: 40px;
+  padding: 11px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+}
+
+.qlx-rcx-card:hover .qlx-rcx-card__play {
+  opacity: 1;
+}
+
+.qlx-rcx-card__live {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 8px;
+  background: var(--qlx-rcx-primary);
+  color: #fff;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 5px 8px 6px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.qlx-rcx-card__live span {
+  display: inline-block;
+  width: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  animation: qlxEq 1.05s ease-in-out infinite;
+}
+
+.qlx-rcx-card__live span:nth-child(1) { height: 6px; animation-delay: -0.3s; }
+.qlx-rcx-card__live span:nth-child(2) { height: 9px; animation-delay: -0.15s; }
+.qlx-rcx-card__live span:nth-child(3) { height: 5px; }
+
+.qlx-rcx-card__body {
+  padding: 11px 12px 13px;
+  text-align: start;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  background: var(--qlx-rcx-surface);
+}
+
+.qlx-rcx-card__name {
+  margin: 0 0 3px;
+  font-family: 'Poppins', 'Inter', var(--qlx-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--qlx-rcx-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.qlx-rcx-card__style {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--qlx-rcx-muted);
+  text-transform: capitalize;
+}
+
+/* -------- Skeleton -------- */
+.qlx-rcx-skel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--qlx-rcx-surface);
+  border: 1px solid var(--qlx-rcx-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--qlx-rcx-shadow-sm);
+}
+
+.qlx-rcx-skel__media {
+  aspect-ratio: var(--qlx-rcx-card-media-ratio);
+  background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: qlx-shimmer 1.4s ease-in-out infinite;
+}
+
+.qlx-rcx-skel__body {
+  padding: 11px 12px 13px;
+}
+
+.qlx-rcx-skel__line {
+  height: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: qlx-shimmer 1.4s ease-in-out infinite;
+}
+
+.qlx-rcx-skel__line--w70 { width: 72%; }
+.qlx-rcx-skel__line--w45 { width: 42%; margin-bottom: 0; }
+
+/* -------- Empty states in grid -------- */
+.qlx-rcx-grid > .qlx-rcx-empty {
+  grid-column: 1 / -1;
+  border: 1px dashed var(--qlx-rcx-border-strong);
+  border-radius: 12px;
+  background: var(--qlx-rcx-surface);
+}
+
+/* -------- Responsive -------- */
+@media (max-width: 1320px) {
+  .qlx-rcx-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .qlx-rcx-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 720px) {
+  .qlx-rcx-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (max-width: 720px) {
+  .qlx-rcx-page {
+    margin: 0 -16px;
+  }
+
+  .qlx-rcx-hero {
+    padding: 28px 16px 32px;
+  }
+
+  .qlx-rcx-hero__art {
+    background-position: center 42%;
+  }
+
+  .qlx-rcx-hero__veil {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(4, 47, 46, 0.78) 0%,
+        rgba(6, 78, 59, 0.55) 45%,
+        rgba(4, 47, 46, 0.85) 100%
+      ),
+      radial-gradient(
+        ellipse 100% 75% at 50% 25%,
+        rgba(16, 185, 129, 0.18) 0%,
+        rgba(4, 47, 46, 0.75) 100%
+      );
+  }
+
+  .qlx-rcx-hero__search {
+    max-width: 100%;
+    min-height: 42px;
+  }
+
+  .qlx-rcx-hero__count {
+    margin-bottom: 12px;
+  }
+
+  .qlx-rcx-body {
+    padding: 24px 16px 40px;
+  }
+
+  .qlx-rcx-controls {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 20px;
+  }
+
+  .qlx-rcx-controls .qlx-rcx-filters {
+    justify-content: center;
+  }
+
+  .qlx-rcx-controls__sort {
+    width: 100%;
+  }
+
+  .qlx-rcx-controls__sort .qlx-rcx-sort {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .qlx-rcx-grid {
+    gap: 12px;
+  }
+
+  .qlx-rcx-card__body {
+    padding: 10px 11px 12px;
+  }
+}
+
+/* =====================================================================
+ * PLATFORM-PALETTE ALIGNMENT (May 2026)
+ * Soften remaining dark-teal blocks in the Quran Library so the module
+ * visually belongs to the e-Tasmi system (etasmi-theme.css palette:
+ * primary #0f766e, surface #fff, border #e2e8f0, text #0f172a).
+ * Final cascade — wins over earlier rules.
+ * ===================================================================== */
+
+/* Reciter profile — keep green hero (unified with Reciters page) */
+.qlx-root .qlx-profile__hero.qlx-rcx-prof {
+  border: 0 !important;
+  color: #fff !important;
+}
+
+.qlx-root .qlx-rcx-prof__eyebrow {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.qlx-root .qlx-profile__name.qlx-rcx-prof__name {
+  color: #fff !important;
+}
+
+.qlx-root .qlx-profile__pill.qlx-rcx-prof__pill {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  color: #fff !important;
+}
+
+.qlx-root .qlx-profile__pill.qlx-rcx-prof__pill svg {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.qlx-root .qlx-profile__bio.qlx-rcx-prof__bio {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.qlx-root .qlx-rcx-row__live {
+  color: #0d9488;
+}
+
+/* Audio dock — green premium player */
+.qlx-root .qlx-dock:not([hidden]) {
+  animation: qlxDockSlideUp 0.38s cubic-bezier(0.22, 0.8, 0.25, 1) both;
+}
+
+@keyframes qlxDockSlideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.qlx-root .qlx-dock {
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf9 100%);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  box-shadow:
+    0 12px 40px rgba(6, 78, 59, 0.18),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.qlx-root .qlx-dock__avatar {
+  background: linear-gradient(135deg, #10b981 0%, #0d9488 55%, #0f766e 100%) !important;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.qlx-root .qlx-dock__play {
+  background: linear-gradient(135deg, #10b981 0%, #0f766e 100%) !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
+}
+
+.qlx-root .qlx-dock__play:hover {
+  background: linear-gradient(135deg, #059669 0%, #0f766e 100%) !important;
+}
+
+.qlx-root .qlx-dock__bar-fill {
+  background: linear-gradient(90deg, #10b981, #0d9488) !important;
+}
+
+.qlx-root .qlx-dock__btn:hover {
+  background: #ecfdf5;
+  color: #0f766e;
+}
+
+/* Mushaf surface (verse list) — softer border and shadow */
+.qlx-root .qlx-mushaf-body {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+/* Reader header — light platform chrome */
+.qlx-root .qlx-reader__head {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* Reader toggle pills (Listen / Translate / Surah) */
+.qlx-root .qlx-toggle {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.qlx-root .qlx-toggle:hover {
+  background: #ecfdf5;
+  border-color: #cbd5e1;
+  color: #115e59;
+}
+
+.qlx-root .qlx-toggle.is-on {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
+}
+
+.qlx-root .qlx-toggle--play.is-on {
+  background: #115e59;
+  border-color: #115e59;
+}
+
+/* Per-ayah "now playing" accent inside paired view */
+.qlx-root .qlx-ayah-pair--playing {
+  border-color: #0f766e;
+  box-shadow: 0 14px 28px -16px rgba(15, 118, 110, 0.5);
+}
+
+.qlx-root .qlx-ayah-pair__arabic .qlx-mushaf-ayah.is-playing {
+  background: linear-gradient(180deg, transparent 60%, #ecfdf5 60%);
+}
+
+.qlx-root .qlx-mushaf-tr__num {
+  background: #ecfdf5 !important;
+  color: #115e59 !important;
+}
+
+/* Home hero / continue reading / reciters — LIGHT MODE ONLY (do not override dark theme) */
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-hero.qlx-home-hero--compact {
+  background:
+    radial-gradient(110% 90% at 50% 0%, rgba(15, 118, 110, 0.06) 0%, transparent 65%),
+    linear-gradient(180deg, #f7faf9 0%, #f0f5f4 100%) !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-hero--compact .qlx-home-hero__title {
+  color: #0f172a !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-hero--compact .qlx-home-hero__lead {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-hero--compact .qlx-home-hero__cta {
+  background: #fff !important;
+  color: #0f766e !important;
+  border: 1px solid rgba(13, 148, 136, 0.32) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-hero--compact .qlx-home-hero__cta:hover {
+  background: #f0fdf9 !important;
+  color: #115e59 !important;
+  border-color: rgba(13, 148, 136, 0.48) !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-continue {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-continue__label {
+  color: #64748b !important;
+  background: none !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-continue__name {
+  color: #0f172a !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-continue__btn {
+  background: #fff !important;
+  color: #0f766e !important;
+  border: 1px solid rgba(13, 148, 136, 0.32) !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-home-continue__btn:hover {
+  background: #f0fdf9 !important;
+  color: #115e59 !important;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-surah-card__num {
+  background-image: linear-gradient(135deg, #ecfdf5, #ffffff 60%);
+  color: #115e59;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-surah-card__num::before {
+  border-color: rgba(15, 118, 110, 0.3);
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-pillar__icon,
+:root:not([data-theme="dark"]) .qlx-root .qlx-recent-card__num {
+  background: linear-gradient(135deg, var(--qlx-accent), var(--qlx-accent-deep));
+  color: #ffffff;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-verse__num {
+  background: #ecfdf5;
+  color: #115e59;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-verse__num::before {
+  border-color: rgba(15, 118, 110, 0.28);
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-mushaf__bismillah {
+  color: #115e59;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-mushaf__crest {
+  background: #ecfdf5;
+  color: #115e59;
+}
+
+:root:not([data-theme="dark"]) .qlx-root .qlx-end-ayah {
+  color: #115e59;
+}
+
+:root:not([data-theme="dark"]) .qlx-rcx-body {
+  background:
+    linear-gradient(180deg, rgba(236, 253, 245, 0.5) 0%, transparent 120px);
+}
+
+:root:not([data-theme="dark"]) .qlx-rcx-controls .qlx-rcx-chip.is-active {
+  background: linear-gradient(135deg, #10b981 0%, #0d9488 55%, #0f766e 100%);
+  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qlx-rcx-hero__art,
+  .qlx-rcx-hero__veil,
+  .qlx-rcx-prof__geom,
+  .qlx-rcx-prof__inner,
+  .qlx-dock:not([hidden]) {
+    animation: none !important;
+  }
+  .qlx-rcx-card:hover,
+  .qlx-rcx-hero__search:hover,
+  .qlx-rcx-hero__search:focus-within,
+  .qlx-profile-surah.qlx-rcx-row:hover,
+  .qlx-rcx-prof__btn--primary:hover {
+    transform: none;
+  }
+}

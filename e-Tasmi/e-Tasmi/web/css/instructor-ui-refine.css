@@ -1,0 +1,514 @@
+/* Controlled instructor UI refinement: focused SaaS layout without changing workflow. */
+body.instructor-package-page,
+body.instructor-premium-page.instructor-package-page,
+body.instructor-package-page.instructor-module-page,
+body.instructor-dashboard-page.instructor-package-page {
+  --instructor-bg: #f8fafc;
+  --instructor-surface: #ffffff;
+  --instructor-surface-muted: #f8fafc;
+  --instructor-border: #e5e7eb;
+  --instructor-border-strong: #cbd5e1;
+  --instructor-text: #0f172a;
+  --instructor-text-soft: #64748b;
+  --instructor-text-muted: #64748b;
+  --instructor-primary: #22c55e;
+  --instructor-primary-dark: #16a34a;
+  --instructor-primary-soft: #ecfdf5;
+  --instructor-accent: #22c55e;
+  --instructor-success: #16a34a;
+  --instructor-warning: #d97706;
+  --instructor-danger: #dc2626;
+  --instructor-line: #e5e7eb;
+  --instructor-app-bg: #f8fafc;
+  --instructor-shell-bg: #ffffff;
+  --instructor-main-bg: #f8fafc;
+  --instructor-sidebar-bg: #ffffff;
+  --instructor-sidebar-border: #e5e7eb;
+  --instructor-shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.06);
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body.instructor-package-page.instructor-module-page {
+  background: #f8fafc;
+}
+
+body.instructor-package-page.instructor-module-page .app-shell {
+  width: 100%;
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-topbar {
+  border-radius: 0;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: none;
+  background: #ffffff;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-layout {
+  border-radius: 0;
+  box-shadow: none;
+  background: #ffffff;
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__panel {
+  padding: 20px 18px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-inline-end: 1px solid #e2e8f0;
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__link {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #64748b;
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__link small {
+  display: none;
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__link:hover {
+  background: rgba(15, 118, 110, 0.08);
+  border-color: rgba(15, 118, 110, 0.14);
+  color: #0f172a;
+  box-shadow: none;
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__link.is-active {
+  background: linear-gradient(135deg, #0f766e, #0b665f);
+  color: #ffffff;
+  border-color: rgba(15, 118, 110, 0.4);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.2);
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__logout {
+  border-radius: 8px;
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #64748b;
+}
+
+body.instructor-package-page.instructor-module-page:not(.instructor-nav-collapsed) .instructor-shell-sidebar__logout:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-content {
+  padding: 32px;
+  background: #f8fafc;
+  gap: 24px;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-workspace-view,
+.instructor-dashboard-clean {
+  gap: 24px;
+}
+
+body.instructor-package-page.instructor-module-page .sd-hero,
+body.instructor-package-page.instructor-module-page .sd-card,
+body.instructor-package-page.instructor-module-page .notification-item,
+body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__hero,
+body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__panel,
+.isess-hero,
+.isess-table-wrap,
+.isess-empty,
+.isess-modal,
+.isess-detail-desc,
+.isess-participants-table {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+body.instructor-package-page.instructor-module-page .sd-hero,
+body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__hero,
+.isess-hero {
+  padding: 28px 32px;
+  background: #ffffff;
+}
+
+.instructor-dashboard-clean__hero {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.instructor-dashboard-clean__hero-panel {
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  box-shadow: none;
+}
+
+.instructor-dashboard-clean__hero-progress,
+.sd-progressbar {
+  background: #e5e7eb;
+}
+
+.instructor-dashboard-clean__hero-progress span,
+.sd-progressbar > span {
+  background: #22c55e;
+}
+
+body.instructor-package-page.instructor-module-page .sd-hero-kicker,
+body.instructor-package-page.instructor-module-page .sd-card-eyebrow,
+.instructor-dashboard-clean__eyebrow,
+.isess-hero__eyebrow {
+  background: transparent;
+  color: #22c55e;
+  padding: 0;
+  min-height: 0;
+  border-radius: 0;
+  letter-spacing: 0.08em;
+}
+
+body.instructor-package-page.instructor-module-page .sd-hero-title,
+body.instructor-package-page.instructor-module-page .sd-card-title,
+.instructor-dashboard-clean__welcome,
+.instructor-dashboard-clean__welcome-name,
+.instructor-dashboard-clean__panel-head h3,
+.instructor-dashboard-clean__session-title-row strong,
+.isess-hero__text h1,
+.isess-modal__header h3,
+.isess-empty-title {
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+body.instructor-package-page.instructor-module-page .sd-hero-subtitle,
+.instructor-dashboard-clean__hero-copy p,
+.instructor-dashboard-clean__session-meta-row span,
+.isess-hero__text p,
+.isess-empty-sub,
+.isess-session-desc,
+.isess-detail-desc,
+.text-muted,
+.eval-summary span {
+  color: #64748b;
+}
+
+body.instructor-package-page.instructor-module-page .btn,
+body.instructor-package-page.instructor-module-page .btn-primary,
+body.instructor-package-page.instructor-module-page .btn-secondary,
+body.instructor-package-page.instructor-module-page .btn-ghost,
+.ibtn,
+.isess-modal__close {
+  min-height: 42px;
+  border-radius: 8px;
+  box-shadow: none;
+  font-weight: 600;
+}
+
+body.instructor-package-page.instructor-module-page .btn-primary,
+body.instructor-package-page.instructor-module-page .btn-success,
+.ibtn-primary {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.16);
+}
+
+body.instructor-package-page.instructor-module-page .btn-primary:hover,
+body.instructor-package-page.instructor-module-page .btn-success:hover,
+.ibtn-primary:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #ffffff;
+}
+
+body.instructor-package-page.instructor-module-page .btn-ghost,
+.ibtn-outline,
+.ibtn-ghost {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #0f172a;
+}
+
+.ibtn-danger {
+  background: #ffffff;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.status-pill,
+.isess-pill {
+  border-radius: 8px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  letter-spacing: 0;
+}
+
+.status-pill--neutral,
+.isess-pill--completed {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #64748b;
+}
+
+.status-pill--success,
+.isess-pill--ongoing {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #16a34a;
+}
+
+.status-pill--warning,
+.isess-pill--scheduled {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #16a34a;
+}
+
+.status-pill--danger,
+.isess-pill--cancelled {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.instructor-dashboard-clean__session-card {
+  border-radius: 8px;
+  border-color: #e5e7eb;
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: none;
+}
+
+.instructor-dashboard-clean__session-meta-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.isess-hero {
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.isess-table-wrap {
+  overflow-x: auto;
+}
+
+.isess-table {
+  min-width: 920px;
+}
+
+.isess-table th,
+.isess-table td,
+.isess-participants-table th,
+.isess-participants-table td,
+.eval-table th,
+.eval-table td {
+  padding: 16px 18px;
+  border-color: #e5e7eb;
+}
+
+.isess-table th,
+.isess-participants-table th,
+.eval-table th {
+  background: #f8fafc;
+  color: #64748b;
+  letter-spacing: 0.06em;
+}
+
+.isess-table tbody tr:hover,
+.isess-table tbody tr.is-expanded {
+  background: #f8fafc;
+}
+
+.isess-session-thumb {
+  width: 58px;
+  height: 44px;
+  border-radius: 8px;
+  background: #ecfdf5;
+}
+
+.isess-session-thumb .thumb-icon {
+  color: #22c55e;
+}
+
+.isess-detail-inner {
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.isess-detail-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.isess-detail-item {
+  padding: 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.isess-detail-actions {
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.isess-participants-section h4 {
+  margin-bottom: 14px;
+}
+
+.isess-modal-overlay {
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.isess-modal {
+  max-width: 860px;
+}
+
+.isess-modal__header {
+  padding: 24px 28px 18px;
+}
+
+.isess-modal__body {
+  padding: 24px 28px 28px;
+}
+
+.isess-modal__footer {
+  padding: 0 28px 28px;
+}
+
+.isess-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+}
+
+.isess-field {
+  gap: 8px;
+}
+
+.isess-field input,
+.isess-field select,
+.isess-field textarea,
+body.instructor-package-page.instructor-module-page input,
+body.instructor-package-page.instructor-module-page select,
+body.instructor-package-page.instructor-module-page textarea {
+  min-height: 46px;
+  border-radius: 8px;
+  border-color: #e5e7eb;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.isess-field textarea {
+  min-height: 96px;
+}
+
+.isess-field input:focus,
+.isess-field select:focus,
+.isess-field textarea:focus,
+body.instructor-package-page.instructor-module-page input:focus,
+body.instructor-package-page.instructor-module-page select:focus,
+body.instructor-package-page.instructor-module-page textarea:focus {
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.isess-banner-zone {
+  border-color: #cbd5e1;
+  border-radius: 8px;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.isess-banner-zone:hover {
+  border-color: #22c55e;
+  background: #ecfdf5;
+}
+
+.eval-table {
+  min-width: 980px;
+}
+
+.eval-audio-cell audio,
+.eval-audio-cell video {
+  width: min(260px, 100%);
+}
+
+.eval-form {
+  min-width: 240px;
+  gap: 10px;
+}
+
+.eval-form label {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.eval-form .btn-sm {
+  width: fit-content;
+}
+
+body.instructor-package-page.instructor-module-page .footer {
+  color: #64748b;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (min-width: 1101px) {
+  body.instructor-package-page.instructor-module-page .app-shell {
+    height: 100vh;
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 940px) {
+  body.instructor-package-page.instructor-module-page .instructor-shell-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-topbar {
+    border-radius: 0;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-content {
+    padding: 24px;
+  }
+
+  .instructor-dashboard-clean__hero,
+  .isess-hero,
+  .sd-hero-head,
+  .instructor-dashboard-clean__session-card {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  body.instructor-package-page.instructor-module-page .instructor-shell-content {
+    padding: 20px 14px;
+  }
+
+  body.instructor-package-page.instructor-module-page .sd-hero,
+  body.instructor-dashboard-page.instructor-package-page .instructor-dashboard-clean__hero,
+  .isess-hero,
+  .isess-modal__header,
+  .isess-modal__body,
+  .isess-modal__footer {
+    padding-inline-start: 22px;
+    padding-inline-end: 22px;
+  }
+
+  .isess-form-grid,
+  .instructor-dashboard-clean__session-meta-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ibtn,
+  .isess-hero__actions,
+  .isess-hero__actions .ibtn,
+  .eval-form .btn-sm {
+    width: 100%;
+  }
+}

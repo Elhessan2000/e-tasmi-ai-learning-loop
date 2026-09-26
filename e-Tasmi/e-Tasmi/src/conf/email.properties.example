@@ -1,0 +1,22 @@
+# e-Tasmi SMTP configuration (EXAMPLE)
+#
+# IMPORTANT:
+# - Do NOT commit real passwords to git.
+# - In production, prefer environment variables.
+#
+# Priority order used by the app:
+# 1) Environment variables (SMTP_HOST, SMTP_PORT, ...)
+# 2) web.xml <context-param>
+# 3) This file: src/conf/email.properties (loaded from classpath as /email.properties)
+#
+# Copy this file to: src/conf/email.properties
+# and fill in the values.
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_STARTTLS=true
+
+# Gmail/Google Workspace: use an App Password (not your normal password)
+SMTP_USERNAME=
+SMTP_PASSWORD=
+SMTP_FROM=

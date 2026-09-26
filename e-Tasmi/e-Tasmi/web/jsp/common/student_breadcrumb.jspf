@@ -1,0 +1,60 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="util.LocaleSupport" %>
+<%
+  Object _bcActiveObj = request.getAttribute("activeMenu");
+  String _bcActive    = (_bcActiveObj == null) ? "" : String.valueOf(_bcActiveObj);
+
+  String _bcI18nKey     = "";
+  String _bcDefaultText = "";
+  String _bcHref        = "";
+
+  switch (_bcActive) {
+    case "overview":
+      _bcI18nKey = "student.nav.dashboard";        _bcDefaultText = "Dashboard";         _bcHref = "/student/dashboard";           break;
+    case "sessions":
+      _bcI18nKey = "student.nav.browse";           _bcDefaultText = "Browse Sessions";   _bcHref = "/student/available-sessions";  break;
+    case "enrollments":
+      _bcI18nKey = "student.nav.mySessions";       _bcDefaultText = "My Sessions";       _bcHref = "/student/enrollments";         break;
+    case "recitations":
+      _bcI18nKey = "student.nav.uploadRecitation"; _bcDefaultText = "Upload Recitation"; _bcHref = "/student/recitations";         break;
+    case "quran-library":
+      _bcI18nKey = "student.nav.quranLibrary";     _bcDefaultText = "Qur\u2019an Library"; _bcHref = "/student/quran-library";     break;
+    case "progress":
+      _bcI18nKey = "student.nav.progress";         _bcDefaultText = "Progress";          _bcHref = "/student/progress";            break;
+    case "payments":
+      _bcI18nKey = "student.nav.payments";         _bcDefaultText = "Payments";          _bcHref = "/student/payments";            break;
+    case "notifications":
+      _bcI18nKey = "student.nav.notifications";    _bcDefaultText = "Notifications";     _bcHref = "/student/notifications";       break;
+    case "profile":
+      _bcI18nKey = "student.nav.profile";          _bcDefaultText = "Profile";           _bcHref = "/student/profile";             break;
+    default:
+      break;
+  }
+  boolean _bcRender = !_bcI18nKey.isEmpty();
+%>
+<% if (_bcRender) { %>
+<nav class="etasmi-bc" aria-label="Breadcrumb">
+  <ol class="etasmi-bc__list">
+
+    <li class="etasmi-bc__item">
+      <a class="etasmi-bc__link"
+         href="<%= LocaleSupport.localizedUrl(request, "/student/dashboard") %>"
+         data-i18n="student.breadcrumb.home">Home</a>
+    </li>
+
+    <li class="etasmi-bc__sep" aria-hidden="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+           xmlns="http://www.w3.org/2000/svg" class="etasmi-bc__chevron" aria-hidden="true">
+        <path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </li>
+
+    <li class="etasmi-bc__item etasmi-bc__item--active" aria-current="page">
+      <span class="etasmi-bc__current"
+            data-i18n="<%= _bcI18nKey %>"><%= _bcDefaultText %></span>
+    </li>
+
+  </ol>
+</nav>
+<% } %>

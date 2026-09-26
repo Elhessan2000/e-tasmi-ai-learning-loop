@@ -1,0 +1,55 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%--
+  Reusable instructor content-area page header (woodland green hero).
+
+  Set before include:
+    iupHeroMod       — modifier class suffix: sessions | evaluations | payments | profile
+    iupHeroEyebrow   — small uppercase label
+    iupHeroTitle     — main heading
+    iupHeroDesc      — subtitle / description
+    iupHeroIconSvg   — optional raw SVG markup for icon (defaults to book icon)
+    iupHeroEyebrowKey, iupHeroTitleKey, iupHeroDescKey — optional data-i18n keys
+
+  Optional HTML blocks via request attributes (String):
+    iupHeroBreadcrumbHtml — breadcrumb nav HTML
+    iupHeroActionsHtml    — action buttons / badges HTML
+    iupHeroChipsHtml      — legend chips row HTML
+--%>
+<%
+  String iupMod = request.getAttribute("iupHeroMod") == null ? "" : String.valueOf(request.getAttribute("iupHeroMod")).trim();
+  String iupEyebrow = request.getAttribute("iupHeroEyebrow") == null ? "" : String.valueOf(request.getAttribute("iupHeroEyebrow"));
+  String iupTitle = request.getAttribute("iupHeroTitle") == null ? "" : String.valueOf(request.getAttribute("iupHeroTitle"));
+  String iupDesc = request.getAttribute("iupHeroDesc") == null ? "" : String.valueOf(request.getAttribute("iupHeroDesc"));
+  String iupEyebrowKey = request.getAttribute("iupHeroEyebrowKey") == null ? "" : String.valueOf(request.getAttribute("iupHeroEyebrowKey")).trim();
+  String iupTitleKey = request.getAttribute("iupHeroTitleKey") == null ? "" : String.valueOf(request.getAttribute("iupHeroTitleKey")).trim();
+  String iupDescKey = request.getAttribute("iupHeroDescKey") == null ? "" : String.valueOf(request.getAttribute("iupHeroDescKey")).trim();
+  String iupIcon = request.getAttribute("iupHeroIconSvg") == null ? "" : String.valueOf(request.getAttribute("iupHeroIconSvg"));
+  String iupBreadcrumb = request.getAttribute("iupHeroBreadcrumbHtml") == null ? "" : String.valueOf(request.getAttribute("iupHeroBreadcrumbHtml"));
+  String iupActions = request.getAttribute("iupHeroActionsHtml") == null ? "" : String.valueOf(request.getAttribute("iupHeroActionsHtml"));
+  String iupChips = request.getAttribute("iupHeroChipsHtml") == null ? "" : String.valueOf(request.getAttribute("iupHeroChipsHtml"));
+
+  if (iupIcon.isEmpty()) {
+    iupIcon = "<svg viewBox=\"0 0 24 24\" fill=\"none\" aria-hidden=\"true\"><path d=\"M4.75 6.75A1.75 1.75 0 0 1 6.5 5h4.75c1.1 0 2.13.48 2.84 1.3.71-.82 1.74-1.3 2.84-1.3h.57a1.75 1.75 0 0 1 1.75 1.75v10.5A1.75 1.75 0 0 1 18.5 19h-1.07a3.5 3.5 0 0 0-2.48 1.02l-.45.45a.7.7 0 0 1-.99 0l-.45-.45A3.5 3.5 0 0 0 10.57 19H6.5a1.75 1.75 0 0 1-1.75-1.75V6.75Z\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linejoin=\"round\"/><path d=\"M12 6.75v11.5\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\"/></svg>";
+  }
+
+  String modClass = iupMod.isEmpty() ? "" : " iup-page-hero--" + iupMod;
+  String ariaLabel = iupTitle.isEmpty() ? "Page header" : iupTitle;
+%>
+<section class="iup-page-hero<%= modClass %>" aria-label="<%= ariaLabel %>"<% if (!iupTitleKey.isEmpty()) { %> data-i18n="<%= iupTitleKey %>" data-i18n-attr="aria-label"<% } %>>
+  <span class="iup-page-hero__glow" aria-hidden="true"></span>
+  <% if (!iupBreadcrumb.isEmpty()) { %><%= iupBreadcrumb %><% } %>
+  <div class="iup-page-hero__inner">
+    <span class="iup-page-hero__icon" aria-hidden="true"><%= iupIcon %></span>
+    <div class="iup-page-hero__text">
+      <% if (!iupEyebrow.isEmpty()) { %><p class="iup-page-hero__eyebrow"<% if (!iupEyebrowKey.isEmpty()) { %> data-i18n="<%= iupEyebrowKey %>"<% } %>><%= iupEyebrow %></p><% } %>
+      <% if (!iupTitle.isEmpty()) { %><h1 class="iup-page-hero__title"<% if (!iupTitleKey.isEmpty()) { %> data-i18n="<%= iupTitleKey %>"<% } %>><%= iupTitle %></h1><% } %>
+      <% if (!iupDesc.isEmpty()) { %><p class="iup-page-hero__desc"<% if (!iupDescKey.isEmpty()) { %> data-i18n="<%= iupDescKey %>"<% } %>><%= iupDesc %></p><% } %>
+    </div>
+  </div>
+  <% if (!iupActions.isEmpty()) { %>
+  <div class="iup-page-hero__actions"><%= iupActions %></div>
+  <% } %>
+  <% if (!iupChips.isEmpty()) { %>
+  <div class="iup-page-hero__chips" aria-label="Legend"><%= iupChips %></div>
+  <% } %>
+</section>

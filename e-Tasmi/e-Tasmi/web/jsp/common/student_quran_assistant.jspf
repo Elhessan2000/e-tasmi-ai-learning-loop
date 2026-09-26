@@ -1,0 +1,182 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%
+  String qaCtx = request.getContextPath();
+  String qaPhotoUrl = qaCtx + "/student/profile-photo";
+  Object qaDisplayNameObj = session.getAttribute("displayName");
+  String qaDisplayName = (qaDisplayNameObj == null) ? "Student" : String.valueOf(qaDisplayNameObj).trim();
+  if (qaDisplayName.isEmpty()) qaDisplayName = "Student";
+  String qaInitials = "S";
+  String[] qaParts = qaDisplayName.split("\\s+");
+  if (qaParts.length == 1 && !qaParts[0].isEmpty()) {
+    qaInitials = qaParts[0].substring(0, 1).toUpperCase();
+  } else if (qaParts.length > 1) {
+    String a = qaParts[0].isEmpty() ? "" : qaParts[0].substring(0, 1).toUpperCase();
+    String b = qaParts[qaParts.length - 1].isEmpty() ? "" : qaParts[qaParts.length - 1].substring(0, 1).toUpperCase();
+    qaInitials = (a + b).trim().isEmpty() ? "S" : (a + b);
+  }
+  String qaFirstName = (qaParts.length > 0 && !qaParts[0].isEmpty()) ? qaParts[0] : qaDisplayName;
+  boolean qaHasName = !qaDisplayName.equalsIgnoreCase("Student");
+  String qaGreetTitle = qaHasName
+      ? ("Assalamu Alaikum, " + qaFirstName + " \uD83D\uDC4B")
+      : "Assalamu Alaikum \uD83D\uDC4B";
+  String qaGreetTitleEsc = qaGreetTitle.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+%>
+<div id="etasmiQuranAssistant" class="eqa" data-eqa-root hidden aria-hidden="true"
+     data-api-chat="<%= qaCtx %>/student/api/quran-assistant/chat"
+     data-api-voice-turn="<%= qaCtx %>/student/api/quran-assistant/voice/turn"
+     data-api-voice-speak="<%= qaCtx %>/student/api/quran-assistant/voice/speak"
+     data-student-photo="<%= qaPhotoUrl %>"
+     data-student-name="<%= qaDisplayName.replace("\"", "&quot;") %>"
+     data-student-initials="<%= qaInitials %>">
+
+  <!-- Floating, draggable AI launcher with Islamic child avatar -->
+  <button type="button" class="eqa-fab" data-eqa-fab data-eqa-drag-handle="fab"
+          data-i18n="quranAssistant.openFab" data-i18n-attr="aria-label|title"
+          aria-label="Open Quran AI Assistant (drag to reposition)" title="Quran AI Assistant — drag to move">
+    <span class="eqa-fab__ring" aria-hidden="true"></span>
+    <span class="eqa-fab__avatar" data-eqa-fab-avatar aria-hidden="true"></span>
+    <span class="eqa-fab__grip" aria-hidden="true"></span>
+  </button>
+
+  <!-- Auto welcome greeting bubble (time-of-day aware, non-intrusive) -->
+  <div class="eqa-greet" data-eqa-greet-bubble hidden role="status" aria-live="polite">
+    <span class="eqa-greet__avatar" data-eqa-greet-avatar aria-hidden="true"></span>
+    <div class="eqa-greet__body">
+      <p class="eqa-greet__text eqa-greet__title" data-eqa-greet-text><%= qaGreetTitleEsc %></p>
+      <div class="eqa-greet__actions">
+        <button type="button" class="eqa-greet__cta" data-eqa-greet-open
+                data-i18n="quranAssistant.greetingBubble.cta">Ask me anything</button>
+      </div>
+    </div>
+    <button type="button" class="eqa-greet__close" data-eqa-greet-close
+            data-i18n="quranAssistant.greetingBubble.dismiss" data-i18n-attr="aria-label|title"
+            aria-label="Dismiss greeting" title="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <div class="eqa-backdrop" data-eqa-backdrop hidden></div>
+
+  <section class="eqa-panel" data-eqa-panel role="dialog" aria-labelledby="eqaPanelTitle" aria-modal="false" hidden>
+    <div class="eqa-panel__aurora" aria-hidden="true"></div>
+    <div class="eqa-panel__grid" aria-hidden="true"></div>
+
+    <header class="eqa-panel__head" data-eqa-drag-handle="panel">
+      <span class="eqa-panel__drag-hint" aria-hidden="true"></span>
+      <div class="eqa-panel__brand">
+        <span class="eqa-panel__avatar-shell">
+          <span class="eqa-panel__avatar-wrap" data-eqa-header-avatar aria-hidden="true"></span>
+          <span class="eqa-panel__status-dot" aria-hidden="true"></span>
+        </span>
+        <div class="eqa-panel__meta">
+          <h2 id="eqaPanelTitle" class="eqa-panel__title" data-i18n="quranAssistant.panelTitle">e-Tasmi Quran Assistant</h2>
+          <p class="eqa-panel__status" data-eqa-status-text>
+            <span class="eqa-panel__status-pulse" aria-hidden="true"></span>
+            <span data-i18n="quranAssistant.statusOnline">Online · Ready to help</span>
+          </p>
+        </div>
+      </div>
+      <div class="eqa-panel__controls">
+        <button type="button" class="eqa-panel__ctrl" data-eqa-minimize
+          data-i18n="quranAssistant.minimize" data-i18n-attr="aria-label|title"
+          aria-label="Minimize assistant" title="Minimize">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" class="eqa-panel__ctrl eqa-panel__ctrl--close" data-eqa-close
+          data-i18n="quranAssistant.close" data-i18n-attr="aria-label|title"
+          aria-label="Close assistant" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="eqa-panel__body" data-eqa-body>
+      <div class="eqa-home" data-eqa-home>
+        <div class="eqa-welcome" data-eqa-welcome>
+          <div class="eqa-welcome__row">
+            <span class="eqa-avatar eqa-avatar--ai" data-eqa-welcome-avatar aria-hidden="true"></span>
+            <div class="eqa-welcome__bubble">
+              <span class="eqa-welcome__tag" data-i18n="quranAssistant.aiTag">AI Assistant</span>
+              <p class="eqa-welcome__text" data-eqa-greeting-text><%= qaGreetTitleEsc %></p>
+            </div>
+          </div>
+        </div>
+        <div class="eqa-context" data-eqa-context-banner hidden></div>
+      </div>
+
+      <div class="eqa-chat" data-eqa-chat hidden>
+        <div class="eqa-messages" data-eqa-messages role="log" aria-live="polite"></div>
+        <div class="eqa-quick" data-eqa-quick hidden></div>
+      </div>
+    </div>
+
+    <footer class="eqa-panel__foot" data-eqa-foot>
+      <div class="eqa-suggest" data-eqa-suggestions role="list"
+        data-i18n="quranAssistant.suggestedTopics" data-i18n-attr="aria-label" aria-label="Suggested topics"></div>
+      <form class="eqa-compose" data-eqa-form>
+        <div class="eqa-compose__shell">
+          <button type="button" class="eqa-compose__voice" data-eqa-voice-start
+                  data-i18n="quranAssistant.voice.talkButton" data-i18n-attr="aria-label|title"
+                  aria-label="Talk with e-Tasmi Assistant" title="Talk with e-Tasmi Assistant">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" stroke="currentColor" stroke-width="1.7"/>
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <textarea id="eqaInput" class="eqa-compose__input" data-eqa-input rows="1"
+                    data-i18n="quranAssistant.inputPlaceholder" data-i18n-attr="placeholder"
+                    placeholder="Ask about an ayah, tajweed, memorization…" autocomplete="off"></textarea>
+          <button type="submit" class="eqa-compose__send" data-eqa-send
+                  data-i18n="quranAssistant.sendMessage" data-i18n-attr="aria-label" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m5 12 14-7-4 7 4 7-14-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <p class="eqa-compose__note" data-eqa-compose-note data-i18n="quranAssistant.scopeNote">Qur'an · Tafsir · Tajweed · Hifz only</p>
+      </form>
+    </footer>
+
+    <!-- Real-time voice conversation overlay -->
+    <section class="eqa-voice" data-eqa-voice hidden aria-hidden="true" role="dialog"
+             aria-labelledby="eqaVoiceTitle" aria-modal="false">
+      <div class="eqa-voice__aurora" aria-hidden="true"></div>
+      <header class="eqa-voice__head">
+        <h2 id="eqaVoiceTitle" class="eqa-voice__title" data-i18n="quranAssistant.voice.title">Voice Conversation</h2>
+        <button type="button" class="eqa-voice__close" data-eqa-voice-close
+                data-i18n="quranAssistant.voice.exit" data-i18n-attr="aria-label|title"
+                aria-label="Exit voice mode" title="Exit voice mode">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <div class="eqa-voice__stage">
+        <div class="eqa-voice__orb" data-eqa-voice-orb aria-hidden="true">
+          <span class="eqa-voice__orb-core" data-eqa-voice-avatar></span>
+          <span class="eqa-voice__wave"><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p class="eqa-voice__status" data-eqa-voice-status aria-live="polite"
+           data-i18n="quranAssistant.voice.statusIdle">Tap start to begin talking</p>
+      </div>
+
+      <div class="eqa-voice__transcript" data-eqa-voice-transcript role="log" aria-live="polite"></div>
+
+      <div class="eqa-voice__controls">
+        <button type="button" class="eqa-voice__btn eqa-voice__btn--mic" data-eqa-voice-mic
+                data-i18n="quranAssistant.voice.start" data-i18n-attr="aria-label|title"
+                aria-label="Start conversation" title="Start conversation">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button type="button" class="eqa-voice__btn eqa-voice__btn--stop" data-eqa-voice-stop hidden
+                data-i18n="quranAssistant.voice.stop" data-i18n-attr="aria-label|title"
+                aria-label="Stop conversation" title="Stop conversation">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <p class="eqa-voice__hint" data-eqa-voice-hint data-i18n="quranAssistant.voice.hint">Speak naturally — I will listen and reply with my voice.</p>
+    </section>
+  </section>
+</div>

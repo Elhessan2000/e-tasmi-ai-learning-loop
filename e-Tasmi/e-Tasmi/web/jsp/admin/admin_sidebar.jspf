@@ -1,0 +1,133 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page import="util.LocaleSupport" %>
+<%
+  Object adminSidebarActiveObj = request.getAttribute("activeMenu");
+  String adminSidebarActiveMenu = (adminSidebarActiveObj == null) ? "" : String.valueOf(adminSidebarActiveObj);
+%>
+<div class="admin-shell-sidebar__scrim" data-admin-nav-dismiss></div>
+<aside class="admin-shell-sidebar" id="adminWorkspaceSidebar" data-admin-sidebar
+  data-i18n="admin.sidebar.aria" data-i18n-attr="aria-label">
+  <div class="admin-shell-sidebar__panel admin-shell-sidebar__panel--minimal">
+    <div class="admin-shell-sidebar__mobile-bar">
+      <button class="admin-shell-sidebar__close" type="button"
+        data-i18n="admin.sidebar.closeNav" data-i18n-attr="aria-label|title"
+        aria-label="Close navigation" title="Close navigation" data-admin-nav-dismiss>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="admin-shell-sidebar__nav" data-i18n="admin.sidebar.navAria" data-i18n-attr="aria-label" aria-label="Admin navigation">
+      <a class="admin-shell-sidebar__link <%= "overview".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/dashboard") %>"
+        data-i18n="admin.nav.dashboard" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+            <rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+            <rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+            <rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.dashboard">Dashboard</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "verification".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/instructors/verification?status=PENDING") %>"
+        data-i18n="admin.nav.verification" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3 4 6v6c0 4.5 3.2 8.4 8 9 4.8-.6 8-4.5 8-9V6l-8-3Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.verification">Instructor Verification</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "payments".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/payments") %>"
+        data-i18n="admin.nav.payments" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3 10h18" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M7 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.payments">Payment Monitoring</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "users".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/users") %>"
+        data-i18n="admin.nav.users" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3 19a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="17" cy="10" r="2.5" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M15 19a4 4 0 0 1 6 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.users">User Management</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "reports".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/reports") %>"
+        data-i18n="admin.nav.reports" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4a2 2 0 0 1 2-2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M14 2v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M8 18v-4M12 18v-7M16 18v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.reports">Reports</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "logs".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/logs") %>"
+        data-i18n="admin.nav.logs" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5a2 2 0 0 1 2-2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M14 3v5h5M8 13h8M8 17h6M8 9h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.logs">Audit Logs</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "notifications".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/notifications") %>"
+        data-i18n="admin.nav.notifications" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 17H9m9-1.5V10a6 6 0 1 0-12 0v5.5L4.5 17v1h15v-1L18 15.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.notifications">Notifications</span>
+      </a>
+      <a class="admin-shell-sidebar__link <%= "profile".equals(adminSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/admin/profile") %>"
+        data-i18n="admin.nav.profile" data-i18n-attr="aria-label|data-tooltip">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.profile">Profile</span>
+      </a>
+    </nav>
+
+    <div class="admin-shell-sidebar__footer admin-shell-sidebar__footer--logout">
+      <a class="admin-shell-sidebar__logout admin-shell-sidebar__logout--solid"
+        href="<%= LocaleSupport.localizedUrl(request, "/auth/logout") %>"
+        data-i18n="admin.nav.logout" data-i18n-attr="aria-label|data-tooltip" aria-label="Logout">
+        <span class="admin-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m10 17-5-5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 12h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="admin-shell-sidebar__label" data-i18n="admin.nav.logout">Logout</span>
+      </a>
+    </div>
+  </div>
+</aside>

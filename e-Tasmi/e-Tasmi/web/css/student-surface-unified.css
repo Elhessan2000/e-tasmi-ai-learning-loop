@@ -1,0 +1,292 @@
+/*
+ * e-Tasmi — Unified Elevated Surface Card System (Dark)
+ * -------------------------------------------------------
+ * Single source of truth for dashboard-aligned elevated cards across
+ * student modules (Notifications, Quran Library, etc.).
+ *
+ * Palette:
+ *   Canvas  — Deep Space Navy  (--theme-bg / #0b1220)
+ *   Cards   — Elevated Navy    (--theme-surface / #111b32)
+ *   Text    — Silver / off-white on dark surfaces
+ *
+ * Loaded AFTER student-theme-dark.css for final override authority.
+ */
+
+/* ============================================================
+ * 1. CANONICAL SURFACE TOKENS
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page,
+:root[data-theme="dark"] body.quran-library-page {
+  --student-canvas-bg: var(--theme-bg);
+  --student-card-bg: var(--theme-surface);
+  --student-card-bg-raised: var(--theme-surface-raised);
+  --student-card-bg-hover: var(--theme-surface-hover);
+  --student-card-border: var(--theme-border);
+  --student-card-border-accent: rgba(45, 212, 191, 0.28);
+  --student-card-radius: 14px;
+  --student-card-shadow: var(--theme-shadow-sm);
+  --student-card-shadow-hover: var(--theme-shadow-md);
+  --student-card-title: var(--theme-text);
+  --student-card-body: var(--theme-text-soft);
+  --student-card-meta: var(--theme-text-muted);
+}
+
+/* ============================================================
+ * 2. CANVAS — flat deep navy (no mixed gradients)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-notifications-page .student-workspace-view,
+:root[data-theme="dark"] body.quran-library-page .student-workspace-view,
+:root[data-theme="dark"] body.quran-library-page .student-shell-content.qlx-main,
+:root[data-theme="dark"] body.quran-library-page .qlx-main {
+  background: var(--student-canvas-bg) !important;
+}
+
+/* ============================================================
+ * 3. UNIFIED ELEVATED CARD CHROME
+ *    Shared by notification rows, Quran recents, pillars, empty states
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page .notif-card,
+:root[data-theme="dark"] body.student-package-page .notif-empty,
+:root[data-theme="dark"] body.quran-library-page .qlx-recent-card,
+:root[data-theme="dark"] body.quran-library-page .qlx-pillar {
+  background: var(--student-card-bg) !important;
+  border: 1px solid var(--student-card-border) !important;
+  border-radius: var(--student-card-radius) !important;
+  box-shadow: var(--student-card-shadow) !important;
+  color: var(--student-card-title) !important;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+:root[data-theme="dark"] body.student-package-page .notif-card:hover,
+:root[data-theme="dark"] body.quran-library-page .qlx-recent-card:hover,
+:root[data-theme="dark"] body.quran-library-page .qlx-pillar:hover {
+  background: var(--student-card-bg-hover) !important;
+  border-color: var(--student-card-border-accent) !important;
+  box-shadow: var(--student-card-shadow-hover) !important;
+}
+
+/* Unread / emphasis variant */
+:root[data-theme="dark"] body.student-package-page .notif-card--unread {
+  background: var(--student-card-bg-raised) !important;
+  border-color: var(--student-card-border-accent) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .notif-card--read {
+  background: var(--student-card-bg) !important;
+  border-color: var(--student-card-border) !important;
+}
+
+/* ============================================================
+ * 4. UNIFIED CARD TYPOGRAPHY
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-package-page .notif-card__title,
+:root[data-theme="dark"] body.quran-library-page .qlx-recent-card__name,
+:root[data-theme="dark"] body.quran-library-page .qlx-pillar__title,
+:root[data-theme="dark"] body.student-package-page .notif-empty strong {
+  color: var(--student-card-title) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .notif-card__msg,
+:root[data-theme="dark"] body.quran-library-page .qlx-pillar__desc {
+  color: var(--student-card-body) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .notif-card__time,
+:root[data-theme="dark"] body.quran-library-page .qlx-recent-card__meta,
+:root[data-theme="dark"] body.student-package-page .notif-empty {
+  color: var(--student-card-meta) !important;
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-recent-card__ar {
+  color: var(--student-card-title) !important;
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-home-section-title {
+  color: var(--student-card-title) !important;
+}
+
+/* Icon chips inside cards */
+:root[data-theme="dark"] body.student-package-page .notif-card__icon-wrap--star,
+:root[data-theme="dark"] body.quran-library-page .qlx-recent-card__num,
+:root[data-theme="dark"] body.quran-library-page .qlx-pillar__icon {
+  background: var(--theme-primary-soft) !important;
+  border: 1px solid var(--student-card-border-accent) !important;
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .notif-card__icon-wrap--bell {
+  background: rgba(59, 130, 246, 0.14) !important;
+  border: 1px solid rgba(96, 165, 250, 0.32) !important;
+  color: #93c5fd !important;
+}
+
+:root[data-theme="dark"] body.student-package-page .notif-card__icon-wrap--clock {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(251, 191, 36, 0.32) !important;
+  color: #fcd34d !important;
+}
+
+/* ============================================================
+ * 5. NOTIFICATIONS — page chrome & badges
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-notifications-page .notif-crumb__muted {
+  color: var(--student-card-meta) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-crumb__sep {
+  color: var(--student-card-border) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-crumb__current {
+  color: var(--student-card-title) !important;
+}
+
+/* Hero banner — teal dashboard gradient (not purple) */
+:root[data-theme="dark"] body.student-notifications-page .notif-banner {
+  background: linear-gradient(
+    120deg,
+    #02312c 0%,
+    #064e46 38%,
+    #0a7268 100%
+  ) !important;
+  border: 1px solid rgba(94, 234, 212, 0.18) !important;
+  box-shadow: 0 14px 40px rgba(2, 49, 44, 0.38) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-banner__title,
+:root[data-theme="dark"] body.student-notifications-page .notif-banner__sub {
+  color: #ecfdf5 !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-banner__icon {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-banner__mark {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  color: #fff !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-banner__mark:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* NEW badge — teal pill, high contrast without clutter */
+:root[data-theme="dark"] body.student-notifications-page .notif-card__new {
+  background: rgba(45, 212, 191, 0.14) !important;
+  border: 1px solid rgba(45, 212, 191, 0.38) !important;
+  color: #5eead4 !important;
+}
+
+/* Action buttons */
+:root[data-theme="dark"] body.student-notifications-page .notif-card__btn {
+  color: var(--student-card-meta) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-card__btn:hover {
+  background: var(--student-card-bg-hover) !important;
+  color: var(--student-card-title) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-card__btn--read {
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-card__btn--read:hover {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-card__btn--delete {
+  color: #f87171 !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-card__btn--delete:hover {
+  background: rgba(248, 113, 113, 0.12) !important;
+  color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.student-notifications-page .notif-empty {
+  border-style: dashed !important;
+}
+
+/* ============================================================
+ * 6. QURAN LIBRARY — continue-reading + token remap
+ * ============================================================ */
+
+:root[data-theme="dark"] body.quran-library-page {
+  --qlx-paper: var(--student-card-bg);
+  --qlx-bg: var(--student-canvas-bg);
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-root {
+  --qlx-paper: var(--student-card-bg);
+  --qlx-bg: var(--student-canvas-bg);
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-root .qlx-home-continue {
+  background: var(--student-card-bg-raised) !important;
+  border: 1px solid var(--student-card-border-accent) !important;
+  box-shadow: var(--student-card-shadow) !important;
+  border-radius: var(--student-card-radius) !important;
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-root .qlx-home-continue__label {
+  color: var(--student-card-meta) !important;
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-root .qlx-home-continue__name {
+  color: var(--student-card-title) !important;
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-root .qlx-home-continue__btn {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary) !important;
+  border-color: var(--student-card-border-accent) !important;
+}
+
+:root[data-theme="dark"] body.quran-library-page .qlx-root .qlx-home-continue__btn:hover {
+  background: rgba(45, 212, 191, 0.22) !important;
+}
+
+/* ============================================================
+ * 7. UPLOAD RECITATION (.rec-* on .rec-studio-page)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.rec-studio-page .rec-workspace,
+:root[data-theme="dark"] body.rec-studio-page .rec-stat,
+:root[data-theme="dark"] body.rec-studio-page .rec-row,
+:root[data-theme="dark"] body.rec-studio-page .rec-empty-state {
+  background: var(--student-card-bg) !important;
+  border: 1px solid var(--student-card-border) !important;
+  border-radius: var(--student-card-radius) !important;
+  box-shadow: var(--student-card-shadow) !important;
+}
+
+:root[data-theme="dark"] body.rec-studio-page .student-workspace-view {
+  background: var(--student-canvas-bg) !important;
+}
+
+/* ============================================================
+ * 8. PROGRESS PAGE — minimalist plain header in dark mode
+ * ============================================================ */
+
+:root[data-theme="dark"] body.student-page--progress .student-progress-head__title {
+  color: #e2e8f0 !important;
+}
+
+:root[data-theme="dark"] body.student-page--progress .student-progress-head__sub {
+  color: #94a3b8 !important;
+}

@@ -1,0 +1,96 @@
+/*
+ * e-Tasmi — Instructor Sidebar Green Override
+ * Applies the same dark-emerald (#064e46) sidebar theme used in the Student Module.
+ * Loaded AFTER instructor-figma-shell.css so it wins the cascade.
+ */
+
+/* ── Sidebar shell ── */
+body.instructor-package-page .instructor-shell-sidebar {
+  background: #064e46 !important;
+  /* Use logical border-inline-end (trailing edge); clears physical sides */
+  border-inline-end: 1px solid rgba(255,255,255,0.10) !important;
+  border-right: none !important;
+  border-left:  none !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__panel {
+  background: transparent !important;
+}
+
+/* ── Nav links ── */
+body.instructor-package-page .instructor-shell-sidebar__link {
+  color: rgba(255,255,255,0.74) !important;
+  background: transparent !important;
+  border-radius: 10px !important;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__link:hover {
+  background: rgba(255,255,255,0.09) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+/* Active item — soft white fill + teal indicator (matches student sidebar) */
+body.instructor-package-page .instructor-shell-sidebar__link.is-active {
+  background: rgba(255,255,255,0.16) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Active indicator bar — inline-start edge (left in LTR, right in RTL) */
+body.instructor-package-page .instructor-shell-sidebar__link.is-active::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  inset-inline-start: -1px !important;   /* logical: left in LTR, right in RTL */
+  left:  unset !important;
+  right: unset !important;
+  top: 20% !important;
+  bottom: 20% !important;
+  width: 3px !important;
+  border-start-end-radius: 3px !important;
+  border-end-end-radius: 3px !important;
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
+  background: #5eead4 !important;
+}
+
+/* ── Footer separator ── */
+body.instructor-package-page .instructor-shell-sidebar__footer {
+  border-top: 1px solid rgba(255,255,255,0.12) !important;
+  background: transparent !important;
+}
+
+/* ── Logout link ── */
+body.instructor-package-page .instructor-shell-sidebar__logout {
+  color: rgba(255,255,255,0.65) !important;
+  background: transparent !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__logout:hover {
+  background: rgba(239,68,68,0.15) !important;
+  color: #fca5a5 !important;
+}
+
+/* ── Icon tint ── */
+body.instructor-package-page .instructor-shell-sidebar__icon {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* ── Collapsed rail (icon-only) ── */
+[data-instructor-nav="collapsed"] body.instructor-package-page .instructor-shell-sidebar,
+body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar {
+  background: #064e46 !important;
+}
+
+/* ── Dark mode: keep the same green (already dark) ── */
+html[data-theme="dark"] body.instructor-package-page .instructor-shell-sidebar {
+  background: #043d36 !important;
+  border-inline-end: 1px solid rgba(255,255,255,0.08) !important;
+  border-right: none !important;
+  border-left:  none !important;
+}

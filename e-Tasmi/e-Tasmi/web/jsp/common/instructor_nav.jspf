@@ -1,0 +1,12 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%
+  Object navActiveObj = request.getAttribute("activeMenu");
+  String navActiveMenu = (navActiveObj == null) ? "" : String.valueOf(navActiveObj);
+%>
+<nav class="sdw-nav" data-i18n="instructor.sidebar.navAria" data-i18n-attr="aria-label" aria-label="Instructor sections">
+  <a class="sdw-nav-link <%= "overview".equals(navActiveMenu) ? "is-active" : "" %>" href="<%= request.getContextPath() %>/instructor/dashboard" data-i18n="instructor.nav.dashboard">Dashboard</a>
+  <a class="sdw-nav-link <%= "sessions".equals(navActiveMenu) ? "is-active" : "" %>" href="<%= request.getContextPath() %>/instructor/sessions" data-i18n="instructor.nav.sessions">Sessions</a>
+  <a class="sdw-nav-link <%= "evaluations".equals(navActiveMenu) ? "is-active" : "" %>" href="<%= request.getContextPath() %>/instructor/evaluations" data-i18n="instructor.nav.evaluations">Evaluations</a>
+  <a class="sdw-nav-link <%= "profile".equals(navActiveMenu) ? "is-active" : "" %>" href="<%= request.getContextPath() %>/instructor/profile" data-i18n="instructor.nav.profile">Profile</a>
+  <a class="sdw-nav-link <%= "notifications".equals(navActiveMenu) ? "is-active" : "" %>" href="<%= request.getContextPath() %>/notifications" data-i18n="student.nav.notifications">Notifications</a>
+</nav>

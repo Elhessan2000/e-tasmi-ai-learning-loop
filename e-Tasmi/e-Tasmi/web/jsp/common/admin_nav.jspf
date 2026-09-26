@@ -1,0 +1,8 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%
+  Object navActiveObj = request.getAttribute("activeMenu");
+  String navActiveMenu = (navActiveObj == null) ? "" : String.valueOf(navActiveObj);
+%>
+<nav class="sdw-nav" data-i18n="admin.nav.sectionsAria" data-i18n-attr="aria-label" aria-label="Admin sections">
+  <a class="sdw-nav-link <%= "overview".equals(navActiveMenu) ? "is-active" : "" %>" href="<%= request.getContextPath() %>/admin/dashboard" data-i18n="admin.nav.dashboard">Dashboard</a>
+</nav>

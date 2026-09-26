@@ -1,0 +1,39 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ include file="/jsp/common/etasmi_theme_init.jspf" %>
+<%@ include file="/jsp/common/etasmi_i18n_head.jspf" %>
+<script>
+  (function(){
+    try{
+      var c = localStorage.getItem('etasmi-instructor-nav-collapsed');
+      if (c === '1' && window.matchMedia && window.matchMedia('(min-width: 1101px)').matches){
+        document.documentElement.setAttribute('data-instructor-nav', 'collapsed');
+      }
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-platform.css?v=20260610-instructor-shell4">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-package.css?v=20260610-instructor-shell4">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-ui-refine.css?v=20260610-instructor-shell4">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-surface.css?v=20260610-instructor-shell4">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-theme.css?v=20260609-theme-unified">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-module-polish.css?v=20260426-instructor-polish1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-my-sessions.css?v=20260505-eval-cards-premium">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-uplift.css?v=20260506-eval-green-premium-v2">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-dark-polish.css?v=20260609-theme-unified">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-theme-dark.css?v=20260625-dark-fix">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-mobile-responsive.css?v=20260511-no-dash-float-qc">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-typography.css?v=20260520-type-balanced">
+<%-- Shell grid + collapse rail --%>
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-shell-layout.css?v=20260610-instructor-shell4">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-layout-behavior.css?v=20260610-instructor-shell4">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-sidebar-collapsed.css?v=20260614-lime5">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-page-headers.css?v=20260625-student-theme">
+<%-- Clean minimal shell — MUST load last so it wins the cascade --%>
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-figma-shell.css?v=20260625-rtl-logical">
+<%-- Green sidebar override — loads after figma-shell to apply dark-emerald theme --%>
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-sidebar-green.css?v=20260625-rtl-border">
+<script defer src="<%= request.getContextPath() %>/assets/js/instructor-workspace.js?v=20260610-instructor-shell4"></script>
+<script defer src="<%= request.getContextPath() %>/assets/js/etasmi-theme.js?v=20260609-theme-unified"></script>

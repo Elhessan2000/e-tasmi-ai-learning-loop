@@ -1,0 +1,913 @@
+/* ----------------------------------------------------------------- */
+/* Student QR Payment — Stripe-style split layout (left/right)       */
+/* ----------------------------------------------------------------- */
+body.student-premium-page .qrpay-page {
+  --qrp-green: #15803d;
+  --qrp-green-dark: #166534;
+  --qrp-green-soft: #f0fdf4;
+  --qrp-text: #0f172a;
+  --qrp-muted: #64748b;
+  --qrp-line: #eef2f6;
+  --qrp-border: #e5e7eb;
+  --qrp-soft: #f8fafc;
+  --qrp-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+  --qrp-grid-w: 780px;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  align-content: start;
+  padding: 2px 0 20px;
+}
+
+@keyframes qrpay-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.qrpay-alert {
+  width: min(var(--qrp-grid-w), 100%);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+  animation: qrpay-fade-in 0.35s ease both;
+}
+
+.qrpay-alert--success {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: var(--qrp-green-dark);
+}
+
+.qrpay-alert--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Two-column grid */
+/* Horizontal two-column layout — Scan to Pay (left) + session details (right) */
+.qrpay-grid {
+  width: min(var(--qrp-grid-w), 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 16px;
+  align-items: start;
+}
+
+/* Left card: QR as the dominant element, upload/actions below */
+.qrpay-card--pay {
+  align-content: start;
+  gap: 12px;
+}
+
+.qrpay-card {
+  background: #ffffff;
+  border: 1px solid var(--qrp-line);
+  border-radius: 16px;
+  box-shadow: var(--qrp-shadow);
+  padding: 14px 16px 13px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  animation: qrpay-fade-in 0.45s ease 0.05s both;
+}
+
+.qrpay-card:hover {
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.08);
+}
+
+.qrpay-card--pay {
+  align-items: stretch;
+  background: linear-gradient(180deg, #ffffff 0%, #fafdfb 100%);
+}
+
+.qrpay-card--details {
+  background: linear-gradient(180deg, #ffffff 0%, var(--qrp-soft) 100%);
+  border-color: var(--qrp-border);
+}
+
+/* Card head — title + secondary marker */
+.qrpay-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--qrp-line);
+}
+
+.qrpay-card__head-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.qrpay-card__title {
+  margin: 0;
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--qrp-text);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.qrpay-card__subtitle {
+  font-size: 0.78rem;
+  color: var(--qrp-muted);
+  font-weight: 500;
+}
+
+.qrpay-secure {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--qrp-muted);
+}
+
+.qrpay-secure svg {
+  width: 13px;
+  height: 13px;
+  color: var(--qrp-green);
+}
+
+/* Status / brand chips */
+.qrpay-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.qrpay-chip--neutral { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+.qrpay-chip--warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.qrpay-chip--success { background: #ecfdf5; border-color: #bbf7d0; color: var(--qrp-green-dark); }
+.qrpay-chip--danger  { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+/* ============= LEFT — Payment area ============= */
+
+/* Method label + name */
+.qrpay-method {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.qrpay-method__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--qrp-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.qrpay-method__name {
+  margin: 0;
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--qrp-text);
+  letter-spacing: -0.01em;
+}
+
+.qrpay-method__tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--qrp-green-dark);
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--qrp-green-soft);
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+/* QR — primary focal element, fills the left card width */
+.qrpay-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.qrpay-qr__frame {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Soft green corner accents to read like a payment terminal frame */
+.qrpay-qr__frame::before,
+.qrpay-qr__frame::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--qrp-green);
+  opacity: 0.55;
+}
+
+.qrpay-qr__frame::before { top: 7px; inset-inline-start: 7px; border-inline-end: 0; border-bottom: 0; border-start-start-radius: 8px; }
+.qrpay-qr__frame::after { bottom: 7px; inset-inline-end: 7px; border-inline-start: 0; border-top: 0; border-end-end-radius: 8px; }
+
+.qrpay-qr__img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  aspect-ratio: 1;
+  display: block;
+  object-fit: contain;
+  background: #ffffff;
+}
+
+/* Subtle payment step guidance: Scan → Make Payment → Upload → Submit */
+.qrpay-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.qrpay-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--qrp-muted);
+  white-space: nowrap;
+}
+
+.qrpay-step:not(:last-child)::after {
+  content: "\203A";
+  margin-inline-start: 8px;
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+.qrpay-step__num {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: var(--qrp-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.qrpay-step.is-active { color: var(--qrp-green-dark); }
+.qrpay-step.is-active .qrpay-step__num { background: var(--qrp-green); color: #ffffff; }
+
+.qrpay-qr__hint {
+  margin: 0;
+  text-align: center;
+  color: var(--qrp-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Status banners */
+.qrpay-state {
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.qrpay-state--pending { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.qrpay-state--success { background: #ecfdf5; border-color: #bbf7d0; color: var(--qrp-green-dark); }
+.qrpay-state--danger  { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+
+/* Receipt link */
+.qrpay-receipt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: center;
+  color: var(--qrp-green-dark);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+  padding-bottom: 1px;
+  transition: color 0.18s ease;
+}
+
+.qrpay-receipt-link svg { width: 14px; height: 14px; }
+.qrpay-receipt-link:hover { color: var(--qrp-green); }
+
+/* Upload form */
+.qrpay-upload-form { display: none; gap: 14px; animation: qrpay-fade-in 0.3s ease both; }
+.qrpay-upload-form.is-open { display: grid; }
+
+.qrpay-upload-box {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  background: var(--qrp-soft);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.qrpay-upload-box:hover { border-color: var(--qrp-green); background: var(--qrp-green-soft); }
+.qrpay-upload-box__title { color: var(--qrp-text); font-weight: 800; font-size: 0.9rem; }
+
+.qrpay-upload-box input {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--qrp-border);
+  border-radius: 10px;
+  background: #ffffff;
+  font: inherit;
+}
+
+.qrpay-upload-box small { color: var(--qrp-muted); font-size: 0.78rem; }
+
+/* Buttons */
+.qrpay-actions {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.qrpay-actions.is-hidden { display: none; }
+
+.qrpay-btn {
+  appearance: none;
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease,
+    color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.qrpay-btn svg { width: 16px; height: 16px; }
+
+.qrpay-btn--primary {
+  background: var(--qrp-green);
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(21, 128, 61, 0.22);
+}
+
+.qrpay-btn--primary:hover,
+.qrpay-btn--primary:focus-visible {
+  background: var(--qrp-green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(21, 128, 61, 0.3);
+}
+
+.qrpay-btn--primary:active { transform: translateY(0); box-shadow: 0 6px 14px rgba(21, 128, 61, 0.22); }
+
+.qrpay-btn--ghost {
+  background: #ffffff;
+  color: var(--qrp-muted);
+  border-color: var(--qrp-border);
+  font-weight: 600;
+}
+
+.qrpay-btn--ghost:hover,
+.qrpay-btn--ghost:focus-visible {
+  border-color: #cbd5e1;
+  color: var(--qrp-text);
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+/* Keep "Back" the lowest-emphasis action in the upload row */
+.qrpay-upload-form .qrpay-actions .qrpay-btn--ghost { flex: 0 1 auto; }
+
+/* Secondary action (Upload Receipt) — lighter weight than the primary Submit */
+.qrpay-btn--secondary {
+  background: #ffffff;
+  color: var(--qrp-green-dark);
+  border-color: #bbf7d0;
+  font-weight: 700;
+}
+
+.qrpay-btn--secondary:hover,
+.qrpay-btn--secondary:focus-visible {
+  background: var(--qrp-green-soft);
+  border-color: var(--qrp-green);
+  color: var(--qrp-green);
+  transform: translateY(-1px);
+}
+
+.qrpay-btn--secondary:active { transform: translateY(0); }
+
+/* ============= RIGHT — Session details ============= */
+
+.qrpay-session-title {
+  margin: 0;
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--qrp-text);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.qrpay-info {
+  margin: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--qrp-line);
+}
+
+.qrpay-info__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.85fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--qrp-line);
+}
+
+.qrpay-info__row:last-child { border-bottom: 0; }
+
+.qrpay-info dt {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--qrp-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.qrpay-info dt svg {
+  width: 15px;
+  height: 15px;
+  color: var(--qrp-green);
+  flex-shrink: 0;
+}
+
+.qrpay-info dd {
+  margin: 0;
+  color: var(--qrp-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.qrpay-info__hint {
+  font-weight: 500;
+  color: var(--qrp-muted);
+  font-size: 0.74rem;
+  margin-inline-start: 2px;
+}
+
+/* Amount block — the focal payment total (filled green summary) */
+.qrpay-amount-section {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 2px;
+  padding: 11px 15px;
+  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+  border: 1px solid #14532d;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(21, 128, 61, 0.26);
+}
+
+/* faint sheen for a premium card feel */
+.qrpay-amount-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 100% 0%, rgba(255, 255, 255, 0.16), transparent 60%);
+  pointer-events: none;
+}
+
+.qrpay-amount-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.qrpay-amount-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.qrpay-amount-currency {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.qrpay-amount {
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 1.72rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.qrpay-amount-holder {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* Footer (ref + powered by) */
+.qrpay-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--qrp-line);
+  font-size: 0.74rem;
+  color: var(--qrp-muted);
+  font-weight: 500;
+}
+
+.qrpay-ref strong {
+  color: var(--qrp-text);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-inline-start: 2px;
+}
+
+.qrpay-poweredby strong {
+  color: var(--qrp-green-dark);
+  font-weight: 800;
+  margin-inline-start: 2px;
+}
+
+/* Unavailable card */
+.qrpay-card--unavailable {
+  width: min(var(--qrp-grid-w), 100%);
+  text-align: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 28px 24px;
+}
+
+.qrpay-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  display: grid;
+  place-items: center;
+  color: #92400e;
+}
+
+.qrpay-card__icon svg { width: 24px; height: 24px; }
+
+.qrpay-card__heading {
+  margin: 4px 0 0;
+  color: var(--qrp-text);
+  font-family: Inter, "Segoe UI", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.qrpay-card__copy {
+  margin: 0;
+  color: var(--qrp-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: 360px;
+}
+
+/* Responsive — stack vertically below 880px */
+@media (max-width: 880px) {
+  body.student-premium-page .qrpay-page {
+    --qrp-grid-w: 100%;
+  }
+
+  .qrpay-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .qrpay-card { padding: 16px 16px 15px; }
+
+  .qrpay-info__row {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .qrpay-qr__frame { padding: 14px; border-radius: 16px; }
+  .qrpay-qr__img { max-width: 240px; }
+  .qrpay-steps { gap: 4px 6px; }
+  .qrpay-step { font-size: 0.68rem; }
+
+  .qrpay-actions {
+    flex-direction: column-reverse;
+    gap: 9px;
+  }
+
+  .qrpay-btn {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .qrpay-info__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .qrpay-info dd { text-align: start; }
+
+  .qrpay-card__foot {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+/* ============= Dark mode ============= */
+html[data-theme="dark"] .qrpay-page {
+  --qrp-text: #e2e8f0;
+  --qrp-muted: #94a3b8;
+  --qrp-line: rgba(255, 255, 255, 0.08);
+  --qrp-border: rgba(255, 255, 255, 0.14);
+  --qrp-soft: rgba(255, 255, 255, 0.04);
+  --qrp-green-soft: rgba(22, 163, 74, 0.16);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-card,
+html[data-theme="dark"] .qrpay-page .qrpay-card--pay,
+html[data-theme="dark"] .qrpay-page .qrpay-card--details {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-card__title,
+html[data-theme="dark"] .qrpay-page .qrpay-session-title {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-step__num {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+/* Keep the QR on a white plate so it stays scannable in dark mode */
+html[data-theme="dark"] .qrpay-page .qrpay-qr__frame {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-method__tag {
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-chip--neutral {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-btn--ghost {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-btn--ghost:hover,
+html[data-theme="dark"] .qrpay-page .qrpay-btn--ghost:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-btn--secondary {
+  background: rgba(22, 163, 74, 0.14);
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-link,
+html[data-theme="dark"] .qrpay-page .qrpay-poweredby strong {
+  color: #86efac;
+}
+
+/* QR hint + secure label */
+html[data-theme="dark"] .qrpay-page .qrpay-qr__hint,
+html[data-theme="dark"] .qrpay-page .qrpay-secure,
+html[data-theme="dark"] .qrpay-page .qrpay-secure span {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-secure svg {
+  color: #86efac;
+}
+
+/* Status state banners (pending / success) */
+html[data-theme="dark"] .qrpay-page .qrpay-state--pending {
+  background: rgba(217, 119, 6, 0.15);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-state--success {
+  background: rgba(22, 163, 74, 0.15);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #86efac;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-reject-banner {
+  background: rgba(220, 38, 38, 0.14);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+/* Receipt preview card */
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-preview {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-preview__name {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-preview__size {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-preview__status {
+  color: #86efac;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-preview__thumb {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-preview__remove {
+  background: #1e293b;
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fca5a5;
+}
+
+/* Inline field styles (from JSP inline CSS) must be overridden here */
+html[data-theme="dark"] .qrpay-page .qrpay-field label {
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-field input,
+html[data-theme="dark"] .qrpay-page .qrpay-field textarea {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+/* Bank / notes (kept for safety even though removed from view) */
+html[data-theme="dark"] .qrpay-page .qrpay-bank {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-bank__row + .qrpay-bank__row {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-bank__row dt {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-bank__row dd {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-notes {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+}
+
+/* Receipt link */
+html[data-theme="dark"] .qrpay-page .qrpay-receipt-link {
+  color: #86efac;
+  border-bottom-color: rgba(74, 222, 128, 0.5);
+}
+
+/* Session details (right card) */
+html[data-theme="dark"] .qrpay-page .qrpay-info dt {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-info dd {
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-info__hint {
+  color: #64748b;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-card__subtitle {
+  color: #94a3b8;
+}
+
+/* Timeline */
+html[data-theme="dark"] .qrpay-page .qrpay-timeline__title {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-timeline__meta {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-timeline__reason {
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-timeline-heading {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-timeline-wrap {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-timeline__item:after {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Footer ref */
+html[data-theme="dark"] .qrpay-page .qrpay-ref {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-ref strong {
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-poweredby {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .qrpay-page .qrpay-poweredby strong {
+  color: #86efac;
+}

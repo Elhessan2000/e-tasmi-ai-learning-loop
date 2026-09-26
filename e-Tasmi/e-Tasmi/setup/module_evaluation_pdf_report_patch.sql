@@ -1,0 +1,6 @@
+-- The evaluation PDF feature was removed from the application.
+-- Fresh installs: use etasmi_schema.sql / railway_schema.sql (no pdf_report_path).
+--
+-- Existing databases that still have the column: run once:
+--   source setup/drop_evaluation_pdf_column.sql;
+-- (or: mysql ... < setup/drop_evaluation_pdf_column.sql)

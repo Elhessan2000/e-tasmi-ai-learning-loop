@@ -1,0 +1,820 @@
+/* e-Tasmi auth shell: login + registration flow (shared with login.jsp) */
+.etasmi-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body.etasmi-auth-v2 {
+  font-family: "Poppins", system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: none !important;
+  background-color: #ecfdf5 !important;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(34, 197, 94, 0.12), transparent 55%),
+    radial-gradient(circle at 1px 1px, rgba(22, 163, 74, 0.06) 1px, transparent 0) !important;
+  background-size: auto, 32px 32px !important;
+  color: #0f172a;
+}
+
+body.etasmi-auth-v2 .auth-page {
+  min-height: 100vh;
+  padding: 1.25rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+body.etasmi-auth-v2--register .auth-page {
+  padding: 0.85rem 1rem 1.5rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-shell {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-shell {
+  max-width: 720px;
+}
+
+body.etasmi-auth-v2--role .etasmi-auth-shell {
+  max-width: 720px;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-home-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  align-self: flex-end;
+  transition: color 0.2s ease;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-home-link:hover,
+body.etasmi-auth-v2 .etasmi-auth-home-link:focus-visible {
+  color: #16a34a;
+  outline: none;
+}
+
+body.etasmi-auth-v2 .auth-card.etasmi-auth-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow:
+    0 4px 6px -1px rgba(15, 23, 42, 0.06),
+    0 24px 48px -12px rgba(15, 23, 42, 0.14),
+    0 0 0 1px rgba(22, 163, 74, 0.06);
+}
+
+body.etasmi-auth-v2--register .auth-card.etasmi-auth-card {
+  max-width: 680px;
+  width: 100%;
+}
+
+body.etasmi-auth-v2--role .auth-card.etasmi-auth-card {
+  max-width: 640px;
+  width: 100%;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__hero {
+  position: relative;
+  padding: 2.25rem 1.75rem 2.5rem;
+  text-align: center;
+  background: linear-gradient(155deg, #22c55e 0%, #10b981 42%, #0d9488 88%);
+  color: #fff;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 4l6 18h18l-14 10 5 18-15-11-15 11 5-18-14-10h18z' fill='none' stroke='%23ffffff' stroke-width='0.85'/%3E%3C/svg%3E");
+  background-size: 52px 52px;
+  pointer-events: none;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__hero,
+body.etasmi-auth-v2--role .etasmi-auth-card__hero {
+  padding: 1.5rem 1.35rem 1.65rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__hero-inner--row {
+  flex-direction: row;
+  align-items: center;
+  text-align: start;
+  gap: 1rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__logo,
+body.etasmi-auth-v2--role .etasmi-auth-card__logo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.85rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__logo svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__logo svg,
+body.etasmi-auth-v2--role .etasmi-auth-card__logo svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__brand {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__brand,
+body.etasmi-auth-v2--role .etasmi-auth-card__brand {
+  font-size: 1.4rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__tagline {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 16rem;
+  line-height: 1.45;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__tagline,
+body.etasmi-auth-v2--role .etasmi-auth-card__tagline {
+  max-width: none;
+  font-size: 0.78rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__body {
+  position: relative;
+  margin-top: -1.35rem;
+  padding: 1.75rem 1.75rem 1.85rem;
+  background: #ffffff;
+  border-radius: 1.5rem 1.5rem 0 0;
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.04);
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__body {
+  padding: 1.5rem 1.75rem 1.65rem;
+}
+
+body.etasmi-auth-v2--role .etasmi-auth-card__body {
+  padding: 1.6rem 1.85rem 1.75rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__body-head {
+  margin-bottom: 1.25rem;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-card__body-head {
+  margin-bottom: 0.85rem;
+}
+
+body.etasmi-auth-v2--role .etasmi-auth-card__body-head {
+  margin-bottom: 1rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__body-head h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0d9488;
+  letter-spacing: -0.02em;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-card__body-head p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-form-surface {
+  animation: etasmiAuthFade 0.28s ease;
+}
+
+@keyframes etasmiAuthFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.15rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 560px) {
+  body.etasmi-auth-v2 .etasmi-auth-pick-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 148px;
+  padding: 1.45rem 1.35rem 1.5rem;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  text-decoration: none;
+  color: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick:hover {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(22, 163, 74, 0.14);
+  transform: translateY(-2px);
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick:focus-visible {
+  outline: 2px solid rgba(34, 197, 94, 0.65);
+  outline-offset: 2px;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick__icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.14);
+  color: #16a34a;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick__icon svg {
+  width: 1.65rem;
+  height: 1.65rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick h3 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-pick p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+body.etasmi-auth-v2 .auth-panel__icon,
+body.etasmi-auth-v2--login .auth-panel__head {
+  display: none;
+}
+
+body.etasmi-auth-v2 [data-alert-host="1"] {
+  margin-bottom: 1rem;
+}
+
+body.etasmi-auth-v2 .auth-form--clean {
+  gap: 1.1rem;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body.etasmi-auth-v2--register .auth-form--clean {
+  gap: 0.95rem;
+}
+
+body.etasmi-auth-v2--register [hidden] {
+  display: none !important;
+}
+
+body.etasmi-auth-v2--register .etasmi-role-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+body.etasmi-auth-v2--register .etasmi-role-switch__option {
+  min-height: 2.55rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.etasmi-auth-v2--register .etasmi-role-switch__option:hover,
+body.etasmi-auth-v2--register .etasmi-role-switch__option:focus-visible {
+  color: #16a34a;
+  outline: none;
+}
+
+body.etasmi-auth-v2--register .etasmi-role-switch__option.is-active {
+  background: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.24);
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-reg-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 600px) {
+  body.etasmi-auth-v2--register .etasmi-auth-reg-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.etasmi-auth-v2--register .etasmi-auth-reg-fields > .auth-field--span-full,
+body.etasmi-auth-v2--register .etasmi-auth-reg-fields > .auth-instructor-fields {
+  grid-column: 1 / -1;
+}
+
+body.etasmi-auth-v2--register .auth-form-grid,
+body.etasmi-auth-v2--register .auth-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+}
+
+body.etasmi-auth-v2 .auth-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+body.etasmi-auth-v2 .auth-control {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+body.etasmi-auth-v2 .auth-control:focus-within {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+body.etasmi-auth-v2 .auth-control input,
+body.etasmi-auth-v2 .auth-control select,
+body.etasmi-auth-v2 .auth-control textarea {
+  font-family: inherit;
+  font-size: 0.9375rem;
+}
+
+/* Single-surface fields: wrapper owns border/background (not components.css / pages.css inputs). */
+body.etasmi-auth-v2 .auth-control input,
+body.etasmi-auth-v2 .auth-control textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.78rem 1rem 0.78rem 2.75rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #0f172a;
+  outline: none;
+}
+
+body.etasmi-auth-v2 .auth-control input::placeholder,
+body.etasmi-auth-v2 .auth-control textarea::placeholder {
+  color: #94a3b8;
+}
+
+body.etasmi-auth-v2 .auth-control input:focus,
+body.etasmi-auth-v2 .auth-control textarea:focus {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+body.etasmi-auth-v2 .auth-control select {
+  border: none;
+  background: transparent;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.65rem 0.5rem;
+  cursor: pointer;
+  color: #0f172a;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Select without leading icon: avoids reserved left padding / overlap that can look like a stray glyph */
+body.etasmi-auth-v2--register .auth-control--select-plain select {
+  padding-inline-start: 1rem !important;
+  padding-inline-end: 2rem;
+}
+
+
+body.etasmi-auth-v2 .auth-control--textarea textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+body.etasmi-auth-v2 .auth-field-error {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #dc2626;
+}
+
+body.etasmi-auth-v2 .auth-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #22c55e;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+body.etasmi-auth-v2 .auth-link:hover,
+body.etasmi-auth-v2 .auth-link:focus-visible {
+  color: #16a34a;
+}
+
+body.etasmi-auth-v2 .auth-btn[type="submit"] {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.85rem 1.25rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+body.etasmi-auth-v2 .auth-btn[type="submit"]:hover,
+body.etasmi-auth-v2 .auth-btn[type="submit"]:focus-visible {
+  filter: brightness(1.03);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+  transform: translateY(-1px);
+}
+
+body.etasmi-auth-v2 .auth-meta--center {
+  margin-top: 1.35rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+body.etasmi-auth-v2--register .auth-meta--center {
+  margin-top: 1rem;
+  padding-top: 0.95rem;
+}
+
+body.etasmi-auth-v2 .auth-meta--center .auth-link {
+  font-weight: 600;
+  margin-inline-start: 0.25rem;
+}
+
+body.etasmi-auth-v2 .auth-inline-panel {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+}
+
+body.etasmi-auth-v2 .auth-inline-panel strong {
+  color: #0f172a;
+}
+
+body.etasmi-auth-v2 .auth-inline-panel .auth-help {
+  color: #64748b;
+  margin: 0.4rem 0 0.85rem;
+  font-size: 0.8125rem;
+}
+
+body.etasmi-auth-v2 .auth-btn-secondary {
+  width: 100%;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+body.etasmi-auth-v2 .auth-btn-secondary:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+body.etasmi-auth-v2--register .auth-instructor-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+}
+
+body.etasmi-auth-v2--register .auth-control--textarea textarea {
+  min-height: 4.75rem;
+}
+
+body.etasmi-auth-v2--register .auth-upload {
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  background: #fafafa;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+body.etasmi-auth-v2--register .auth-upload:hover {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: #fff;
+}
+
+body.etasmi-auth-v2--register .auth-status {
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  font-size: 0.8125rem;
+  color: #166534;
+  line-height: 1.5;
+}
+
+body.etasmi-auth-v2--register .auth-status strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #14532d;
+}
+
+body.etasmi-auth-v2 .auth-row--compact {
+  display: flex;
+  justify-content: flex-end;
+  margin: -0.25rem 0 0;
+}
+
+body.etasmi-auth-v2 .auth-row--compact span:empty {
+  display: none;
+}
+
+body.etasmi-auth-v2--login .auth-row--compact span {
+  display: none;
+}
+
+/* ============================================================
+ * Dark mode — registration & auth shell (data-theme="dark")
+ * Loads after ui_head theme bundles on register.jsp.
+ * ============================================================ */
+
+:root[data-theme="dark"] body.etasmi-auth-v2 {
+  background-color: var(--theme-bg) !important;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(45, 212, 191, 0.10), transparent 55%),
+    radial-gradient(circle at 1px 1px, rgba(45, 212, 191, 0.04) 1px, transparent 0) !important;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-card.etasmi-auth-card {
+  background: #0f172a !important;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.35),
+    0 24px 48px -12px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(51, 65, 85, 0.55) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body,
+html[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body {
+  background: #0f172a !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-form-surface {
+  background: transparent !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body-head h2 {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-card__body-head p {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-label {
+  color: #cbd5e1 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control {
+  background: rgba(30, 41, 59, 0.5) !important;
+  border-color: #334155 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control:focus-within {
+  background: rgba(30, 41, 59, 0.72) !important;
+  border-color: rgba(45, 212, 191, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.14) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control svg {
+  color: rgba(45, 212, 191, 0.78) !important;
+}
+
+/* Override pages.css auth-screen input surfaces — keep border/bg on wrapper only */
+:root[data-theme="dark"] body.etasmi-auth-v2.auth-screen .auth-control input,
+:root[data-theme="dark"] body.etasmi-auth-v2.auth-screen .auth-control select,
+:root[data-theme="dark"] body.etasmi-auth-v2.auth-screen .auth-control textarea,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control select,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control textarea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input::placeholder,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input:focus,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control select:focus,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control textarea:focus {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none;
+}
+
+/* Browser autofill — email & password fields */
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input:-webkit-autofill,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input:-webkit-autofill:hover,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-control input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  transition: background-color 99999s ease-in-out 0s;
+  box-shadow: 0 0 0 1000px rgba(30, 41, 59, 0.5) inset !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .etasmi-role-switch {
+  background: rgba(15, 23, 42, 0.65) !important;
+  border-color: #334155 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .etasmi-role-switch__option {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .etasmi-role-switch__option:hover,
+:root[data-theme="dark"] body.etasmi-auth-v2--register .etasmi-role-switch__option:focus-visible {
+  color: #2dd4bf !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .etasmi-role-switch__option.is-active {
+  background: rgba(45, 212, 191, 0.18) !important;
+  color: #2dd4bf !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-meta--center {
+  border-top-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-link {
+  color: #2dd4bf !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-link:hover,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-link:focus-visible {
+  color: #5eead4 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-home-link {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-home-link:hover,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-home-link:focus-visible {
+  color: #2dd4bf !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .auth-upload {
+  background: rgba(30, 41, 59, 0.5) !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .auth-upload:hover {
+  background: rgba(30, 41, 59, 0.72) !important;
+  border-color: rgba(45, 212, 191, 0.45) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .auth-upload strong {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .auth-status {
+  background: rgba(45, 212, 191, 0.08) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  color: #99f6e4 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2--register .auth-status strong {
+  color: #ccfbf1 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-field-error {
+  color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-alert[data-tone="error"] {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.32) !important;
+  color: #fca5a5 !important;
+}

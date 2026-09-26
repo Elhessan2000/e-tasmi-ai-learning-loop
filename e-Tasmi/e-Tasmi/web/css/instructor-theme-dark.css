@@ -1,0 +1,605 @@
+/*
+ * e-Tasmi — Instructor Portal Unified Dark Mode
+ * ----------------------------------------------
+ * Fixes hardcoded light surfaces that leak when html[data-theme="dark"].
+ * Loaded AFTER etasmi-dark-polish.css in instructor_ui_head.jspf.
+ *
+ * Palette: Deep Space Navy canvas + Elevated Navy cards (--theme-*)
+ */
+
+:root[data-theme="dark"] body.instructor-package-page {
+  --instructor-canvas-bg: var(--theme-bg);
+  --instructor-card-bg: var(--theme-surface);
+  --instructor-card-border: var(--theme-border);
+  --instructor-card-radius: 14px;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .instructor-workspace-view,
+:root[data-theme="dark"] body.instructor-package-page .instructor-shell-content {
+  background: transparent;
+  color: var(--theme-text);
+}
+
+/* ============================================================
+ * 1. PROFILE — footer action row + form sections
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .profile-actions-row {
+  background: transparent !important;
+  border-top-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .profile-form-card .form-section-title,
+:root[data-theme="dark"] body.instructor-package-page .form-section-title {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .profile-upload-btn {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .profile-upload-btn:hover {
+  background: var(--theme-surface-hover) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .profile-sidebar-role {
+  color: var(--theme-primary) !important;
+}
+
+/* ============================================================
+ * 2. NOTIFICATIONS (.iup-notif-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-banner {
+  background: linear-gradient(120deg, #0f172a 0%, #111b32 42%, #17223d 100%) !important;
+  border: 1px solid var(--theme-border) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-banner h1,
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-banner p {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-banner p {
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-banner__icon {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-banner__count {
+  background: rgba(45, 212, 191, 0.14) !important;
+  border-color: rgba(45, 212, 191, 0.32) !important;
+  color: #6ee7d6 !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-card {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-card:hover {
+  background: var(--theme-surface-hover) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+  transform: translateY(-2px);
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-card__title {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-card__msg {
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-card__time {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-empty {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .iup-notif-empty strong {
+  color: var(--theme-text) !important;
+}
+
+/* ============================================================
+ * 3. GENERIC TABLE LEAK (instructor-package.css forces #fff on all tables)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page .table-wrap,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: var(--theme-shadow-sm) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table thead th,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table th {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text-muted) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table td {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table tbody tr:nth-child(even) td {
+  background: var(--theme-surface-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table tbody tr:hover td,
+:root[data-theme="dark"] body.instructor-package-page.instructor-module-page table tr:hover td {
+  background: var(--theme-surface-hover) !important;
+}
+
+/* ============================================================
+ * 4. EVALUATIONS (#eval-redesign) — Tailwind table rows
+ * ============================================================ */
+
+:root[data-theme="dark"] #eval-redesign table tbody tr {
+  background: transparent !important;
+}
+
+:root[data-theme="dark"] #eval-redesign table tbody td {
+  background: transparent !important;
+  color: inherit !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] #eval-redesign table thead tr {
+  background: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme="dark"] #eval-redesign table thead th {
+  background: transparent !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table thead th {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table tbody td {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-evaluations-page .eval-table tbody tr:hover td {
+  background: var(--theme-surface-hover) !important;
+}
+
+/* ============================================================
+ * 5. SESSIONS ACCORDION (.isess-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .isess-table-wrap {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-table th {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text-muted) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-table td {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-soft) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-table tbody tr:hover {
+  background: var(--theme-surface-hover) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-table tbody tr.is-expanded {
+  background: var(--theme-surface-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-inner {
+  background: var(--theme-surface-muted) !important;
+  border-top-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-item .isess-detail-label {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-item .isess-detail-value {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-desc {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-participants-section h4 {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-participants-table {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-participants-table th {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text-muted) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-participants-table td {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text-soft) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-participants-empty {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-history-tools {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-history-tools label {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-history-tools input,
+:root[data-theme="dark"] body.instructor-package-page .isess-history-tools select {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-history-tools input:focus,
+:root[data-theme="dark"] body.instructor-package-page .isess-history-tools select:focus {
+  border-color: var(--theme-primary) !important;
+  box-shadow: 0 0 0 3px var(--theme-primary-soft) !important;
+  background: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-history-detail {
+  background: var(--theme-surface) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-history-note {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-more-menu {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] body.instructor-package-page .isess-more-menu button:hover {
+  background: rgba(248, 113, 113, 0.12) !important;
+}
+
+/* ============================================================
+ * 6. DASHBOARD — countdown card + KPI cards
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .idash-countdown {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-kpi-card {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  text-decoration: none !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-kpi-card__label,
+:root[data-theme="dark"] body.instructor-package-page .idash-kpi-card__hint {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-kpi-card__value {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-countdown__title,
+:root[data-theme="dark"] body.instructor-package-page .idash-countdown__caption,
+:root[data-theme="dark"] body.instructor-package-page .idash-countdown__digits {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-countdown__sub,
+:root[data-theme="dark"] body.instructor-package-page .idash-countdown__meta {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-activity {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-cal {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-cal__col-head,
+:root[data-theme="dark"] body.instructor-package-page .idash-cal__col-head--gutter,
+:root[data-theme="dark"] body.instructor-package-page .idash-cal__grid,
+:root[data-theme="dark"] body.instructor-package-page .idash-cal__hours {
+  background: var(--theme-surface) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .idash-cal__view-btn[aria-selected="true"] {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text) !important;
+}
+
+/* ============================================================
+ * 7. SESSIONS — create/edit modal
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .isess-modal {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal__header {
+  background: var(--theme-surface) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal__body {
+  background: var(--theme-surface) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal__footer {
+  background: var(--theme-surface) !important;
+  border-top-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal__title {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal__subtitle {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal__section-label {
+  color: var(--theme-text) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-label {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-field input,
+:root[data-theme="dark"] body.instructor-package-page .isess-field select,
+:root[data-theme="dark"] body.instructor-package-page .isess-field textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-banner-zone {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-banner-zone .zone-text {
+  color: var(--theme-text-soft) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-zoom-hint {
+  background: rgba(59, 130, 246, 0.10) !important;
+  border-color: rgba(59, 130, 246, 0.22) !important;
+  color: #93c5fd !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-zoom-hint a {
+  color: #93c5fd !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal-btn--cancel {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-modal-btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ============================================================
+ * 8. SESSIONS — expanded detail row items
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-inner {
+  background: var(--theme-surface-muted) !important;
+  border-top-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-item {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .isess-detail-desc {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-soft) !important;
+}
+
+/* ============================================================
+ * 9. PAYMENTS — filter bar, table, review modal
+ * ============================================================ */
+
+:root[data-theme="dark"] body.instructor-package-page .ipd-filter-bar {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-filter-bar label {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-filter-bar select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-table-wrap {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-table thead th {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text-muted) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-table tbody td {
+  color: var(--theme-text-soft) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-table tbody tr:hover {
+  background: var(--theme-surface-hover) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-student__name {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-student__email {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-session {
+  color: var(--theme-text-soft) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-amount {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-header__title {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-header__sub {
+  color: var(--theme-text-muted) !important;
+}
+/* Payment review / receipt modal */
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__backdrop {
+  background: rgba(2, 6, 23, 0.62) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__panel,
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-panel {
+  background: rgba(15, 23, 42, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-close {
+  color: #94a3b8 !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-close:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-student {
+  background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-note {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-meta {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-meta__label {
+  color: #94a3b8 !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-meta__icon {
+  color: #64748b !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-meta__value {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-meta__value--date {
+  color: var(--theme-text-soft) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-status-pill--awaiting,
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-status-pill--pending {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #fcd34d !important;
+  border-color: rgba(245, 158, 11, 0.28) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-receipt-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-receipt-card__inner {
+  background: rgba(0, 0, 0, 0.2) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-receipt-slip {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-receipt-slip__bank,
+:root[data-theme="dark"] body.instructor-package-page .ipd-receipt-slip__row strong {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-btn--outline {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-verify-btn--outline:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__panel {
+  background: var(--theme-surface) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__title {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__sub {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__quick button {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__btn--ghost {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] body.instructor-package-page .ipd-modal__btn--reject {
+  background: rgba(220, 38, 38, 0.10) !important;
+  border-color: rgba(220, 38, 38, 0.25) !important;
+  color: #fca5a5 !important;
+}
+
+/* ============================================================
+ * 10. EVALUATIONS — KPI strip cards
+ * ============================================================ */
+
+:root[data-theme="dark"] .eval-kpi {
+  background: var(--theme-surface) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+:root[data-theme="dark"] .eval-kpi__value {
+  color: var(--theme-text) !important;
+}
+:root[data-theme="dark"] .eval-kpi__label {
+  color: var(--theme-text-muted) !important;
+}
+:root[data-theme="dark"] .eval-kpi__icon--sessions,
+:root[data-theme="dark"] .eval-kpi__icon--students,
+:root[data-theme="dark"] .eval-kpi__icon--pending,
+:root[data-theme="dark"] .eval-kpi__icon--action,
+:root[data-theme="dark"] .eval-kpi__icon--eval {
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #94a3b8 !important;
+}

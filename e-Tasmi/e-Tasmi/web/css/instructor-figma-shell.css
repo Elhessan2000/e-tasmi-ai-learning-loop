@@ -1,0 +1,1175 @@
+/* =============================================================================
+ * e-Tasmi — Instructor workspace shell (clean minimal SaaS design)
+ * -----------------------------------------------------------------------------
+ * Design tokens extracted from the reference screenshot.
+ * Layout: fixed 260px white sidebar | fixed 70px white topbar | #F8FAFC canvas
+ *
+ * Strategy: position:fixed sidebar + fixed topbar offset from sidebar.
+ *   The .instructor-shell-layout flex row still exists in the DOM but the
+ *   sidebar pops out of flow; .instructor-shell-content fills 100% width and
+ *   the visual offset is created by margins on .app-main.
+ * ============================================================================= */
+
+/* ── Design tokens ────────────────────────────────────────────────────────── */
+body.instructor-package-page {
+  --et-canvas:       #F8FAFC;
+  --et-surface:      #FFFFFF;
+  --et-brand:        #89F336;
+  --et-brand-dark:   #6DC527;
+  --et-brand-grad:   linear-gradient(135deg, #89F336, #6DC527);
+  --et-brand-glow:   0 4px 14px rgba(137, 243, 54, 0.40);
+  --et-brand-text:   #1a2e05;   /* dark text on lime — high contrast */
+  --et-text:         #1E293B;
+  --et-muted:        #64748B;
+  --et-hover-bg:     #F1F5F9;
+  --et-border:       #E2E8F0;
+  --et-shadow:       0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  --et-danger:       #EF4444;
+  --et-sidebar-w:    260px;
+  --et-rail-w:       70px;
+  --et-topbar-h:     70px;
+
+  /* keep legacy var aligned so other files don't break */
+  --instructor-sidebar-width: var(--et-sidebar-w);
+  --figma-sidebar: var(--et-surface);
+
+  background: var(--et-canvas) !important;
+  color: var(--et-text);
+}
+
+/* ── Body & app-shell: strip the floating-card, reset to full-width ─────── */
+body.instructor-package-page,
+body.instructor-package-page.instructor-module-page,
+body.instructor-dashboard-page.instructor-package-page {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.instructor-package-page .app-shell,
+body.instructor-package-page.instructor-module-page .app-shell,
+body.instructor-dashboard-page.instructor-package-page .app-shell {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* ── TOPBAR: glassmorphic, soft, full-width ─────────────────────────────── */
+body.instructor-package-page .instructor-shell-topbar,
+body.instructor-package-page.instructor-module-page .instructor-shell-topbar,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-topbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: var(--et-topbar-h) !important;
+
+  /* ── Glassmorphism ── */
+  background: rgba(255, 255, 255, 0.72) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.04),
+    0 4px 20px rgba(0, 0, 0, 0.04) !important;
+
+  border-radius: 0 !important;
+  z-index: 70 !important;
+  flex: none !important;
+}
+
+body.instructor-package-page .instructor-shell-topbar__inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-height: var(--et-topbar-h);
+  max-height: var(--et-topbar-h);
+  padding: 0 24px 0 20px;
+  gap: 8px;
+}
+
+/* Hamburger — 3-bar lines, visible on all sizes */
+body.instructor-package-page .instructor-shell-topbar__menu {
+  display: inline-flex !important;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: var(--et-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.instructor-package-page .instructor-shell-topbar__menu:hover {
+  background: var(--et-hover-bg);
+  color: var(--et-text);
+}
+
+body.instructor-package-page .instructor-shell-topbar__menu span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+body.instructor-package-page .instructor-shell-topbar__spacer {
+  flex: 1 1 auto;
+}
+
+body.instructor-package-page .instructor-shell-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Icon buttons (theme toggle, notifications) */
+body.instructor-package-page .instructor-shell-topbar__iconbtn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--et-border) !important;
+  background: var(--et-surface) !important;
+  color: var(--et-muted) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+body.instructor-package-page .instructor-shell-topbar__iconbtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+body.instructor-package-page .instructor-shell-topbar__iconbtn:hover {
+  background: var(--et-hover-bg) !important;
+  color: var(--et-text) !important;
+  border-color: var(--et-border) !important;
+  transform: none !important;
+}
+
+/* Notification badge */
+body.instructor-package-page .instructor-shell-topbar__badge {
+  position: absolute;
+  top: -4px;
+  inset-inline-end: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #EF4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid var(--et-surface);
+  line-height: 1;
+}
+
+/* Language switcher pill */
+body.instructor-package-page .instructor-shell-topbar__actions .etasmi-language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+body.instructor-package-page .instructor-shell-topbar__actions .etasmi-language-switcher__label {
+  display: none;
+}
+
+body.instructor-package-page .instructor-shell-topbar__actions .etasmi-language-switcher__select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--et-border);
+  border-radius: 8px;
+  background: var(--et-surface);
+  color: var(--et-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Profile chip */
+body.instructor-package-page .instructor-shell-profile {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 12px 0 4px;
+  border-radius: 8px;
+  border: 1px solid var(--et-border) !important;
+  background: var(--et-surface) !important;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  box-shadow: none !important;
+}
+
+body.instructor-package-page .instructor-shell-profile:hover {
+  background: var(--et-hover-bg) !important;
+}
+
+body.instructor-package-page .instructor-shell-profile__avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--et-brand-grad);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.instructor-package-page .instructor-shell-profile__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.instructor-package-page .instructor-shell-profile__fallback {
+  width: 100%;
+  height: 100%;
+  display: grid !important;
+  place-items: center;
+}
+
+body.instructor-package-page .instructor-shell-profile__name {
+  color: var(--et-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── MAIN CONTENT AREA: offset from fixed sidebar + topbar ──────────────── */
+/*
+ * IMPORTANT – source order within a block matters when logical and physical
+ * properties map to the same computed value.  The LAST declaration wins.
+ * Pattern used here:
+ *   1. Reset physical properties to "unset" first  (clears any earlier override)
+ *   2. Set logical property LAST so it becomes authoritative
+ * Result:
+ *   LTR → margin-left : var(--et-sidebar-w)
+ *   RTL → margin-right: var(--et-sidebar-w)   (no [dir="rtl"] rule needed)
+ */
+body.instructor-package-page .app-main,
+body.instructor-package-page.instructor-module-page .app-main,
+body.instructor-dashboard-page.instructor-package-page .app-main {
+  /* 1. Clear any physical margin from earlier stylesheets */
+  margin-left:  unset !important;
+  margin-right: unset !important;
+  /* 2. Logical margin is last → wins over physical unset values above */
+  margin-inline-start: var(--et-sidebar-w) !important;   /* 260px start edge */
+  margin-inline-end:   0 !important;
+
+  padding-top: var(--et-topbar-h) !important;
+  width: auto !important;
+  max-width: none !important;
+  background: var(--et-canvas) !important;
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex: none !important;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box !important;
+}
+/* No [dir="rtl"] override needed — margin-inline-start handles both directions */
+
+/* .container and .instructor-shell-layout: plain block, no flex tricks needed */
+body.instructor-package-page .container.sd-container.instructor-workspace-shell {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  background: transparent !important;
+}
+
+body.instructor-package-page .instructor-shell-layout {
+  display: block !important;
+  grid-template-columns: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* The sidebar in-flow placeholder is not needed; sidebar is position:fixed */
+body.instructor-package-page .instructor-shell-content {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 28px 32px !important;
+  grid-area: unset !important;
+  grid-column: unset !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+@media (max-width: 1280px) {
+  body.instructor-package-page .instructor-shell-content {
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  body.instructor-package-page .instructor-shell-content {
+    padding: 20px 16px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body.instructor-package-page .instructor-shell-content {
+    padding: 16px 12px !important;
+  }
+}
+
+/* ── SIDEBAR: fixed, white, full height ─────────────────────────────────── */
+body.instructor-package-page .instructor-shell-sidebar__scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+  z-index: 59;
+  pointer-events: none;
+}
+
+body.instructor-nav-open .instructor-shell-sidebar__scrim {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+body.instructor-package-page .instructor-shell-sidebar {
+  position: fixed !important;
+  top: var(--et-topbar-h) !important;      /* start below the full-width topbar */
+
+  /*
+   * POSITIONING — logical-property pattern:
+   *   1. Reset physical left/right to unset first (clear earlier overrides)
+   *   2. Set logical inset-inline-start LAST so it wins
+   * Result:
+   *   LTR → sidebar at left:  0   (left edge)
+   *   RTL → sidebar at right: 0   (right edge) — no [dir="rtl"] rule needed
+   */
+  left:  unset !important;
+  right: unset !important;
+  inset-inline-end:   auto !important;
+  inset-inline-start: 0 !important;  /* ← last, wins: left in LTR / right in RTL */
+
+  width: var(--et-sidebar-w) !important;
+  max-width: var(--et-sidebar-w) !important;
+  height: calc(100vh - var(--et-topbar-h)) !important;
+  background: var(--et-surface) !important;
+  /* Logical border on the trailing edge of the sidebar panel */
+  border-right:       none !important;
+  border-left:        none !important;
+  border-inline-end: 1px solid var(--et-border) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  z-index: 60 !important;    /* below topbar (70), above content (1) */
+  flex: none !important;
+  grid-area: unset !important;
+  overflow: hidden;
+
+  /* Default mobile/tablet state: hidden off-screen to the logical start edge.
+     In LTR: translateX(-100%) slides left off screen.
+     In RTL: translateX(-100%) goes left — but sidebar is on the right in RTL,
+             so the RTL rule below corrects the direction. */
+  transform: translateX(-100%);
+  transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* RTL mobile: sidebar slides in from the right → translate to +100% when hidden */
+[dir="rtl"] body.instructor-package-page .instructor-shell-sidebar {
+  transform: translateX(100%);
+}
+
+/* On desktop the sidebar is always visible (no transform) */
+@media (min-width: 1101px) {
+  body.instructor-package-page .instructor-shell-sidebar {
+    transform: none !important;
+  }
+}
+
+/* Mobile open state */
+body.instructor-nav-open .instructor-shell-sidebar {
+  transform: translateX(0) !important;
+}
+
+/* ── Sidebar panel ──────────────────────────────────────────────────────── */
+body.instructor-package-page .instructor-shell-sidebar__panel {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+
+/* ── Sidebar nav (scrollable middle) ────────────────────────────────────── */
+body.instructor-package-page .instructor-shell-sidebar__nav {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 16px 12px !important;
+  gap: 4px !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--et-border) transparent;
+}
+
+/* ── Nav links ──────────────────────────────────────────────────────────── */
+body.instructor-package-page .instructor-shell-sidebar__link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--et-muted) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease !important;
+  position: relative;
+}
+
+/* Remove every stray pseudo-element (dots, bars, underlines) */
+body.instructor-package-page .instructor-shell-sidebar__link::before,
+body.instructor-package-page .instructor-shell-sidebar__link::after {
+  content: none !important;
+  display: none !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__link:hover {
+  background: var(--et-hover-bg) !important;
+  color: #0F172A !important;
+  box-shadow: none !important;
+}
+
+/* Active item: lime gradient, rounded, dark text (lime is a light colour) */
+body.instructor-package-page .instructor-shell-sidebar__link.is-active {
+  background: var(--et-brand-grad) !important;
+  color: var(--et-brand-text, #1a2e05) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--et-brand-glow) !important;
+  border: none !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
+  color: inherit !important;
+  opacity: 1 !important;
+  max-width: none !important;
+  pointer-events: none;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ── Sidebar footer (logout only) ───────────────────────────────────────── */
+body.instructor-package-page .instructor-shell-sidebar__footer {
+  flex-shrink: 0 !important;
+  padding: 12px 12px 20px !important;
+  border-top: 1px solid var(--et-border) !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+}
+
+/* Logout — plain text row, danger color, no card wrapper */
+body.instructor-package-page .instructor-shell-sidebar__logout {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--et-danger) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: background 0.15s ease !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__logout::before,
+body.instructor-package-page .instructor-shell-sidebar__logout::after {
+  content: none !important;
+  display: none !important;
+}
+
+body.instructor-package-page .instructor-shell-sidebar__logout:hover {
+  background: #FEF2F2 !important;
+  color: #DC2626 !important;
+}
+
+/* ── Collapsed icon rail (desktop Ctrl+B) ───────────────────────────────── */
+@media (min-width: 1101px) {
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar {
+    width: var(--et-rail-w) !important;
+    max-width: var(--et-rail-w) !important;
+  }
+
+  /* Topbar stays full-width regardless of sidebar collapse */
+
+  body.instructor-package-page.instructor-nav-collapsed .app-main {
+    /* Logical pattern: physical unset first, logical last */
+    margin-left:  unset !important;
+    margin-right: unset !important;
+    margin-inline-start: var(--et-rail-w) !important;   /* 70px – start edge */
+    margin-inline-end:   0 !important;
+    width: auto !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__label {
+    display: none !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__nav {
+    padding: 16px 8px !important;
+    align-items: center !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link {
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    margin: 0 auto !important;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__footer {
+    padding: 12px 8px !important;
+    display: flex;
+    justify-content: center;
+  }
+
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout {
+    justify-content: center !important;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    margin: 0 auto !important;
+  }
+
+  /* Tooltip on collapsed rail */
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__link[data-tooltip]:hover::after,
+  body.instructor-package-page.instructor-nav-collapsed .instructor-shell-sidebar__logout[data-tooltip]:hover::after {
+    content: attr(data-tooltip) !important;
+    display: block !important;
+    position: absolute;
+    inset-inline-start: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--et-text);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+}
+
+/* ── Mobile / tablet (≤1100px) ───────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  /* Content: no margin offset — sidebar is a full-height overlay drawer */
+  body.instructor-package-page .app-main {
+    /* Physical unset first, logical last (same pattern as desktop rule) */
+    margin-left:  unset !important;
+    margin-right: unset !important;
+    margin-inline-start: 0 !important;
+    margin-inline-end:   0 !important;
+    width: auto !important;
+    padding-top: var(--et-topbar-h) !important;
+  }
+
+  body.instructor-package-page .instructor-shell-sidebar {
+    /* Full-height drawer; renders above the topbar */
+    top: 0 !important;
+    height: 100vh !important;
+    width: min(80vw, 280px) !important;
+    max-width: 280px !important;
+    z-index: 80 !important;
+    /* Shadow trails away from the open edge (inline-end side of sidebar) */
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12) !important;
+  }
+
+  /* RTL: shadow falls to the left of the sidebar (it opens from the right) */
+  [dir="rtl"] body.instructor-package-page .instructor-shell-sidebar {
+    box-shadow: -4px 0 24px rgba(0,0,0,0.12) !important;
+  }
+}
+
+/* =============================================================================
+ * DESIGN UNITY — align all dashboard component tokens to the blue shell
+ * ============================================================================= */
+
+/* ── Re-map dashboard brand tokens from teal/emerald → blue ──────────────── */
+body.instructor-package-page {
+  --idash-brand:              var(--et-brand);
+  --idash-brand-deep:         var(--et-brand-dark);
+  --idash-brand-soft:         rgba(137, 243, 54, 0.10);
+  --idash-brand-soft-2:       rgba(137, 243, 54, 0.18);
+  --idash-status-scheduled:   var(--et-brand);
+  --idash-status-scheduled-soft: rgba(137, 243, 54, 0.10);
+
+  /* Page hero gradient variables — dark forest green → lime */
+  --iup-woodland-gradient:    linear-gradient(135deg, #1c3d0a 0%, #3b7a12 52%, #5db41c 100%);
+  --iup-woodland-shadow:      0 12px 28px rgba(93, 180, 28, 0.28);
+  --iup-woodland-border:      rgba(255, 255, 255, 0.13);
+  --iup-hero-eyebrow:         #d9f8a8;
+  --iup-hero-muted:           rgba(212, 248, 160, 0.85);
+  --iup-hero-body:            #f2fde4;
+}
+
+/* ── Premium greeting card on dashboard: dark green → blue/indigo ─────────── */
+body.instructor-dashboard-page .idash-greet.idash-greet--premium,
+body.instructor-dashboard-page .idash-greet.idash-greet--premium.iup-page-hero--welcome {
+  background: linear-gradient(135deg, #1c3d0a 0%, #3b7a12 52%, #5db41c 100%) !important;
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  box-shadow:
+    0 4px 6px rgba(93, 180, 28, 0.08),
+    0 20px 48px rgba(93, 180, 28, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+body.instructor-dashboard-page .idash-greet--premium .iup-page-hero__glow {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(185, 255, 100, 0.22), transparent 46%),
+    radial-gradient(circle at 6% 82%, rgba(255, 255, 255, 0.05), transparent 42%) !important;
+}
+
+/* ── Section hero cards on other pages (sessions, evaluations, payments) ── */
+body.instructor-package-page .iup-page-hero,
+body.instructor-package-page .isess-hero.iup-page-hero,
+body.instructor-package-page .profile-hero.iup-page-hero,
+body.instructor-package-page .ip-hero.iup-page-hero {
+  background: var(--iup-woodland-gradient) !important;
+  box-shadow: var(--iup-woodland-shadow) !important;
+  border-color: var(--iup-woodland-border) !important;
+}
+
+/* ── Stat/KPI cards: flat white surface with clean shadow ─────────────────── */
+body.instructor-package-page .idash-kpi-card,
+body.instructor-package-page .idash-countdown,
+body.instructor-package-page .idash-activity,
+body.instructor-package-page .idash-cal {
+  background: var(--et-surface) !important;
+  border: 1px solid var(--et-border) !important;
+  box-shadow: var(--et-shadow) !important;
+  border-radius: 12px !important;
+}
+
+/* KPI card hover lift */
+body.instructor-package-page .idash-kpi-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+  transform: translateY(-2px);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* Active indicator on KPI card icon uses brand blue */
+body.instructor-package-page .idash-kpi-card__icon {
+  color: var(--et-brand) !important;
+}
+
+body.instructor-package-page .idash-kpi-card[data-tone="amber"] .idash-kpi-card__icon {
+  color: #d97706 !important;
+}
+
+body.instructor-package-page .idash-kpi-card[data-tone="violet"] .idash-kpi-card__icon {
+  color: #7c3aed !important;
+}
+
+/* ── Countdown pill: teal → blue ──────────────────────────────────────────── */
+body.instructor-package-page .idash-pill {
+  background: rgba(137, 243, 54, 0.12) !important;
+  color: var(--et-brand-dark) !important;
+}
+
+/* ── Button accent: brand blue ────────────────────────────────────────────── */
+body.instructor-package-page .idash-btn--primary {
+  background: var(--et-brand-grad) !important;
+  box-shadow: var(--et-brand-glow) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+body.instructor-package-page .idash-btn--primary:hover {
+  background: linear-gradient(135deg, #6DC527, #5aab1c) !important;
+}
+
+/* ── Calendar accent ──────────────────────────────────────────────────────── */
+body.instructor-package-page .idash-cal__today,
+body.instructor-package-page .idash-cal__view-btn[aria-selected="true"] {
+  background: var(--et-brand) !important;
+  color: #fff !important;
+}
+
+/* ── Topbar: ensure exact 70px height, clean flex alignment ──────────────── */
+body.instructor-package-page .instructor-shell-topbar__inner {
+  min-height: var(--et-topbar-h) !important;
+  max-height: var(--et-topbar-h) !important;
+  height: var(--et-topbar-h) !important;
+  padding: 0 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Strip any brandbar width that lingered from old topbar layout */
+body.instructor-package-page .instructor-shell-topbar__brandbar {
+  display: none !important;
+}
+
+/* ── Content area responsive safety net ──────────────────────────────────── */
+body.instructor-package-page .idash-page {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body.instructor-package-page .idash-hero {
+  min-width: 0;
+}
+
+/* Prevent any fixed-width child from causing horizontal scroll */
+body.instructor-package-page .instructor-shell-content * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+body.instructor-package-page .instructor-shell-content table,
+body.instructor-package-page .instructor-shell-content img,
+body.instructor-package-page .instructor-shell-content video,
+body.instructor-package-page .instructor-shell-content canvas,
+body.instructor-package-page .instructor-shell-content iframe {
+  max-width: 100%;
+}
+
+/* ── Greet card text colours stay white on blue background ────────────────── */
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__eyebrow {
+  color: #d9f8a8 !important;
+}
+
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__title,
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__salutation,
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__name {
+  color: #ffffff !important;
+}
+
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__date,
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__time-label {
+  color: rgba(219, 234, 254, 0.85) !important;
+}
+
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__clock-h,
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__clock-m,
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__clock-colon {
+  color: #ffffff !important;
+}
+
+body.instructor-dashboard-page .idash-greet--premium .idash-greet__avatar {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+/* =============================================================================
+ * TOPBAR: brand link (always in topbar) + hamburger (always visible)
+ * ============================================================================= */
+
+/* Hamburger: visible on ALL screen sizes — collapses rail on desktop, opens
+   drawer on mobile. Override any earlier display:none. */
+body.instructor-package-page .instructor-shell-topbar__menu {
+  display: inline-flex !important;
+  flex-shrink: 0;
+}
+
+/* Brand link inside the topbar */
+body.instructor-package-page .instructor-shell-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+body.instructor-package-page .instructor-shell-topbar__brand-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--et-brand-grad);
+  color: #ffffff;
+  transition: opacity 0.15s ease;
+}
+
+body.instructor-package-page .instructor-shell-topbar__brand-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+body.instructor-package-page .instructor-shell-topbar__brand-label {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--et-text);
+  white-space: nowrap;
+}
+
+body.instructor-package-page .instructor-shell-topbar__brand:hover
+  .instructor-shell-topbar__brand-icon {
+  opacity: 0.85;
+}
+
+/* Topbar inner: consistent padding across all sizes */
+body.instructor-package-page .instructor-shell-topbar__inner {
+  padding: 0 20px !important;
+  gap: 8px !important;
+}
+
+/* =============================================================================
+ * SIDEBAR: no brand row — nav items start at the top
+ * ============================================================================= */
+
+/* Ensure no stale brand-row or collapse-btn styles show */
+body.instructor-package-page .instructor-shell-sidebar__brand-row,
+body.instructor-package-page .instructor-shell-sidebar__brand,
+body.instructor-package-page .instructor-shell-sidebar__collapse-btn,
+body.instructor-package-page .instructor-shell-sidebar__close {
+  display: none !important;
+}
+
+/* Nav starts right at the top of the sidebar panel */
+body.instructor-package-page .instructor-shell-sidebar__nav {
+  padding-top: 16px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INSTRUCTOR PROFILE DROPDOWN — mirrors student-shell-profilemenu exactly
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.instructor-package-page .instructor-shell-profilemenu {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  margin-left: 4px !important;
+}
+
+/* Trigger button */
+body.instructor-package-page .instructor-shell-profilemenu__trigger {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 38px !important;
+  padding: 4px 8px 4px 4px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: background .14s ease, border-color .14s ease !important;
+  max-width: 220px !important;
+}
+
+body.instructor-package-page .instructor-shell-profilemenu__trigger:hover,
+body.instructor-package-page .instructor-shell-profilemenu.is-open .instructor-shell-profilemenu__trigger {
+  background: var(--et-hover-bg) !important;
+  border-color: var(--et-border) !important;
+}
+
+/* Avatar inside trigger */
+body.instructor-package-page .instructor-shell-profilemenu__trigger .instructor-shell-profile__avatar {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  background: var(--et-brand-grad) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+/* Fallback person icon (shown when no photo) */
+body.instructor-package-page .instructor-shell-profile__icon-fallback {
+  position: absolute !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  pointer-events: none !important;
+}
+
+/* Hide fallback icon when the photo loads successfully */
+body.instructor-package-page .instructor-shell-profile__image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Name label */
+body.instructor-package-page .instructor-shell-profilemenu__name {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: var(--et-text) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 140px !important;
+}
+
+/* Chevron arrow */
+body.instructor-package-page .instructor-shell-profilemenu__chevron {
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--et-muted) !important;
+  flex-shrink: 0 !important;
+  transition: transform .18s ease !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu.is-open .instructor-shell-profilemenu__chevron {
+  transform: rotate(180deg) !important;
+}
+
+/* Floating dropdown panel */
+body.instructor-package-page .instructor-shell-profilemenu__panel {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  right: 0 !important;
+  width: 220px !important;
+  background: #ffffff !important;
+  border: 1px solid var(--et-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .08), 0 4px 6px -4px rgba(0, 0, 0, .05) !important;
+  padding: 8px !important;
+  z-index: 2000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__panel[hidden] { display: none !important; }
+
+html[data-theme="dark"] body.instructor-package-page .instructor-shell-profilemenu__panel {
+  background: var(--et-surface) !important;
+  border-color: var(--et-border) !important;
+  box-shadow: 0 10px 30px -6px rgba(0, 0, 0, .55) !important;
+}
+
+/* Menu items */
+body.instructor-package-page .instructor-shell-profilemenu__item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px 10px !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  color: var(--et-text) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  transition: background .12s ease, color .12s ease !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__item svg {
+  width: 17px !important;
+  height: 17px !important;
+  color: var(--et-muted) !important;
+  flex-shrink: 0 !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__item:hover {
+  background: var(--et-hover-bg) !important;
+  color: var(--et-text) !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__item:hover svg {
+  color: var(--et-text) !important;
+}
+
+/* Divider */
+body.instructor-package-page .instructor-shell-profilemenu__divider {
+  height: 1px !important;
+  background: var(--et-border) !important;
+  margin: 6px 4px !important;
+}
+
+/* Danger (logout) item */
+body.instructor-package-page .instructor-shell-profilemenu__item--danger {
+  color: var(--et-danger) !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__item--danger svg {
+  color: var(--et-danger) !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__item--danger:hover {
+  background: var(--et-danger-soft) !important;
+  color: var(--et-danger) !important;
+}
+body.instructor-package-page .instructor-shell-profilemenu__item--danger:hover svg {
+  color: var(--et-danger) !important;
+}
+
+/* Responsive: hide name on small screens */
+@media (max-width: 640px) {
+  body.instructor-package-page .instructor-shell-profilemenu__name { display: none !important; }
+}
+
+/* =============================================================================
+ * RTL LAYOUT POLISH — Arabic / right-to-left language support
+ * These rules run LAST in the cascade so they are the definitive authority.
+ * Most structural layout (sidebar position, content margin) is already handled
+ * by CSS logical properties above; this section handles remaining directional
+ * details: topbar padding, profile dropdown anchor, eval back-button, etc.
+ * ============================================================================= */
+
+/* ── Topbar inner: flip horizontal padding for RTL ─────────────────────── */
+[dir="rtl"] body.instructor-package-page .instructor-shell-topbar__inner {
+  padding: 0 20px 0 24px;   /* swap left/right padding so spacing feels natural */
+}
+
+/* ── Profile dropdown panel: anchor from inline-start edge in RTL ───────── */
+[dir="rtl"] body.instructor-package-page .instructor-shell-profilemenu__panel {
+  left:  auto !important;
+  right: 0 !important;
+  inset-inline-start: auto !important;
+  inset-inline-end:   0 !important;
+}
+
+/* ── Eval "Back to all sessions" arrow: flip for RTL ───────────────────── */
+[dir="rtl"] body.instructor-package-page .eval-back-btn__arrow svg {
+  transform: scaleX(-1);
+}
+
+/* ── Page hero decoration: mirror the glow radial to the other corner ───── */
+[dir="rtl"] body.instructor-package-page .iup-page-hero__icon,
+[dir="rtl"] body.instructor-package-page .iup-page-hero__deco {
+  left:  auto;
+  right: 16px;
+}
+
+/* ── Tables: align header / cell text using logical properties ───────────── */
+[dir="rtl"] body.instructor-package-page th,
+[dir="rtl"] body.instructor-package-page td {
+  text-align: right;
+}
+
+/* ── Search bars: icon and input placeholder alignment ──────────────────── */
+[dir="rtl"] body.instructor-package-page .eval-search {
+  direction: rtl;
+}
+[dir="rtl"] body.instructor-package-page .eval-search__input {
+  text-align: right;
+  padding-inline-start: 44px;
+  padding-inline-end: 14px;
+}
+[dir="rtl"] body.instructor-package-page .eval-search__icon {
+  left:  auto;
+  right: 14px;
+  inset-inline-start: auto;
+  inset-inline-end:   14px;
+}
+
+/* ── Sidebar nav link text: right-align in RTL ──────────────────────────── */
+[dir="rtl"] body.instructor-package-page .instructor-shell-sidebar__link {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* ── Collapsed rail tooltip: appear to the LEFT of the rail in RTL ──────── */
+@media (min-width: 1101px) {
+  [dir="rtl"] body.instructor-package-page.instructor-nav-collapsed
+    .instructor-shell-sidebar__link[data-tooltip]:hover::after,
+  [dir="rtl"] body.instructor-package-page.instructor-nav-collapsed
+    .instructor-shell-sidebar__logout[data-tooltip]:hover::after {
+    inset-inline-start: calc(100% + 10px);
+    inset-inline-end: auto;
+    left: auto;
+    right: calc(100% + 10px);
+  }
+}
+
+/* ── KPI / stat cards: text and icon direction ──────────────────────────── */
+[dir="rtl"] body.instructor-package-page .idash-kpi-card,
+[dir="rtl"] body.instructor-package-page .idash-kpi-card__label,
+[dir="rtl"] body.instructor-package-page .idash-kpi-card__value {
+  text-align: right;
+}
+
+/* ── Form labels and inputs: RTL alignment ──────────────────────────────── */
+[dir="rtl"] body.instructor-package-page label,
+[dir="rtl"] body.instructor-package-page input,
+[dir="rtl"] body.instructor-package-page select,
+[dir="rtl"] body.instructor-package-page textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+/* ── Notification badge: flip to inline-end corner in RTL ──────────────── */
+[dir="rtl"] body.instructor-package-page .instructor-shell-topbar__badge {
+  left: -4px;
+  right: auto;
+  inset-inline-start: -4px;
+  inset-inline-end: auto;
+}

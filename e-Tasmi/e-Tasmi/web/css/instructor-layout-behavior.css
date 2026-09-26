@@ -1,0 +1,264 @@
+/*
+ * Instructor shell — flex column wrapper + flex row sidebar/content.
+ * Sidebar width authority: --instructor-sidebar-width (260px expanded / 70px collapsed).
+ * Overrides etasmi-shell-layout.css grid for instructor only (loads after that file).
+ */
+body.instructor-package-page.instructor-module-page,
+body.instructor-dashboard-page.instructor-package-page {
+  --instructor-sidebar-width: 260px;
+  --instructor-sidebar-width-expanded: 260px;
+  --instructor-sidebar-width-collapsed: 70px;
+}
+
+@media (min-width: 1101px) {
+  :root[data-instructor-nav="collapsed"] body.instructor-package-page.instructor-module-page,
+  :root[data-instructor-nav="collapsed"] body.instructor-dashboard-page.instructor-package-page,
+  body.instructor-package-page.instructor-module-page.instructor-nav-collapsed,
+  body.instructor-dashboard-page.instructor-package-page.instructor-nav-collapsed {
+    --instructor-sidebar-width: var(--instructor-sidebar-width-collapsed);
+  }
+}
+
+/* ── Outer shell: column flex, full viewport height ── */
+body.instructor-package-page.instructor-module-page .app-shell,
+body.instructor-dashboard-page.instructor-package-page .app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-topbar,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-topbar {
+  flex: 0 0 auto;
+}
+
+body.instructor-package-page.instructor-module-page .app-main,
+body.instructor-dashboard-page.instructor-package-page .app-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+body.instructor-package-page.instructor-module-page .container.sd-container.instructor-workspace-shell,
+body.instructor-dashboard-page.instructor-package-page .container.sd-container.instructor-workspace-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── Inner row: sidebar + main content (flex, not grid) ── */
+body.instructor-package-page.instructor-module-page .instructor-shell-layout,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  gap: 0;
+  overflow: hidden;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-sidebar,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar {
+  flex: 0 0 var(--instructor-sidebar-width, 260px);
+  width: var(--instructor-sidebar-width, 260px);
+  max-width: var(--instructor-sidebar-width, 260px);
+  min-width: 0;
+  box-sizing: border-box;
+  transition:
+    flex-basis 0.3s ease-in-out,
+    width 0.3s ease-in-out,
+    max-width 0.3s ease-in-out;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-content,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  max-width: none;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-workspace-view,
+body.instructor-dashboard-page.instructor-package-page .instructor-workspace-view {
+  flex: 1 0 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Dashboard cards, calendars, tables — stretch with layout shifts */
+body.instructor-package-page.instructor-module-page .instructor-shell-content > *,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-content > *,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .idash-page,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .idash-hero,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .idash-cal,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .idash-kpi,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .idash-bottom,
+body.instructor-package-page.instructor-module-page .instructor-shell-content table,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .card,
+body.instructor-package-page.instructor-module-page .instructor-shell-content .instructor-panel {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-content > .footer,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-content > .footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body.instructor-package-page.instructor-module-page .instructor-shell-topbar__brandbar,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-topbar__brandbar {
+  flex: 0 0 var(--instructor-sidebar-width, 260px);
+  transition: flex-basis 0.3s ease-in-out;
+}
+
+@media (min-width: 1101px) {
+  body.instructor-package-page.instructor-module-page,
+  body.instructor-dashboard-page.instructor-package-page {
+    overflow: hidden;
+  }
+
+  body.instructor-package-page.instructor-module-page .app-shell,
+  body.instructor-dashboard-page.instructor-package-page .app-shell {
+    height: calc(100vh - 18px);
+    min-height: calc(100vh - 18px);
+    overflow: hidden;
+  }
+
+  /* Override grid rules from etasmi-shell-layout.css */
+  body.instructor-package-page.instructor-module-page .instructor-shell-layout,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    top: auto;
+    inset-inline-start: auto;
+    z-index: 2;
+    height: 100%;
+    min-height: 0;
+    align-self: stretch;
+    grid-area: unset !important;
+    grid-column: unset !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar__panel,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar__panel {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar__nav,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar__nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar__footer,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar__footer {
+    flex-shrink: 0;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-content,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-content {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    width: auto !important;
+    max-width: none !important;
+    margin-inline-start: 0 !important;
+    grid-area: unset !important;
+    grid-column: unset !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+  }
+}
+
+@media (max-width: 1100px) {
+  body.instructor-package-page.instructor-module-page .instructor-shell-layout,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-layout {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar {
+    flex: none;
+    width: auto;
+    max-width: none;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-topbar__brandbar,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-topbar__brandbar {
+    flex: 0 0 auto;
+  }
+}
+
+@media (min-width: 1101px) and (prefers-reduced-motion: reduce) {
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-sidebar,
+  body.instructor-package-page.instructor-module-page .instructor-shell-topbar__brandbar,
+  body.instructor-dashboard-page.instructor-package-page .instructor-shell-topbar__brandbar {
+    transition: none !important;
+  }
+}

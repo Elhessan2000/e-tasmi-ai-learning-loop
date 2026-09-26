@@ -1,0 +1,8 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+
+<div class="footer">
+
+  <span data-i18n="footer.appCopyright" data-i18n-vars='{"number":"<%= java.time.Year.now() %>"}'>&copy; <%= java.time.Year.now() %> e-Tasmi. Built as a focused digital workspace for Qur'an recitation learning, teaching, and platform operations.</span>
+
+</div>
+

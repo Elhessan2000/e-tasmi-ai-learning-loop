@@ -1,0 +1,11 @@
+.git
+.gitignore
+**/build/
+**/dist/
+**/generated/
+**/generated-sources/
+**/test/
+**/.DS_Store
+**/Thumbs.db
+mysql-data/
+.vscode/

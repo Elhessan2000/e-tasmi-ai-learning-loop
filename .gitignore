@@ -1,0 +1,61 @@
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+.env.template-overwrite-backup
+
+# Local session captures and test artifacts
+*cookies*.txt
+tmp-headers.txt
+*Probe.java
+tmp-*.html
+tmp-*.txt
+tmp_*.txt
+tmp_*.sh
+javac-sources*.txt
+student-dashboard-direct.html
+student-dashboard-live.html
+student-test-audio.mp3
+
+# Local maintenance scripts and design mockups
+e-Tasmi/scripts/
+e-Tasmi/e-Tasmi/web/mockups/
+
+# Empty leftover file, not a Git repository
+e-Tasmi/git
+
+# Research manuscript working files
+e-Tasmi/docs/MJCSC/
+e-Tasmi/docs/latex/
+e-Tasmi/docs/ijcds/
+e-Tasmi/docs/_docx_extract/
+e-Tasmi/docs/_temp_docx_extract/
+e-Tasmi/docs/paper-figures/
+*.log
+*.aux
+
+# Uploads and local database data
+uploads/
+mysql-data/
+
+# Build output and dependencies
+build/
+dist/
+node_modules/
+*.war
+*.class
+
+# IDE and editor metadata
+nbproject/private/
+.idea/
+.vscode/
+.cursor/
+
+# OS temporary files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.tmp
+*~

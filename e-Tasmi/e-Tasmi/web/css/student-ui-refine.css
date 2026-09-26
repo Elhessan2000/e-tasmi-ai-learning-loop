@@ -1,0 +1,838 @@
+/* Controlled student UI refinement: clean SaaS surface, focused content, consistent spacing. */
+body.student-package-page,
+body.student-premium-page.student-package-page,
+body.student-package-page.student-module-page {
+  --student-bg: #f8fafc;
+  --student-surface: #ffffff;
+  --student-surface-muted: #f8fafc;
+  --student-border: #e5e7eb;
+  --student-border-strong: #cbd5e1;
+  --student-text: #0f172a;
+  --student-text-soft: #64748b;
+  --student-text-muted: #64748b;
+  --student-primary: #22c55e;
+  --student-primary-dark: #16a34a;
+  --student-primary-soft: #ecfdf5;
+  --student-success: #16a34a;
+  --student-warning: #d97706;
+  --student-danger: #dc2626;
+  --student-line: #e5e7eb;
+  --student-app-bg: #f8fafc;
+  --student-shell-bg: #ffffff;
+  --student-main-bg: #f8fafc;
+  --student-sidebar-bg: #ffffff;
+  --student-sidebar-border: #e5e7eb;
+  --student-shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.06);
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body.student-package-page.student-module-page {
+  background: #f8fafc;
+}
+
+body.student-package-page.student-module-page .app-shell {
+  width: 100%;
+  margin: 0;
+  min-height: 100vh;
+}
+
+body.student-package-page.student-module-page .student-shell-topbar {
+  border-radius: 0;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: none;
+  background: #ffffff;
+}
+
+body.student-package-page.student-module-page .student-shell-layout {
+  grid-template-columns: var(--student-sidebar-width, 312px) minmax(0, 1fr);
+  border-radius: 0;
+  box-shadow: none;
+  background: #ffffff;
+}
+
+body.student-package-page.student-module-page .student-shell-sidebar__panel {
+  padding: 20px 18px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-inline-end: 1px solid #e2e8f0;
+}
+
+body.student-package-page .student-shell-sidebar__role-badge {
+  margin: 4px 4px 12px;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+body.student-package-page.student-module-page .student-shell-sidebar__nav {
+  gap: 4px;
+  margin-top: 0;
+}
+
+body.student-package-page.student-module-page .student-shell-sidebar__link {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #64748b;
+  border: 1px solid transparent;
+}
+
+body.student-package-page.student-module-page .student-shell-sidebar__footer {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+body.student-package-page.student-module-page .student-shell-sidebar__link:hover {
+  background: rgba(15, 118, 110, 0.08);
+  border-color: rgba(15, 118, 110, 0.14);
+  color: #0f172a;
+}
+
+body.student-package-page.student-module-page .student-shell-sidebar__link.is-active {
+  background: linear-gradient(135deg, #0f766e, #0b665f);
+  color: #ffffff;
+  border-color: rgba(15, 118, 110, 0.4);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.2);
+}
+
+body.student-package-page.student-module-page .student-shell-content {
+  padding: 24px 22px;
+  background: #f8fafc;
+  gap: 20px;
+}
+
+body.student-package-page.student-module-page .student-workspace-view,
+.student-dashboard-clean,
+.rec-page {
+  gap: 18px;
+}
+
+body.student-package-page.student-module-page .sd-hero,
+body.student-package-page.student-module-page .sd-card,
+body.student-package-page.student-module-page .notification-item,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-item,
+.ssess-hero,
+.ssess-card,
+.ssess-empty,
+.rec-card,
+.rec-empty,
+.rec-session-context,
+.table-wrap {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* sd-hero--minimal: padding lives on .sd-hero-inner only (avoid double padding with base .sd-hero-inner). */
+body.student-package-page.student-module-page .sd-hero.sd-hero--minimal {
+  padding: 0;
+}
+
+body.student-package-page.student-module-page .sd-hero:not(.sd-hero--minimal),
+.ssess-hero {
+  background: #ffffff;
+  padding: 18px 20px 16px;
+}
+
+body.student-package-page.student-module-page .ssess-hero {
+  margin-bottom: 1rem;
+}
+
+body.student-package-page.student-module-page .ssess-hero__eyebrow {
+  margin-bottom: 0.35rem;
+}
+
+body.student-package-page.student-module-page .ssess-hero__title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 0.35rem;
+  line-height: 1.2;
+}
+
+body.student-package-page.student-module-page .ssess-hero__sub {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+body.student-package-page.student-module-page .student-workspace-view .ssess-hero__actions {
+  margin-top: 0.625rem;
+}
+
+.student-dashboard-clean__hero {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+@media (min-width: 1101px) {
+  body.student-dashboard-page.student-package-page .student-dashboard-clean {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "hero"
+      "body"
+      "footer";
+    gap: 24px;
+    align-items: start;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__hero {
+    grid-area: hero;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.55fr);
+    gap: 24px;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__main {
+    grid-area: body;
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.72fr);
+    gap: 24px;
+    align-items: start;
+    min-width: 0;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__primary,
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__secondary {
+    min-width: 0;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__secondary {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean > .footer {
+    grid-area: footer;
+  }
+}
+
+@media (max-width: 1100px) {
+  body.student-dashboard-page.student-package-page .student-dashboard-clean {
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__hero {
+    order: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__main,
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__primary,
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__secondary {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+  }
+
+}
+
+.student-dashboard-clean__hero-panel {
+  border-radius: 8px;
+  background: #f8fafc;
+  border-color: #e5e7eb;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero {
+  min-height: 0;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero-copy {
+  gap: 8px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__welcome-card {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 126px;
+  padding: 28px 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel {
+  padding: 28px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming {
+  display: flex;
+  flex-direction: column;
+  min-height: 405px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-card,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__empty {
+  flex: 1 1 auto;
+  min-height: 255px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-card {
+  align-items: stretch;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  border-radius: 8px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-title-row {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-title-row strong {
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-meta-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .student-dashboard-clean__session-meta-row span {
+  display: block;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--upcoming .btn {
+  align-self: flex-start;
+  min-width: 160px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__activity-list {
+  max-height: 294px;
+  overflow-y: auto;
+  padding-inline-end: 4px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--notifications {
+  min-height: 405px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--progress {
+  min-height: 0;
+  padding: 22px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__panel--notifications .student-dashboard-clean__activity-item {
+  padding: 16px;
+  border-radius: 8px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__progress-card {
+  display: grid;
+  gap: 12px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__progress-main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__progress-main span,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid span {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__progress-main strong {
+  color: #0f172a;
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid div {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__summary-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.student-dashboard-clean__hero-progress,
+.sd-progressbar {
+  background: #e5e7eb;
+}
+
+.student-dashboard-clean__hero-progress span,
+.sd-progressbar > span {
+  background: #22c55e;
+}
+
+body.student-package-page.student-module-page .sd-hero-kicker,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__eyebrow,
+.student-dashboard-clean__welcome,
+.sd-card-eyebrow,
+.ssess-hero__eyebrow,
+.rec-card__eyebrow {
+  background: transparent;
+  color: #22c55e;
+  padding: 0;
+  min-height: 0;
+  border-radius: 0;
+  letter-spacing: 0.08em;
+}
+
+body.student-package-page.student-module-page .sd-hero-title,
+body.student-package-page.student-module-page .sd-card-title,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__hero h2,
+.student-dashboard-clean__panel-head h3,
+.ssess-hero__title,
+.rec-page__title,
+.rec-card__title,
+.rec-history__title {
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+body.student-package-page.student-module-page .sd-hero-subtitle,
+.student-dashboard-clean__activity-item p,
+.student-dashboard-clean__session-meta-row span,
+.ssess-hero__sub,
+.ssess-card__instructor,
+.ssess-card__desc,
+.rec-page__subtitle,
+.rec-history__sub,
+.rec-form__hint,
+.notification-item-meta {
+  color: #64748b;
+}
+
+body.student-package-page.student-module-page .btn,
+body.student-dashboard-page.student-package-page .btn,
+.ssess-btn,
+.rec-page__cta,
+.rec-card__close {
+  min-height: 42px;
+  border-radius: 8px;
+  box-shadow: none;
+  font-weight: 600;
+}
+
+body.student-package-page.student-module-page .btn-primary,
+body.student-dashboard-page.student-package-page .btn-primary,
+.ssess-btn--primary,
+.ssess-btn--join,
+.rec-page__cta,
+.rec-form__actions .btn-primary,
+.rec-empty .btn-primary {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.16);
+}
+
+body.student-package-page.student-module-page .btn-primary:hover,
+body.student-dashboard-page.student-package-page .btn-primary:hover,
+.ssess-btn--primary:hover,
+.ssess-btn--join:hover,
+.rec-page__cta:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+body.student-package-page.student-module-page .btn-ghost,
+body.student-dashboard-page.student-package-page .btn-ghost,
+.ssess-btn--outline,
+.ssess-btn--ghost {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #0f172a;
+}
+
+.status-pill,
+.ssess-pill {
+  border-radius: 8px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+  letter-spacing: 0;
+}
+
+.status-pill--neutral {
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  color: #64748b;
+}
+
+.status-pill--warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #d97706;
+}
+
+.status-pill--danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.ssess-card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.ssess-card {
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ssess-card:hover {
+  transform: none;
+  border-color: #cbd5e1;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.ssess-card__banner {
+  height: 150px;
+  background: #f1f5f9;
+}
+
+.ssess-card__banner-placeholder {
+  background: #ecfdf5;
+}
+
+.ssess-card__banner-placeholder svg {
+  color: #22c55e;
+  opacity: 0.38;
+}
+
+.ssess-card__body {
+  padding: 24px;
+  gap: 14px;
+}
+
+.ssess-card__status-row {
+  justify-content: flex-start;
+}
+
+.ssess-card__title {
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.ssess-card__instructor strong,
+.ssess-card__meta-value {
+  color: #0f172a;
+}
+
+.ssess-card__meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ssess-card__meta-item {
+  display: grid;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.ssess-card__meta-label {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ssess-card__actions {
+  padding-top: 8px;
+}
+
+.ssess-search-bar {
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.ssess-search-bar input[type="text"] {
+  min-height: 44px;
+  padding: 0 14px;
+  border-color: #e5e7eb;
+  color: #0f172a;
+}
+
+.sd-progress-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.sd-progress-metric {
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 24px;
+}
+
+.notification-list,
+.student-dashboard-clean__activity-list {
+  gap: 16px;
+}
+
+.notification-item,
+.student-dashboard-clean__activity-item {
+  padding: 20px;
+}
+
+.notification-item h3 {
+  margin: 12px 0 0;
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.rec-page {
+  max-width: 1120px;
+  padding: 0 0 32px;
+}
+
+.rec-page__header {
+  margin-bottom: 8px;
+}
+
+.rec-card {
+  padding: 28px;
+}
+
+.rec-card__head {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+}
+
+.rec-session-context,
+.rec-empty {
+  box-shadow: none;
+}
+
+.rec-form select,
+.rec-form input[type="file"],
+body.student-package-page.student-module-page input,
+body.student-package-page.student-module-page select,
+body.student-package-page.student-module-page textarea {
+  border-radius: 8px;
+  border-color: #e5e7eb;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table-wrap th {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.table-wrap td {
+  color: #0f172a;
+}
+
+body.student-package-page.student-module-page .footer {
+  color: #64748b;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 1180px) {
+  body.student-package-page.student-module-page .student-shell-layout {
+    grid-template-columns: min(var(--student-sidebar-width, 312px), 100%) minmax(0, 1fr);
+  }
+
+  .sd-progress-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 940px) {
+  body.student-package-page.student-module-page .student-shell-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.student-package-page.student-module-page .student-shell-topbar {
+    border-radius: 0;
+  }
+
+  body.student-package-page.student-module-page .student-shell-content {
+    padding: 24px;
+  }
+
+  .student-dashboard-clean__hero,
+  .ssess-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body.student-package-page.student-module-page .student-shell-content {
+    padding: 20px 14px;
+  }
+
+  body.student-package-page.student-module-page .sd-hero,
+  .ssess-hero,
+  .rec-card {
+    padding: 16px 18px;
+  }
+
+  .ssess-card-grid,
+  .sd-progress-metrics,
+  .ssess-card__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .ssess-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ssess-btn,
+  .rec-page__cta {
+    width: 100%;
+  }
+}
+
+/*
+ * Sidebar + shell: same as every student-module-page (dashboard also uses student-module-page on <body>).
+ * Do not scope workspace-shell / student-shell-content here — dashboard-specific padding caused misalignment
+ * vs Browse / My Sessions / Payments / etc.
+ */
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (min-width: 1101px) {
+  body.student-dashboard-page.student-package-page .student-dashboard-clean {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-content: stretch;
+    min-height: calc(100vh - 160px);
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__hero {
+    grid-template-columns: minmax(0, 2.25fr) minmax(280px, 1fr);
+    gap: 24px;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__main {
+    grid-template-columns: minmax(0, 2.25fr) minmax(300px, 1fr);
+    gap: 20px;
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__primary,
+  body.student-dashboard-page.student-package-page .student-dashboard-clean__secondary {
+    min-width: 0;
+  }
+
+  body.student-dashboard-page.student-package-page .student-dashboard-clean > .footer {
+    align-self: stretch;
+    margin-top: 0;
+  }
+}
+
+/* Module pages — compact page headers (sd-hero minimal, recitation header, profile hero). */
+body.student-package-page.student-module-page .sd-hero.sd-hero--minimal .sd-hero-inner {
+  padding: 16px 20px;
+}
+
+body.student-package-page.student-module-page .sd-hero.sd-hero--minimal .sd-hero-kicker {
+  min-height: 22px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+body.student-package-page.student-module-page .sd-hero.sd-hero--minimal .sd-hero-title {
+  margin-top: 6px;
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  line-height: 1.12;
+}
+
+body.student-package-page.student-module-page .sd-hero.sd-hero--minimal .sd-hero-subtitle {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+body.student-recitations-page.student-package-page .rec-page {
+  gap: 18px;
+}
+
+body.student-recitations-page.student-package-page .rec-page__header {
+  gap: 14px 18px;
+  align-items: center;
+}
+
+body.student-recitations-page.student-package-page .rec-page__title {
+  font-size: 1.45rem;
+  margin: 0 0 6px;
+}
+
+body.student-recitations-page.student-package-page .rec-page__subtitle {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+body.student-package-page.student-module-page .profile-hero {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.1rem;
+  gap: 1rem;
+}
+
+body.student-package-page.student-module-page .profile-hero__text h1 {
+  font-size: 1.35rem;
+}
+
+body.student-package-page.student-module-page .profile-breadcrumb {
+  margin-bottom: 0.75rem;
+}
+
+body.student-package-page.student-module-page .ssess-search-bar {
+  margin-bottom: 18px;
+}
+
+/* Toolbar profile control is avatar-only (no student name next to photo). */
+body.student-package-page .student-shell-topbar__actions .student-shell-profile {
+  gap: 0;
+}

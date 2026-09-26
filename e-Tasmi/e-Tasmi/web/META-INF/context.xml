@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/e-Tasmi">
+		<!--
+			Configure the MySQL connection pool for Tomcat JNDI.
+			Connection parameters are read at runtime from Railway environment
+			variables by util.RailwayDataSourceFactory:
+			  MYSQLHOST, MYSQLPORT, MYSQLDATABASE, MYSQLUSER, MYSQLPASSWORD
+
+			NOTE: Tomcat does NOT interpolate ${ENV_VAR} syntax inside Resource
+			attributes, so we use a custom factory that calls System.getenv()
+			directly instead of relying on Tomcat property substitution.
+		-->
+		<Resource
+				name="jdbc/ETasmiDS"
+				auth="Container"
+				type="javax.sql.DataSource"
+				factory="util.RailwayDataSourceFactory"
+				driverClassName="com.mysql.cj.jdbc.Driver"
+				initialSize="2"
+				maxActive="20"
+				maxIdle="10"
+				minIdle="2" />
+</Context>

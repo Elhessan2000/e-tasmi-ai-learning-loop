@@ -1,0 +1,189 @@
+/**
+ * Admin sidebar — parity with student-figma-shell.css / instructor-figma-shell.css
+ * Visual only (#004D40 sidebar). Layout widths: etasmi-shell-layout.css
+ */
+
+body.admin-package-page {
+  --admin-figma-sidebar: #004d40;
+  --admin-figma-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --admin-figma-sidebar-active: rgba(255, 255, 255, 0.14);
+}
+
+body.admin-package-page .admin-shell-sidebar__panel {
+  background: var(--admin-figma-sidebar) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 12px 12px 10px !important;
+  gap: 0 !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__panel--minimal {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  padding: 10px 12px 10px !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__mobile-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 2px 0 8px;
+}
+
+@media (min-width: 1101px) {
+  body.admin-package-page .admin-shell-sidebar__mobile-bar {
+    display: none;
+  }
+}
+
+body.admin-package-page .admin-shell-sidebar__panel--minimal .admin-shell-sidebar__nav {
+  flex: 1;
+  min-height: 0;
+}
+
+body.admin-package-page .admin-shell-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__brand,
+body.admin-package-page .admin-shell-sidebar__intro {
+  display: none !important;
+}
+
+/* Logout — exact parity with student-figma-shell.css (override admin-package base logout sizing) */
+body.admin-package-page .admin-shell-sidebar__footer--logout {
+  margin-top: auto !important;
+  padding-top: 16px !important;
+  padding-bottom: 0 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__logout.admin-shell-sidebar__logout--solid {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 12px 14px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  color: #b91c1c !important;
+  font-weight: 600 !important;
+  font-size: inherit !important;
+  line-height: 1.25 !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+body.admin-package-page .admin-shell-sidebar__logout.admin-shell-sidebar__logout--solid:hover {
+  background: #fee2e2 !important;
+  border-color: #f87171 !important;
+  color: #991b1b !important;
+  transform: none !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__logout.admin-shell-sidebar__logout--solid .admin-shell-sidebar__icon {
+  color: #b91c1c !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__logout.admin-shell-sidebar__logout--solid .admin-shell-sidebar__icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__logout.admin-shell-sidebar__logout--solid:hover .admin-shell-sidebar__icon {
+  color: #991b1b !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link::before {
+  display: none !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link {
+  min-height: 40px !important;
+  padding: 8px 10px !important;
+  gap: 10px !important;
+  border-radius: 10px !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link .admin-shell-sidebar__label {
+  flex: 1;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link:hover {
+  background: var(--admin-figma-sidebar-hover) !important;
+  color: #fff !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link.is-active {
+  background: var(--admin-figma-sidebar-active) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link.is-active::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  margin-inline-start: auto;
+  background: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
+}
+
+body.admin-package-page .admin-shell-sidebar__icon {
+  flex: 0 0 auto;
+  width: 20px !important;
+  height: 20px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__icon svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+body.admin-package-page .admin-shell-sidebar__link.is-active .admin-shell-sidebar__icon,
+body.admin-package-page .admin-shell-sidebar__link:hover .admin-shell-sidebar__icon {
+  color: #fff !important;
+}
+
+@media (min-width: 1101px) {
+  body.admin-package-page .admin-shell-sidebar__panel .admin-shell-sidebar__close {
+    display: none !important;
+  }
+}
+
+body.admin-package-page .admin-shell-sidebar__close {
+  color: rgba(255, 255, 255, 0.85) !important;
+}

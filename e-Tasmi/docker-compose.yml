@@ -1,0 +1,139 @@
+# App DB resolution: if MYSQLHOST (and related vars) are set in .env, the
+# application connects to that host first (e.g. Railway). See util/Db.java.
+# The local "db" service can still be started for phpMyAdmin or local tools;
+# you may `docker compose stop db` after the app is up to save memory.
+#
+# Local secrets & config: place a file named `.env` next to this compose file (repo root).
+# Docker Compose automatically loads it for ${VAR} substitution in `environment:` below.
+# The `app` service also uses `env_file: .env` so variables are passed into the Tomcat
+# container even when not listed explicitly (Java reads them via System.getenv).
+services:
+  db:
+    image: mysql:8.4
+    container_name: etasmi-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: etasmi
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: etasmi
+      MYSQL_PASSWORD: etasmi123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./e-Tasmi/setup/etasmi_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  app:
+    image: etasmi-tomcat:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: etasmi-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # JVM/system timezone. Affects ZoneId.systemDefault() (e.g. dashboard countdown,
+      # next-session selection, session-time display). Default = Asia/Kuala_Lumpur for
+      # the e-Tasmi launch region; override via TZ in .env when deploying elsewhere.
+      TZ: ${TZ:-Asia/Kuala_Lumpur}
+      CATALINA_OPTS: -Duser.timezone=${TZ:-Asia/Kuala_Lumpur}
+      # If MYSQLHOST is set in .env (e.g. Railway public DB), Db.java uses it first and ignores ETASMI_JDBC_* below.
+      MYSQLHOST: ${MYSQLHOST:-}
+      MYSQLPORT: ${MYSQLPORT:-}
+      MYSQLDATABASE: ${MYSQLDATABASE:-}
+      MYSQLUSER: ${MYSQLUSER:-}
+      MYSQLPASSWORD: ${MYSQLPASSWORD:-}
+      ETASMI_JDBC_URL: jdbc:mysql://db:3306/etasmi?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      ETASMI_JDBC_USER: etasmi
+      ETASMI_JDBC_PASSWORD: etasmi123
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      APP_URL: ${APP_URL:-}
+      APP_BASE_URL: ${APP_BASE_URL:-}
+      # Optional: javax.mail debug to stderr (set SMTP_DEBUG=true in .env; remove after fixing email).
+      SMTP_DEBUG: ${SMTP_DEBUG:-}
+      # HTTPS email APIs (take priority over SMTP). Must be passed through here or the app will not see .env.
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      BREVO_SENDER_NAME: ${BREVO_SENDER_NAME:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      ZOOM_ACCOUNT_ID: ${ZOOM_ACCOUNT_ID:-}
+      ZOOM_CLIENT_ID: ${ZOOM_CLIENT_ID:-}
+      ZOOM_CLIENT_SECRET: ${ZOOM_CLIENT_SECRET:-}
+      ZOOM_DEFAULT_HOST_EMAIL: ${ZOOM_DEFAULT_HOST_EMAIL:-}
+      ZOOM_TIMEZONE: ${ZOOM_TIMEZONE:-UTC}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Must support verbose_json for duration + segment confidence gating in the recitation pipeline.
+      OPENAI_RECITATION_MODEL: ${OPENAI_RECITATION_MODEL:-whisper-1}
+      OPENAI_CLASSIFIER_MODEL: ${OPENAI_CLASSIFIER_MODEL:-gpt-4o-mini}
+      # Optional: full HTTPS URL for login page background (e.g. Cloudinary image/upload/...).
+      ETASMI_LOGIN_BG_URL: ${ETASMI_LOGIN_BG_URL:-}
+      ETASMI_UPLOADS_DIR: /usr/local/tomcat/etasmi_uploads
+      # Optional: on each app start, reset admin@etasmi.com password to this value (dev/recovery only).
+      ETASMI_BOOTSTRAP_ADMIN_PASSWORD: ${ETASMI_BOOTSTRAP_ADMIN_PASSWORD:-}
+      # Production: omit from .env (default = verification required). Dev only: true = skip email check at login.
+      ETASMI_ALLOW_LOGIN_WITHOUT_EMAIL_VERIFICATION: ${ETASMI_ALLOW_LOGIN_WITHOUT_EMAIL_VERIFICATION:-}
+      # Dev only: true = fully disable login/register/reset rate limiting (brute-force lockouts).
+      # Leave empty in production. Localhost requests are already bypassed automatically.
+      ETASMI_DISABLE_RATE_LIMIT: ${ETASMI_DISABLE_RATE_LIMIT:-}
+      # Quran Foundation Content API (backend only). QF_ENV=production_live uses production OAuth tier when QF_AUTH_ENDPOINT is unset.
+      QF_ENV: ${QF_ENV:-}
+      QF_CLIENT_ID: ${QF_CLIENT_ID:-}
+      QF_CLIENT_SECRET: ${QF_CLIENT_SECRET:-}
+      QF_API_ENDPOINT: ${QF_API_ENDPOINT:-}
+      QF_AUTH_ENDPOINT: ${QF_AUTH_ENDPOINT:-}
+      QF_OAUTH_SCOPE: ${QF_OAUTH_SCOPE:-}
+      QF_SEARCH_API_BASE: ${QF_SEARCH_API_BASE:-}
+    volumes:
+      - etasmi-uploads:/usr/local/tomcat/etasmi_uploads
+    ports:
+      - "8080:8080"
+
+  # Optional HTTPS front-end (e.g. local TLS). Students join Zoom via redirect, not in-page SDK.
+  caddy:
+    image: caddy:2-alpine
+    container_name: etasmi-caddy
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "8443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+  phpmyadmin:
+    image: phpmyadmin:5-apache
+    container_name: etasmi-phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: etasmi
+      PMA_PASSWORD: etasmi123
+    ports:
+      - "8081:80"
+
+volumes:
+  mysql-data:
+  etasmi-uploads:

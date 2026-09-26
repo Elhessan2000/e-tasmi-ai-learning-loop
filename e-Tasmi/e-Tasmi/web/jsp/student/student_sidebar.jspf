@@ -1,0 +1,144 @@
+﻿<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page import="util.LocaleSupport" %>
+<%
+  Object studentSidebarActiveObj = request.getAttribute("activeMenu");
+  String studentSidebarActiveMenu = (studentSidebarActiveObj == null) ? "" : String.valueOf(studentSidebarActiveObj);
+%>
+<div class="student-shell-sidebar__scrim" data-student-nav-dismiss></div>
+<aside class="student-shell-sidebar" id="studentWorkspaceSidebar" data-student-sidebar
+  data-i18n="student.sidebar.aria" data-i18n-attr="aria-label">
+  <div class="student-shell-sidebar__panel student-shell-sidebar__panel--minimal">
+    <div class="student-shell-sidebar__mobile-bar">
+      <button class="student-shell-sidebar__close" type="button"
+        data-i18n="student.sidebar.closeNav" data-i18n-attr="aria-label|title"
+        aria-label="Close navigation" title="Close navigation" data-student-nav-dismiss>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="student-shell-sidebar__nav" data-i18n="student.sidebar.navAria" data-i18n-attr="aria-label" aria-label="Student navigation">
+      <a class="student-shell-sidebar__link <%= "overview".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/dashboard") %>"
+        data-i18n="student.nav.dashboard" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+            <rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+            <rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+            <rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.dashboard">Dashboard</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "sessions".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/available-sessions") %>"
+        data-i18n="student.nav.browse" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.browse">Browse Sessions</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "enrollments".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/enrollments") %>"
+        data-i18n="student.nav.mySessions" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5a2 2 0 0 1 2-2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M14 3v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.mySessions">My Sessions</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "recitations".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/recitations") %>"
+        data-i18n="student.nav.uploadRecitation" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.uploadRecitation">Upload Recitation</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "quran-library".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/quran-library") %>"
+        data-i18n="student.nav.quranLibrary" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M20 5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M12 3v18" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.quranLibrary">Quran Library</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "progress".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/progress") %>"
+        data-i18n="student.nav.progress" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 20h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <path d="m3 16 5-5 4 3 8-8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 6h5v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.progress">Progress</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "payments".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/payments") %>"
+        data-i18n="student.nav.payments" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M3 10h18" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M7 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.payments">Payments</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "notifications".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/notifications") %>"
+        data-i18n="student.nav.notifications" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 17H9m9-1.5V10a6 6 0 1 0-12 0v5.5L4.5 17v1h15v-1L18 15.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.notifications">Notifications</span>
+      </a>
+      <a class="student-shell-sidebar__link <%= "profile".equals(studentSidebarActiveMenu) ? "is-active" : "" %>"
+        href="<%= LocaleSupport.localizedUrl(request, "/student/profile") %>"
+        data-i18n="student.nav.profile" data-i18n-attr="aria-label|data-tooltip">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.profile">Profile</span>
+      </a>
+    </nav>
+
+    <div class="student-shell-sidebar__footer student-shell-sidebar__footer--logout">
+      <a class="student-shell-sidebar__logout student-shell-sidebar__logout--solid"
+        href="<%= LocaleSupport.localizedUrl(request, "/auth/logout") %>"
+        data-i18n="student.nav.logout" data-i18n-attr="aria-label" aria-label="Logout">
+        <span class="student-shell-sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m10 17-5-5 5-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 12h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="student-shell-sidebar__label" data-i18n="student.nav.logout">Logout</span>
+      </a>
+    </div>
+  </div>
+</aside>

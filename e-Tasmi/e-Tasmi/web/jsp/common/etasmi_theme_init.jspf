@@ -1,0 +1,30 @@
+<%@ page pageEncoding="UTF-8" %>
+<meta name="color-scheme" content="light dark">
+<script>
+  (function () {
+    var STORAGE_KEY = 'etasmi-theme';
+    var THEME_LIGHT = 'light';
+    var THEME_DARK = 'dark';
+
+    function resolveTheme() {
+      try {
+        var stored = localStorage.getItem(STORAGE_KEY);
+        if (stored === THEME_DARK || stored === THEME_LIGHT) {
+          return stored;
+        }
+      } catch (err) {
+        /* private mode / disabled storage */
+      }
+
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return THEME_DARK;
+      }
+      return THEME_LIGHT;
+    }
+
+    var theme = resolveTheme();
+    var root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.setAttribute('data-bs-theme', theme);
+  })();
+</script>

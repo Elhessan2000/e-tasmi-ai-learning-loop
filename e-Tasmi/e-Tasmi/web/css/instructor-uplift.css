@@ -1,0 +1,1030 @@
+/**
+ * Instructor module UI uplift.
+ *
+ * Adds visual polish that mirrors the Student design language:
+ *   - Banner / hero parity (mys-banner inspired)
+ *   - Active session card parity using the .mys-card system
+ *   - Sessions page Scheduled / Completed toggle
+ *   - Evaluations session-based grouping (session list, filtered submissions)
+ *   - Notifications card parity (notif-card inspired)
+ *   - Subtle hover, elevation, animation polish
+ *
+ * No structural changes â€” only additive styles so existing layouts
+ * remain intact when the new markup is opted in.
+ */
+
+/* =========================================================
+ * Shared subtle motion + elevation helpers
+ * ======================================================= */
+.iup-fade-in {
+    animation: iup-fade-in 280ms ease-out both;
+}
+
+@keyframes iup-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+ * Instructor Dashboard â€” banner + card parity
+ * ======================================================= */
+.iup-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-bottom: 22px;
+    background: linear-gradient(90deg, #004d40 0%, #0d9488 52%, #22c55e 100%);
+    box-shadow: 0 12px 28px rgba(13, 148, 136, 0.28);
+    color: #fff;
+}
+
+.iup-banner__inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.iup-banner__icon {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    display: grid;
+    place-items: center;
+    color: #fff;
+}
+
+.iup-banner__icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.iup-banner__copy {
+    flex: 1;
+    min-width: 220px;
+}
+
+.iup-banner__eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgba(236, 253, 245, 0.82);
+    margin-bottom: 4px;
+}
+
+.iup-banner__copy h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 1.85rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+}
+
+.iup-banner__copy p {
+    margin: 8px 0 0;
+    font-size: 15px;
+    color: rgba(204, 251, 241, 0.96);
+    max-width: 620px;
+    line-height: 1.55;
+}
+
+.iup-banner__actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.iup-banner__actions a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f766e;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.iup-banner__actions a:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+}
+
+.iup-banner__actions a.iup-banner__actions--ghost {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: none;
+}
+
+/* =========================================================
+ * Active Session card â€” instructor variant of .mys-card
+ * Reused via .mys-card classes from student-my-sessions.css.
+ * Below adds instructor-only refinements.
+ * ======================================================= */
+.iup-active-section {
+    margin-bottom: 24px;
+}
+
+.iup-active-section__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.iup-active-section__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.iup-active-section__link {
+    color: #0f766e;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(15, 118, 110, 0.4);
+    padding-bottom: 1px;
+}
+
+.iup-active-section__link:hover {
+    color: #0b665f;
+    border-bottom-color: rgba(15, 118, 110, 0.8);
+}
+
+/* "Start Session (Zoom)" CTA â€” green primary, matches platform theme */
+.mys-btn--zoom-start {
+    background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff;
+    border: 1px solid rgba(21, 128, 61, 0.38);
+    box-shadow: 0 6px 18px rgba(22, 163, 74, 0.32),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.mys-btn--zoom-start:hover {
+    background: linear-gradient(180deg, #15803d 0%, #166534 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(22, 101, 52, 0.36),
+                inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.mys-btn--ghost {
+    background: #ffffff;
+    color: #0f766e;
+    border: 1px solid rgba(15, 118, 110, 0.25);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.mys-btn--ghost:hover {
+    background: #f0fdf9;
+    border-color: rgba(15, 118, 110, 0.45);
+    transform: translateY(-1px);
+}
+
+/* Wrap form button correctly in the card foot */
+.mys-card__foot form {
+    display: inline-flex;
+}
+
+.mys-card__foot form .mys-btn,
+.mys-card__foot form .mys-btn--zoom-start {
+    width: 100%;
+}
+
+/* =========================================================
+ * Sessions page â€” Scheduled / Completed toggle
+ * ======================================================= */
+.iup-view-toggle {
+    display: flex;
+    justify-content: center;
+    margin: 18px 0 22px;
+}
+
+.iup-view-toggle__inner {
+    display: inline-flex;
+    background: #e2e8f0;
+    border-radius: 999px;
+    padding: 5px;
+    gap: 4px;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.iup-view-toggle__btn {
+    border: none;
+    background: transparent;
+    padding: 11px 26px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.18s ease, color 0.18s ease,
+                box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.iup-view-toggle__btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.iup-view-toggle__btn:hover {
+    color: #334155;
+}
+
+.iup-view-toggle__btn[aria-selected="true"] {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08),
+                0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.iup-view-toggle__btn[aria-selected="true"] svg {
+    color: #0f766e;
+}
+
+.iup-view-toggle__btn:focus-visible {
+    outline: 2px solid #14b8a6;
+    outline-offset: 2px;
+}
+
+.iup-view-toggle__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.12);
+    color: #0f766e;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.iup-view-toggle__btn[aria-selected="true"] .iup-view-toggle__count {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.iup-view[hidden] {
+    display: none !important;
+}
+
+/* =========================================================
+ * Evaluations page â€” Session list + filtered submissions
+ * ======================================================= */
+.iup-eval-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 4px 0 18px;
+    flex-wrap: wrap;
+}
+
+.iup-eval-toolbar__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.iup-eval-toolbar__sub {
+    font-size: 13px;
+    color: #64748b;
+    margin: 4px 0 0;
+}
+
+.iup-eval-toolbar__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #ffffff;
+    color: #0f766e;
+    border: 1px solid rgba(15, 118, 110, 0.25);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.18s ease, transform 0.18s ease,
+                border-color 0.18s ease;
+}
+
+.iup-eval-toolbar__back:hover {
+    background: #f0fdf9;
+    border-color: rgba(15, 118, 110, 0.45);
+    transform: translateY(-1px);
+}
+
+/* ----------------------------------------------------------------
+ * Evaluation session cards — premium green SaaS tiles (instructor eval)
+ * Soft green gradients, depth + glow, single status badge, no icon clutter.
+ * Variants: default | --complete | --reviewed (green spectrum only)
+ * ---------------------------------------------------------------- */
+
+.iup-eval-sessions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 22px;
+    padding: 4px;
+}
+
+.iup-eval-session-card {
+    --eva-accent: #22c55e;
+    --eva-accent-deep: #16a34a;
+    --eva-accent-glow: rgba(34, 197, 94, 0.28);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 238px;
+    padding: 22px 24px 18px;
+    isolation: isolate;
+    border-radius: 20px;
+    border: 1px solid rgba(22, 163, 74, 0.22);
+    cursor: pointer;
+    text-align: start;
+    font-family: inherit;
+    overflow: hidden;
+
+    --eva-top: #f0fdf4;
+    --eva-mid: #dcfce7;
+    --eva-low: #bbf7d0;
+
+    background: linear-gradient(168deg, var(--eva-top) 0%, var(--eva-mid) 42%, var(--eva-low) 100%);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        0 1px 2px rgba(22, 101, 52, 0.05),
+        0 12px 30px rgba(21, 128, 61, 0.07);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+    animation: iup-eval-card-soft-in 0.42s ease-out both;
+}
+
+.iup-eval-session-card::before {
+    content: "";
+    position: absolute;
+    top: -38%;
+    inset-inline-end: -30%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 42% 42%,
+        rgba(74, 222, 128, 0.42) 0%,
+        rgba(34, 197, 94, 0.14) 45%,
+        transparent 68%
+    );
+    opacity: 0.75;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.28s ease, transform 0.3s ease;
+}
+
+.iup-eval-session-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        155deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        transparent 38%,
+        transparent 58%,
+        rgba(22, 163, 74, 0.06) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes iup-eval-card-soft-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.iup-eval-session-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(34, 197, 94, 0.42);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.88),
+        0 0 0 3px rgba(34, 197, 94, 0.14),
+        0 10px 26px rgba(22, 101, 52, 0.09),
+        0 20px 44px var(--eva-accent-glow);
+}
+
+.iup-eval-session-card:hover::before {
+    opacity: 0.95;
+    transform: scale(1.05) translate(-2%, 1%);
+}
+
+.iup-eval-session-card:focus-visible {
+    outline: 2px solid var(--eva-accent-deep);
+    outline-offset: 3px;
+}
+
+.iup-eval-session-card:active {
+    transform: translateY(-2px);
+    transition-duration: 0.12s;
+}
+
+.iup-eval-session-card--complete {
+    --eva-accent: #16a34a;
+    --eva-accent-deep: #15803d;
+    --eva-accent-glow: rgba(22, 163, 74, 0.3);
+    --eva-top: #ecfdf5;
+    --eva-mid: #d1fae5;
+    --eva-low: #a7f3d0;
+    border-color: rgba(22, 163, 74, 0.26);
+}
+
+.iup-eval-session-card--reviewed {
+    --eva-accent: #059669;
+    --eva-accent-deep: #047857;
+    --eva-accent-glow: rgba(5, 150, 105, 0.32);
+    --eva-top: #ecfdf5;
+    --eva-mid: #d1fae5;
+    --eva-low: #86efac;
+    border-color: rgba(5, 150, 105, 0.28);
+}
+
+.iup-eval-session-card__head,
+.iup-eval-session-card__when,
+.iup-eval-session-card__metrics,
+.iup-eval-session-card__footer {
+    position: relative;
+    z-index: 1;
+}
+
+.iup-eval-session-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 10px;
+}
+
+.iup-eval-session-card__title {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #052e16;
+    letter-spacing: -0.035em;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.iup-eval-session-card__badge {
+    flex-shrink: 0;
+    max-width: 48%;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #9a3412;
+    background: linear-gradient(180deg, #fff7ed, #ffedd5);
+    border: 1px solid rgba(251, 146, 60, 0.45);
+    box-shadow:
+        0 1px 2px rgba(124, 45, 18, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.iup-eval-session-card--complete .iup-eval-session-card__badge {
+    color: #166534;
+    background: linear-gradient(180deg, #ecfdf5, #bbf7d0);
+    border-color: rgba(34, 197, 94, 0.45);
+}
+
+.iup-eval-session-card--reviewed .iup-eval-session-card__badge {
+    color: #065f46;
+    background: linear-gradient(180deg, #d1fae5, #6ee7b7);
+    border-color: rgba(5, 150, 105, 0.4);
+}
+
+.iup-eval-session-card__when {
+    margin: 0 0 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: #365314;
+    opacity: 0.82;
+}
+
+.iup-eval-session-card__metrics {
+    margin: 0 0 14px;
+    flex: 1 1 auto;
+    padding: 11px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: #1a2e05;
+    letter-spacing: 0.01em;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(22, 163, 74, 0.2);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.82) 0%,
+        rgba(240, 253, 244, 0.55) 100%
+    );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 3px rgba(22, 101, 52, 0.04);
+}
+
+.iup-eval-session-card:hover .iup-eval-session-card__metrics {
+    border-color: rgba(34, 197, 94, 0.34);
+}
+
+.iup-eval-session-card__metrics strong {
+    font-weight: 800;
+    color: var(--eva-accent-deep);
+}
+
+.iup-eval-session-card__metrics-dot {
+    padding: 0 7px;
+    color: rgba(63, 98, 18, 0.35);
+    font-weight: 700;
+}
+
+.iup-eval-session-card__footer {
+    margin-top: auto;
+    margin-inline-start: -4px;
+    margin-inline-end: -4px;
+    padding: 12px 4px 0;
+    border-top: 1px solid rgba(22, 163, 74, 0.14);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.iup-eval-session-card__action-label {
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--eva-accent-deep);
+    letter-spacing: 0.02em;
+    transition: color 0.22s ease;
+}
+
+.iup-eval-session-card__action-label::after {
+    content: " →";
+    display: inline-block;
+    margin-inline-start: 2px;
+    opacity: 0.65;
+    transition: transform 0.26s ease, opacity 0.22s ease;
+}
+
+.iup-eval-session-card:hover .iup-eval-session-card__action-label {
+    color: #14532d;
+}
+
+.iup-eval-session-card:hover .iup-eval-session-card__action-label::after {
+    opacity: 1;
+    transform: translateX(5px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iup-eval-session-card {
+        animation: none !important;
+    }
+    .iup-eval-session-card,
+    .iup-eval-session-card::before,
+    .iup-eval-session-card::after,
+    .iup-eval-session-card__action-label,
+    .iup-eval-session-card__action-label::after {
+        transition: none !important;
+    }
+    .iup-eval-session-card:hover,
+    .iup-eval-session-card:active {
+        transform: none;
+    }
+    .iup-eval-session-card:hover::before {
+        transform: none;
+    }
+    .iup-eval-session-card:hover .iup-eval-session-card__action-label::after {
+        transform: none;
+    }
+}
+/* Roster of submitted / not submitted students */
+.iup-eval-roster {
+    margin: 18px 0 6px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 880px) {
+    .iup-eval-roster {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.iup-eval-roster__col {
+    background: #ffffff;
+    border: 1px solid #e5e9f2;
+    border-radius: 14px;
+    padding: 14px 16px 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.iup-eval-roster__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.iup-eval-roster__count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    letter-spacing: 0.04em;
+}
+
+.iup-eval-roster__col--pending .iup-eval-roster__count {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.iup-eval-roster__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.iup-eval-roster__list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    font-size: 13.5px;
+    color: #0f172a;
+}
+
+.iup-eval-roster__list li .iup-eval-roster__name {
+    font-weight: 600;
+}
+
+.iup-eval-roster__list li .iup-eval-roster__id {
+    font-size: 11.5px;
+    color: #64748b;
+    margin-inline-start: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 2px 9px;
+}
+
+.iup-eval-roster__list li.iup-eval-roster__list-item--pending {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #7c2d12;
+}
+
+.iup-eval-roster__empty {
+    font-size: 13px;
+    color: #6b7280;
+    padding: 8px 4px;
+}
+
+.iup-eval-empty {
+    padding: 36px 22px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px dashed #e2e8f0;
+    border-radius: 16px;
+}
+
+.iup-eval-empty strong {
+    display: block;
+    font-size: 1.05rem;
+    color: #0f172a;
+    margin-bottom: 6px;
+    font-weight: 800;
+}
+
+.iup-eval-empty p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+/* =========================================================
+ * Notifications â€” instructor cards mirror student layout
+ * ======================================================= */
+.iup-notif-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    border-radius: 16px;
+    color: #ffffff;
+    background: linear-gradient(90deg, #004d40 0%, #0d9488 52%, #22c55e 100%);
+    box-shadow: 0 10px 28px rgba(13, 148, 136, 0.28);
+}
+
+.iup-notif-banner__left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.iup-notif-banner__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.iup-notif-banner__icon svg {
+    width: 24px;
+    height: 24px;
+    color: #ffffff;
+}
+
+.iup-notif-banner h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+}
+
+.iup-notif-banner p {
+    margin: 4px 0 0;
+    font-size: 13.5px;
+    color: rgba(204, 251, 241, 0.95);
+}
+
+.iup-notif-banner__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+.iup-notif-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.iup-notif-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px 18px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.iup-notif-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(15, 118, 110, 0.28);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.iup-notif-card__icon {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    box-shadow: 0 6px 14px rgba(15, 118, 110, 0.32);
+}
+
+.iup-notif-card__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.iup-notif-card__icon--star {
+    background: linear-gradient(135deg, #d97706, #fbbf24);
+    box-shadow: 0 6px 14px rgba(217, 119, 6, 0.3);
+}
+
+.iup-notif-card__icon--clock {
+    background: linear-gradient(135deg, #1d4ed8, #38bdf8);
+    box-shadow: 0 6px 14px rgba(29, 78, 216, 0.32);
+}
+
+.iup-notif-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.iup-notif-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.iup-notif-card__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.iup-notif-card__time {
+    font-size: 11.5px;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.iup-notif-card__msg {
+    margin: 6px 0 0;
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.55;
+}
+
+.iup-notif-empty {
+    padding: 40px 24px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px dashed #e2e8f0;
+    border-radius: 14px;
+}
+
+.iup-notif-empty strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.iup-notif-empty span {
+    color: #64748b;
+    font-size: 13.5px;
+}
+
+/* =========================================================
+ * Profile â€” soft accent + spacing
+ * ======================================================= */
+body.instructor-premium-page .profile-hero {
+    background: linear-gradient(120deg, #ffffff 0%, #f0fdf9 60%, #ecfdf5 100%);
+    border: 1px solid rgba(15, 118, 110, 0.18);
+    box-shadow: 0 10px 28px rgba(15, 118, 110, 0.08);
+}
+
+body.instructor-premium-page .profile-hero__eyebrow {
+    color: #0f766e;
+}
+
+body.instructor-premium-page .profile-sidebar-card,
+body.instructor-premium-page .profile-form-card {
+    transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+body.instructor-premium-page .profile-sidebar-card:hover,
+body.instructor-premium-page .profile-form-card:hover {
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================================
+ * Payments â€” small spacing + hover refinements
+ * ======================================================= */
+body.instructor-premium-page .ip-card {
+    transition: box-shadow 0.22s ease, border-color 0.22s ease,
+                transform 0.22s ease;
+}
+
+body.instructor-premium-page .ip-card:hover {
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+    border-color: rgba(15, 118, 110, 0.18);
+}
+
+body.instructor-premium-page .ip-hero {
+    background: linear-gradient(120deg, #ffffff 0%, #f0fdf9 100%);
+    border: 1px solid rgba(15, 118, 110, 0.16);
+    box-shadow: 0 10px 28px rgba(15, 118, 110, 0.08);
+}
+
+body.instructor-premium-page .ip-hero__eyebrow {
+    color: #0f766e;
+}
+
+body.instructor-premium-page .ip-table tr {
+    transition: background 0.18s ease;
+}
+
+body.instructor-premium-page .ip-table tbody tr:hover {
+    background: #f0fdf9;
+}
+
+/* =========================================================
+ * Reduced motion preference
+ * ======================================================= */
+@media (prefers-reduced-motion: reduce) {
+    .iup-fade-in,
+    .iup-eval-session-card,
+    .iup-notif-card,
+    .iup-banner__actions a,
+    body.instructor-premium-page .ip-card,
+    body.instructor-premium-page .profile-sidebar-card,
+    body.instructor-premium-page .profile-form-card {
+        transition: none;
+        transform: none;
+        animation: none;
+    }
+}
+

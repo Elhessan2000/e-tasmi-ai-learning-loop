@@ -1,0 +1,226 @@
+/* =====================================================================
+ * e-Tasmi — Premium scroll experience (home.jsp only)
+ * Scroll-reveal, seamless section blending, and micro-interactions.
+ * Vanilla CSS + IntersectionObserver (see assets/js/home-scroll-reveal.js).
+ * Light + dark aware via the shared --theme-* tokens.
+ * ===================================================================== */
+
+:root {
+  /* Premium easing curves — calm, decelerating, intentional. */
+  --etasmi-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --etasmi-ease-soft: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Reveal rhythm */
+  --etasmi-reveal-duration: 640ms;
+  --etasmi-reveal-shift: 22px;
+  --etasmi-stagger-step: 90ms;
+
+  /* Section blend colours (overridden in dark mode below) */
+  --etasmi-blend-from: #ffffff;
+  --etasmi-blend-to: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  --etasmi-blend-from: var(--theme-bg, #0b1424);
+  --etasmi-blend-to: var(--theme-bg, #0b1424);
+}
+
+/* ---------------------------------------------------------------------
+ * 1. SCROLL-REVEAL UTILITIES
+ * The hidden state is only applied once JS confirms support and adds
+ * `.etasmi-reveal-ready` to <html>. Without JS (or with reduced motion)
+ * content stays fully visible — no CLS, no blank sections.
+ * ------------------------------------------------------------------- */
+html.etasmi-reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--etasmi-reveal-shift));
+  transition:
+    opacity var(--etasmi-reveal-duration) var(--etasmi-ease-out),
+    transform var(--etasmi-reveal-duration) var(--etasmi-ease-out);
+  /* Dynamic stagger: index is set inline or auto-assigned by the observer. */
+  transition-delay: calc(var(--item-index, 0) * var(--etasmi-stagger-step));
+  will-change: opacity, transform;
+}
+
+/* Directional variants */
+html.etasmi-reveal-ready [data-reveal="fade"] {
+  transform: translateY(0);
+}
+
+html.etasmi-reveal-ready [data-reveal="left"] {
+  transform: translateX(calc(var(--etasmi-reveal-shift) * -1));
+}
+
+html.etasmi-reveal-ready [data-reveal="right"] {
+  transform: translateX(var(--etasmi-reveal-shift));
+}
+
+/* Revealed state */
+html.etasmi-reveal-ready [data-reveal].is-visible {
+  opacity: 1;
+  transform: translate(0, 0);
+  will-change: auto;
+}
+
+/* ---------------------------------------------------------------------
+ * 2. SMOOTH SCROLLING + ANCHOR OFFSET
+ * Sticky navbar would otherwise hide section tops on in-page jumps.
+ * ------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+/* ---------------------------------------------------------------------
+ * 3. SEAMLESS SECTION CONNECTIONS
+ * Soft gradient scrims fade the tinted bands into the surrounding
+ * surfaces, removing abrupt background cuts. Pure overlay — never
+ * intercepts clicks and never moves content.
+ * ------------------------------------------------------------------- */
+.etasmi-blend {
+  position: relative;
+  isolation: isolate;
+}
+
+.etasmi-blend > * {
+  position: relative;
+  z-index: 1;
+}
+
+.etasmi-blend::before,
+.etasmi-blend::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: clamp(80px, 12vh, 150px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.etasmi-blend::before {
+  top: 0;
+  background: linear-gradient(180deg, var(--etasmi-blend-from) 0%, transparent 100%);
+}
+
+.etasmi-blend::after {
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--etasmi-blend-to) 100%);
+}
+
+/* ---------------------------------------------------------------------
+ * 4. MICRO-INTERACTIONS — BUTTONS
+ * Subtle lift + a single light sheen sweep on hover. Calm, not flashy.
+ * ------------------------------------------------------------------- */
+.btn {
+  transition:
+    transform 0.45s var(--etasmi-ease-out),
+    box-shadow 0.45s var(--etasmi-ease-out),
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.btn-primary,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-light {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary > *,
+.btn-outline-primary > *,
+.btn-outline-secondary > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s var(--etasmi-ease-soft);
+  pointer-events: none;
+}
+
+.btn-primary:hover::after,
+.btn-primary:focus-visible::after {
+  transform: translateX(130%);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 0.75rem 1.5rem -0.55rem rgba(15, 118, 110, 0.5);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-light:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* ---------------------------------------------------------------------
+ * 5. MICRO-INTERACTIONS — CARD LIFT UTILITY
+ * For cards that don't already carry a hover treatment (e.g. pricing).
+ * Existing session/instructor/testimonial hovers are left untouched.
+ * ------------------------------------------------------------------- */
+.etasmi-lift {
+  transition:
+    transform 0.55s var(--etasmi-ease-out),
+    box-shadow 0.55s var(--etasmi-ease-out);
+  will-change: transform;
+}
+
+.etasmi-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 1.5rem 3rem -1rem rgba(15, 23, 42, 0.18) !important;
+}
+
+:root[data-theme="dark"] .etasmi-lift:hover {
+  box-shadow: 0 1.5rem 3rem -1rem rgba(0, 0, 0, 0.55) !important;
+}
+
+/* ---------------------------------------------------------------------
+ * 6. REDUCED MOTION — honour the user's OS preference
+ * ------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html.etasmi-reveal-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .btn,
+  .btn-primary::after,
+  .etasmi-lift {
+    transition: none !important;
+  }
+
+  .btn-primary:hover,
+  .btn-outline-primary:hover,
+  .btn-outline-secondary:hover,
+  .btn-light:hover,
+  .etasmi-lift:hover {
+    transform: none !important;
+  }
+}

@@ -1,0 +1,88 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%
+  Object hdrDisplayNameObj = session.getAttribute("displayName");
+  String hdrDisplayName = (hdrDisplayNameObj == null) ? "Admin" : String.valueOf(hdrDisplayNameObj);
+
+  String hdrInitials = "A";
+  String hdrDn = hdrDisplayName == null ? "" : hdrDisplayName.trim();
+  if (!hdrDn.isEmpty()) {
+    String[] parts = hdrDn.split("\\s+");
+    if (parts.length == 1) {
+      hdrInitials = parts[0].substring(0, 1).toUpperCase();
+    } else {
+      String a = parts[0].trim().isEmpty() ? "" : parts[0].substring(0, 1).toUpperCase();
+      String b = parts[parts.length - 1].trim().isEmpty() ? "" : parts[parts.length - 1].substring(0, 1).toUpperCase();
+      hdrInitials = (a + b).trim().isEmpty() ? "A" : (a + b);
+    }
+  }
+
+  int notificationCount = 0;
+  Object recentNotificationsObj = request.getAttribute("recentNotifications");
+  Object notificationsObj = request.getAttribute("notifications");
+  if (recentNotificationsObj instanceof List) {
+    notificationCount = ((List) recentNotificationsObj).size();
+  } else if (notificationsObj instanceof List) {
+    notificationCount = ((List) notificationsObj).size();
+  }
+%>
+<header class="admin-shell-topbar" role="banner">
+  <div class="admin-shell-topbar__inner">
+    <div class="admin-shell-topbar__brandbar">
+      <button class="admin-shell-topbar__menu" type="button"
+        data-i18n="nav.toggleNav" data-i18n-attr="aria-label|title"
+        aria-label="Toggle navigation" title="Toggle navigation" aria-controls="adminWorkspaceSidebar" aria-expanded="false" data-admin-nav-toggle>
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <a class="admin-shell-topbar__brand" href="<%= request.getContextPath() %>/admin/dashboard"
+        data-i18n="admin.common.openAdminDashboard" data-i18n-attr="aria-label" aria-label="Open admin dashboard">
+        <span class="admin-shell-topbar__brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.75 6.75A1.75 1.75 0 0 1 6.5 5h4.75c1.1 0 2.13.48 2.84 1.3.71-.82 1.74-1.3 2.84-1.3h.57a1.75 1.75 0 0 1 1.75 1.75v10.5A1.75 1.75 0 0 1 18.5 19h-1.07a3.5 3.5 0 0 0-2.48 1.02l-.45.45a.7.7 0 0 1-.99 0l-.45-.45A3.5 3.5 0 0 0 10.57 19H6.5a1.75 1.75 0 0 1-1.75-1.75V6.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M12 6.75v11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <strong>e-Tasmi</strong>
+      </a>
+    </div>
+
+    <div class="admin-shell-topbar__spacer" aria-hidden="true"></div>
+
+    <div class="admin-shell-topbar__actions">
+      <%@ include file="/jsp/common/etasmi_language_switcher.jspf" %>
+
+      <button class="admin-shell-topbar__iconbtn etasmi-theme-toggle" type="button" data-etasmi-theme-toggle
+        data-i18n="admin.common.toggleAppearance" data-i18n-attr="aria-label|title"
+        aria-label="Toggle appearance" title="Toggle appearance">
+        <svg class="etasmi-theme-toggle__moon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M20 15.5A7.5 7.5 0 0 1 8.5 4a8.5 8.5 0 1 0 11.5 11.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+        <svg class="etasmi-theme-toggle__sun" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <a class="admin-shell-topbar__iconbtn admin-shell-topbar__iconbtn--notify" href="<%= request.getContextPath() %>/notifications"
+        data-i18n="header.openNotifications" data-i18n-attr="aria-label" aria-label="Open notifications">
+        <% if (notificationCount > 0) { %>
+        <span class="admin-shell-topbar__badge"><%= notificationCount > 9 ? "9+" : String.valueOf(notificationCount) %></span>
+        <% } %>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 17H9m9-1.5V10a6 6 0 1 0-12 0v5.5L4.5 17v1h15v-1L18 15.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </a>
+
+      <a class="admin-shell-profile" href="<%= request.getContextPath() %>/admin/profile"
+        data-i18n="header.openProfile" data-i18n-attr="aria-label" aria-label="Open profile">
+        <span class="admin-shell-profile__avatar" aria-hidden="true">
+          <span class="admin-shell-profile__fallback"><%= hdrInitials %></span>
+        </span>
+      </a>
+    </div>
+  </div>
+</header>

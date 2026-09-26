@@ -1,0 +1,7 @@
+/e-Tasmi/build/
+/e-Tasmi/dist/
+/e-Tasmi/nbproject/private/
+mysql-data/
+.vscode/
+.env
+ 

@@ -1,0 +1,10 @@
+<%@ page pageEncoding="UTF-8" %>
+<div class="etasmi-language-switcher" data-language-switcher>
+  <label class="etasmi-language-switcher__label" for="etasmi-site-language" data-i18n="common.language">Language</label>
+  <select id="etasmi-site-language" class="etasmi-language-switcher__select" name="language"
+    aria-label="Switch language">
+    <option value="en" lang="en">English</option>
+    <option value="ar" lang="ar">العربية</option>
+    <option value="ms" lang="ms">Bahasa Melayu</option>
+  </select>
+</div>

@@ -1,0 +1,1099 @@
+/*
+ * e-Tasmi — Platform-wide Theme System (Light + Dark)
+ * ---------------------------------------------------
+ * A single, centralized stylesheet that:
+ *   1. Defines a neutral set of theme tokens (--theme-*).
+ *   2. Maps those tokens onto the existing package variables
+ *      (--admin-*, --instructor-*, --student-*, --etasmi-*,
+ *      and the main.css --bg / --surface / --ink / --line).
+ *   3. Provides targeted dark-mode overrides for hard-coded
+ *      surfaces, borders, and text colors found across the
+ *      admin / instructor / student / public CSS bundles so
+ *      the existing UI adapts without rewriting each file.
+ *
+ * Activation: <html data-theme="dark"> (or remove the attribute
+ * for light mode). Handled by etasmi-theme.js and a small
+ * FOUC-prevention script embedded in every ui_head include.
+ */
+
+/* ============================================================
+ * 1. NEUTRAL THEME TOKENS
+ * ============================================================ */
+
+:root {
+  /* Light (default) neutrals — premium, warm-slate palette */
+  --theme-bg: #f5f7fb;
+  --theme-bg-soft: #eef2f7;
+  --theme-surface: #ffffff;
+  --theme-surface-raised: #ffffff;
+  --theme-surface-muted: #f8fafc;
+  --theme-surface-hover: #f1f5f9;
+  --theme-border: #e2e8f0;
+  --theme-border-strong: #cbd5e1;
+  --theme-text: #0f172a;
+  --theme-text-soft: #475569;
+  --theme-text-muted: #64748b;
+  --theme-primary: #0f766e;
+  --theme-primary-strong: #115e59;
+  --theme-primary-soft: rgba(15, 118, 110, 0.10);
+  --theme-accent: #d97706;
+  --theme-danger: #dc2626;
+  --theme-success: #16a34a;
+  --theme-warning: #d97706;
+  --theme-overlay: rgba(15, 23, 42, 0.52);
+  --theme-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --theme-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --theme-shadow-lg: 0 18px 48px rgba(15, 23, 42, 0.12);
+
+  color-scheme: light;
+}
+
+/* ============================================================
+ * 2. DARK THEME NEUTRALS  (activated via <html data-theme="dark">)
+ * Deep navy / slate palette — elegant, not harsh black.
+ * ============================================================ */
+
+:root[data-theme="dark"] {
+  --theme-bg: #0b1220;
+  --theme-bg-soft: #0d1629;
+  --theme-surface: #111b32;
+  --theme-surface-raised: #17223d;
+  --theme-surface-muted: #0d1629;
+  --theme-surface-hover: #18243f;
+  --theme-border: #1f2c48;
+  --theme-border-strong: #2c3c5e;
+  --theme-text: #e6eaf3;
+  --theme-text-soft: #b7c1d4;
+  --theme-text-muted: #8592aa;
+  --theme-primary: #2dd4bf;
+  --theme-primary-strong: #14b8a6;
+  --theme-primary-soft: rgba(45, 212, 191, 0.16);
+  --theme-accent: #f59e0b;
+  --theme-danger: #f87171;
+  --theme-success: #4ade80;
+  --theme-warning: #fbbf24;
+  --theme-overlay: rgba(2, 6, 17, 0.72);
+  --theme-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --theme-shadow-md: 0 10px 28px rgba(0, 0, 0, 0.50);
+  --theme-shadow-lg: 0 22px 56px rgba(0, 0, 0, 0.55);
+
+  color-scheme: dark;
+}
+
+/* ============================================================
+ * 3. MAP THEME TOKENS → EXISTING PACKAGE VARIABLES
+ *    (So every CSS file that reads --admin-*, --student-*,
+ *     --instructor-*, --etasmi-* automatically re-themes.)
+ * ============================================================ */
+
+:root[data-theme="dark"] {
+  /* main.css */
+  --bg: var(--theme-bg);
+  --bg-soft: var(--theme-bg-soft);
+  --surface: var(--theme-surface);
+  --surface-strong: var(--theme-surface-raised);
+  --ink: var(--theme-text);
+  --ink-soft: var(--theme-text-soft);
+  --line: var(--theme-border);
+  --shadow: var(--theme-shadow-lg);
+
+  /* admin-package.css */
+  --admin-bg: var(--theme-bg);
+  --admin-surface: var(--theme-surface);
+  --admin-surface-muted: var(--theme-surface-muted);
+  --admin-border: var(--theme-border);
+  --admin-border-strong: var(--theme-border-strong);
+  --admin-text: var(--theme-text);
+  --admin-text-soft: var(--theme-text-soft);
+  --admin-text-muted: var(--theme-text-muted);
+  --admin-primary-soft: var(--theme-primary-soft);
+  --admin-shadow-sm: var(--theme-shadow-sm);
+  --admin-shadow-md: var(--theme-shadow-md);
+
+  /* instructor-package.css */
+  --instructor-bg: var(--theme-bg);
+  --instructor-surface: var(--theme-surface);
+  --instructor-surface-muted: var(--theme-surface-muted);
+  --instructor-border: var(--theme-border);
+  --instructor-border-strong: var(--theme-border-strong);
+  --instructor-text: var(--theme-text);
+  --instructor-text-soft: var(--theme-text-soft);
+  --instructor-text-muted: var(--theme-text-muted);
+  --instructor-primary-soft: var(--theme-primary-soft);
+  --instructor-shadow-sm: var(--theme-shadow-sm);
+  --instructor-shadow-md: var(--theme-shadow-md);
+  --instructor-shadow-lg: var(--theme-shadow-lg);
+
+  /* student-package.css */
+  --student-bg: var(--theme-bg);
+  --student-surface: var(--theme-surface);
+  --student-surface-muted: var(--theme-surface-muted);
+  --student-border: var(--theme-border);
+  --student-border-strong: var(--theme-border-strong);
+  --student-text: var(--theme-text);
+  --student-text-soft: var(--theme-text-soft);
+  --student-text-muted: var(--theme-text-muted);
+  --student-primary-soft: var(--theme-primary-soft);
+  --student-shadow-sm: var(--theme-shadow-sm);
+  --student-shadow-md: var(--theme-shadow-md);
+  --student-shadow-lg: var(--theme-shadow-lg);
+
+  /* etasmi-platform.css */
+  --etasmi-ink: var(--theme-text);
+  --etasmi-ink-soft: var(--theme-text-soft);
+  --etasmi-line: var(--theme-border);
+  --etasmi-surface: var(--theme-surface);
+  --etasmi-shadow-card: var(--theme-shadow-sm);
+  --etasmi-shadow-card-hover: var(--theme-shadow-md);
+}
+
+/* ============================================================
+ * 4. GLOBAL BODY + PAGE SURFACE OVERRIDES
+ * ============================================================ */
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] body.admin-package-page,
+:root[data-theme="dark"] body.admin-body.admin-package-page,
+:root[data-theme="dark"] body.instructor-package-page,
+:root[data-theme="dark"] body.instructor-premium-page.instructor-package-page,
+:root[data-theme="dark"] body.student-package-page,
+:root[data-theme="dark"] body.student-premium-page.student-package-page,
+:root[data-theme="dark"] body.auth-body,
+:root[data-theme="dark"] body.etasmi-auth-v2 {
+  background: var(--theme-bg) !important;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] body {
+  background-image: none !important;
+}
+
+/* public home.jsp uses Tailwind canvas/surface colours */
+:root[data-theme="dark"] .bg-canvas,
+:root[data-theme="dark"] .bg-surface,
+:root[data-theme="dark"] .bg-surfaceDeep,
+:root[data-theme="dark"] .bg-white {
+  background-color: var(--theme-surface) !important;
+}
+
+:root[data-theme="dark"] .text-ink,
+:root[data-theme="dark"] .text-ink\/90,
+:root[data-theme="dark"] .text-ink\/80 {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .text-ink-muted,
+:root[data-theme="dark"] .text-slate-500,
+:root[data-theme="dark"] .text-slate-600,
+:root[data-theme="dark"] .text-slate-700 {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .text-slate-800,
+:root[data-theme="dark"] .text-slate-900 {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .border-line,
+:root[data-theme="dark"] .border-slate-100,
+:root[data-theme="dark"] .border-slate-200 {
+  border-color: var(--theme-border) !important;
+}
+
+/* ============================================================
+ * 5. TOPBAR (all roles)
+ * ============================================================ */
+
+:root[data-theme="dark"] .admin-shell-topbar,
+:root[data-theme="dark"] .instructor-shell-topbar,
+:root[data-theme="dark"] .student-shell-topbar,
+:root[data-theme="dark"] .topbar {
+  background: rgba(17, 27, 50, 0.92) !important;
+  border-bottom: 1px solid var(--theme-border) !important;
+  color: var(--theme-text);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+:root[data-theme="dark"] .admin-shell-topbar__menu,
+:root[data-theme="dark"] .instructor-shell-topbar__menu,
+:root[data-theme="dark"] .student-shell-topbar__menu {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-topbar__menu span,
+:root[data-theme="dark"] .instructor-shell-topbar__menu span,
+:root[data-theme="dark"] .student-shell-topbar__menu span {
+  background: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-topbar__iconbtn,
+:root[data-theme="dark"] .instructor-shell-topbar__iconbtn,
+:root[data-theme="dark"] .student-shell-topbar__iconbtn {
+  color: var(--theme-text-soft);
+}
+
+:root[data-theme="dark"] .admin-shell-topbar__iconbtn:hover,
+:root[data-theme="dark"] .instructor-shell-topbar__iconbtn:hover,
+:root[data-theme="dark"] .student-shell-topbar__iconbtn:hover {
+  background: var(--theme-surface-hover) !important;
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-topbar__brandbar,
+:root[data-theme="dark"] .instructor-shell-topbar__brandbar,
+:root[data-theme="dark"] .student-shell-topbar__brandbar {
+  border-inline-end-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-topbar__badge,
+:root[data-theme="dark"] .instructor-shell-topbar__badge,
+:root[data-theme="dark"] .student-shell-topbar__badge {
+  border-color: var(--theme-surface) !important;
+}
+
+/* ============================================================
+ * 6. SIDEBAR (all roles)
+ * ============================================================ */
+
+:root[data-theme="dark"] .admin-shell-sidebar__panel,
+:root[data-theme="dark"] .instructor-shell-sidebar__panel,
+:root[data-theme="dark"] .student-shell-sidebar__panel {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-sidebar__brand-copy strong,
+:root[data-theme="dark"] .instructor-shell-sidebar__brand-copy strong,
+:root[data-theme="dark"] .student-shell-sidebar__brand-copy strong {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-sidebar__link,
+:root[data-theme="dark"] .instructor-shell-sidebar__link,
+:root[data-theme="dark"] .student-shell-sidebar__link {
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-sidebar__link:hover,
+:root[data-theme="dark"] .admin-shell-sidebar__link:focus-visible,
+:root[data-theme="dark"] .instructor-shell-sidebar__link:hover,
+:root[data-theme="dark"] .instructor-shell-sidebar__link:focus-visible,
+:root[data-theme="dark"] .student-shell-sidebar__link:hover,
+:root[data-theme="dark"] .student-shell-sidebar__link:focus-visible {
+  background: var(--theme-surface-hover) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .admin-shell-sidebar__link.is-active,
+:root[data-theme="dark"] .admin-shell-sidebar__link[aria-current="page"],
+:root[data-theme="dark"] .instructor-shell-sidebar__link.is-active,
+:root[data-theme="dark"] .instructor-shell-sidebar__link[aria-current="page"],
+:root[data-theme="dark"] .student-shell-sidebar__link.is-active,
+:root[data-theme="dark"] .student-shell-sidebar__link[aria-current="page"] {
+  background: var(--theme-primary-soft) !important;
+  color: var(--theme-primary) !important;
+  border-color: rgba(45, 212, 191, 0.28) !important;
+}
+
+/* ============================================================
+ * 7. CARDS, PANELS, SECTIONS
+ * ============================================================ */
+
+:root[data-theme="dark"] .sd-card,
+:root[data-theme="dark"] .admin-panel,
+:root[data-theme="dark"] .content-card,
+:root[data-theme="dark"] .page-block,
+:root[data-theme="dark"] .auth-card,
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .ar-hero,
+:root[data-theme="dark"] .ar-stat,
+:root[data-theme="dark"] .ar-section,
+:root[data-theme="dark"] .ar-quick-card,
+:root[data-theme="dark"] .ssess-card,
+:root[data-theme="dark"] .rec-card,
+:root[data-theme="dark"] .isess-hero,
+:root[data-theme="dark"] .isess-table-wrap,
+:root[data-theme="dark"] .notification-item,
+:root[data-theme="dark"] .student-dashboard-clean__panel,
+:root[data-theme="dark"] .instructor-dashboard-clean__panel,
+:root[data-theme="dark"] .profile-stat-card,
+:root[data-theme="dark"] .profile-sidebar-card,
+:root[data-theme="dark"] .ip-method-card,
+:root[data-theme="dark"] .ip-instructions-card,
+:root[data-theme="dark"] .ip-summary,
+:root[data-theme="dark"] .ip-modal,
+:root[data-theme="dark"] .shadow-card {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+:root[data-theme="dark"] .ar-hero {
+  background: linear-gradient(180deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+}
+
+:root[data-theme="dark"] .sd-card-title,
+:root[data-theme="dark"] .admin-section-title,
+:root[data-theme="dark"] .auth-title,
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4 {
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .helper-text,
+:root[data-theme="dark"] .admin-footnote,
+:root[data-theme="dark"] .auth-help,
+:root[data-theme="dark"] .sd-empty-sub,
+:root[data-theme="dark"] .material-sub,
+:root[data-theme="dark"] .text-muted,
+:root[data-theme="dark"] .sd-card-eyebrow {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .sd-empty,
+:root[data-theme="dark"] .admin-empty,
+:root[data-theme="dark"] .ar-empty {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-soft) !important;
+}
+
+/* ============================================================
+ * 8. TABLES
+ * ============================================================ */
+
+:root[data-theme="dark"] .table-wrap,
+:root[data-theme="dark"] .admin-table-wrap,
+:root[data-theme="dark"] .ar-table-wrap {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .table-wrap table,
+:root[data-theme="dark"] table,
+:root[data-theme="dark"] .admin-table,
+:root[data-theme="dark"] .participant-table,
+:root[data-theme="dark"] .ar-table {
+  background: transparent !important;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] th,
+:root[data-theme="dark"] .table-wrap th,
+:root[data-theme="dark"] .ar-table thead,
+:root[data-theme="dark"] .ar-table th {
+  background: var(--theme-surface-muted) !important;
+  color: var(--theme-text-muted) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] td,
+:root[data-theme="dark"] .table-wrap td {
+  border-bottom-color: var(--theme-border) !important;
+  color: var(--theme-text-soft);
+}
+
+:root[data-theme="dark"] tbody tr:hover,
+:root[data-theme="dark"] .table-wrap tbody tr:hover {
+  background: var(--theme-surface-hover) !important;
+}
+
+/* ============================================================
+ * 9. FORM CONTROLS
+ * ============================================================ */
+
+:root[data-theme="dark"] input[type="text"],
+:root[data-theme="dark"] input[type="email"],
+:root[data-theme="dark"] input[type="password"],
+:root[data-theme="dark"] input[type="number"],
+:root[data-theme="dark"] input[type="date"],
+:root[data-theme="dark"] input[type="time"],
+:root[data-theme="dark"] input[type="url"],
+:root[data-theme="dark"] input[type="search"],
+:root[data-theme="dark"] input[type="tel"],
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] .admin-input,
+:root[data-theme="dark"] .admin-select,
+:root[data-theme="dark"] .dash-search input,
+:root[data-theme="dark"] .auth-control input,
+:root[data-theme="dark"] .auth-control select,
+:root[data-theme="dark"] .auth-control textarea,
+:root[data-theme="dark"] .input-group input,
+:root[data-theme="dark"] .input-group select,
+:root[data-theme="dark"] .input-group textarea,
+:root[data-theme="dark"] .input-icon input,
+:root[data-theme="dark"] .input-icon select,
+:root[data-theme="dark"] .input-icon textarea,
+:root[data-theme="dark"] .admin-field input,
+:root[data-theme="dark"] .admin-field select,
+:root[data-theme="dark"] .admin-field textarea {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: var(--theme-text-muted);
+  opacity: 0.85;
+}
+
+:root[data-theme="dark"] input:focus,
+:root[data-theme="dark"] select:focus,
+:root[data-theme="dark"] textarea:focus {
+  border-color: var(--theme-primary) !important;
+  box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.18) !important;
+  background: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme="dark"] .input-label,
+:root[data-theme="dark"] .admin-field label,
+:root[data-theme="dark"] .auth-label,
+:root[data-theme="dark"] label {
+  color: var(--theme-text);
+}
+
+/* Disabled / readonly */
+:root[data-theme="dark"] input:disabled,
+:root[data-theme="dark"] select:disabled,
+:root[data-theme="dark"] textarea:disabled {
+  background: var(--theme-surface-muted) !important;
+  color: var(--theme-text-muted) !important;
+}
+
+/* ============================================================
+ * 10. BUTTONS
+ * ============================================================ */
+
+:root[data-theme="dark"] .btn-ghost,
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] .button--ghost,
+:root[data-theme="dark"] .auth-btn-secondary,
+:root[data-theme="dark"] .admin-btn-secondary {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .btn-ghost:hover,
+:root[data-theme="dark"] .btn-secondary:hover,
+:root[data-theme="dark"] .button--ghost:hover,
+:root[data-theme="dark"] .auth-btn-secondary:hover,
+:root[data-theme="dark"] .admin-btn-secondary:hover {
+  background: var(--theme-surface-hover) !important;
+  border-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] .button--outline {
+  background: transparent !important;
+  border-color: var(--theme-border-strong) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .pill,
+:root[data-theme="dark"] .pill--ghost,
+:root[data-theme="dark"] .admin-status,
+:root[data-theme="dark"] .status-pill,
+:root[data-theme="dark"] .status-pill--neutral {
+  background: var(--theme-surface-muted) !important;
+  color: var(--theme-text-soft) !important;
+  border: 1px solid var(--theme-border);
+}
+
+/* ============================================================
+ * 11. ALERTS
+ * ============================================================ */
+
+:root[data-theme="dark"] .alert,
+:root[data-theme="dark"] .auth-alert,
+:root[data-theme="dark"] .admin-alert {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text);
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .alert-success,
+:root[data-theme="dark"] .auth-alert[data-tone="success"],
+:root[data-theme="dark"] .admin-alert-success {
+  background: rgba(34, 197, 94, 0.12) !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  color: #86efac !important;
+}
+
+:root[data-theme="dark"] .alert-error,
+:root[data-theme="dark"] .auth-alert[data-tone="error"],
+:root[data-theme="dark"] .admin-alert-error {
+  background: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+  color: #fca5a5 !important;
+}
+
+:root[data-theme="dark"] .alert-warning,
+:root[data-theme="dark"] .auth-alert[data-tone="warning"] {
+  background: rgba(251, 191, 36, 0.12) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+  color: #fcd34d !important;
+}
+
+/* ============================================================
+ * 12. MODALS + OVERLAYS
+ * ============================================================ */
+
+:root[data-theme="dark"] .ip-modal__panel,
+:root[data-theme="dark"] .modal-panel,
+:root[data-theme="dark"] .admin-modal__panel,
+:root[data-theme="dark"] .ip-modal,
+:root[data-theme="dark"] dialog,
+:root[data-theme="dark"] .modal,
+:root[data-theme="dark"] .ssess-modal,
+:root[data-theme="dark"] .ssess-modal__panel {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
+  box-shadow: var(--theme-shadow-lg) !important;
+}
+
+:root[data-theme="dark"] .ip-modal__scrim,
+:root[data-theme="dark"] .modal-scrim,
+:root[data-theme="dark"] .admin-modal__scrim,
+:root[data-theme="dark"] .ssess-modal__scrim {
+  background: var(--theme-overlay) !important;
+}
+
+:root[data-theme="dark"] .ip-modal__head,
+:root[data-theme="dark"] .ip-modal__foot,
+:root[data-theme="dark"] .modal-head,
+:root[data-theme="dark"] .modal-foot {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ============================================================
+ * 13. INSTRUCTOR PAYMENTS (.ip-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] .ip-method-card {
+  background: var(--theme-surface-raised) !important;
+}
+
+:root[data-theme="dark"] .ip-method-card.is-disabled {
+  background: var(--theme-surface-muted) !important;
+  opacity: 0.8;
+}
+
+:root[data-theme="dark"] .ip-dropzone {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border-strong) !important;
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .ip-dropzone.is-over,
+:root[data-theme="dark"] .ip-dropzone:hover {
+  background: rgba(45, 212, 191, 0.08) !important;
+  border-color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .ip-state-badge {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .ip-state-badge.is-configured {
+  background: rgba(45, 212, 191, 0.15) !important;
+  border-color: rgba(45, 212, 191, 0.35) !important;
+  color: var(--theme-primary) !important;
+}
+
+/* ============================================================
+ * 14. STUDENT SESSIONS (.ssess-*)
+ * ============================================================ */
+
+:root[data-theme="dark"] .ssess-card {
+  background: var(--theme-surface) !important;
+}
+
+:root[data-theme="dark"] .ssess-card__head,
+:root[data-theme="dark"] .ssess-card__body,
+:root[data-theme="dark"] .ssess-card__foot {
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .ssess-card__meta,
+:root[data-theme="dark"] .ssess-meta,
+:root[data-theme="dark"] .ssess-chip {
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] .ssess-chip {
+  background: var(--theme-surface-muted) !important;
+  border: 1px solid var(--theme-border);
+}
+
+/* ============================================================
+ * 15. NOTIFICATIONS + BADGES
+ * ============================================================ */
+
+:root[data-theme="dark"] .notification-item {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .notification-item.is-unread {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--theme-primary) !important;
+}
+
+/* ============================================================
+ * 16. DIVIDERS, BORDERS, HR
+ * ============================================================ */
+
+:root[data-theme="dark"] hr,
+:root[data-theme="dark"] .divider,
+:root[data-theme="dark"] .sd-divider {
+  border-color: var(--theme-border) !important;
+  background: var(--theme-border);
+}
+
+:root[data-theme="dark"] .footer {
+  color: var(--theme-text-muted);
+  border-top-color: var(--theme-border) !important;
+}
+
+/* ============================================================
+ * 17. PROFILE HERO + BREADCRUMBS
+ * ============================================================ */
+
+:root[data-theme="dark"] .profile-hero,
+:root[data-theme="dark"] .profile-hero__bg,
+:root[data-theme="dark"] .admin-breadcrumb-hero,
+:root[data-theme="dark"] .instructor-breadcrumb-hero,
+:root[data-theme="dark"] .student-breadcrumb-hero {
+  background: linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-raised) 100%) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .profile-breadcrumb,
+:root[data-theme="dark"] .ar-breadcrumb {
+  color: var(--theme-text-muted) !important;
+}
+
+/* ============================================================
+ * 18. THEME TOGGLE BUTTON (shared across roles/public)
+ * ============================================================ */
+
+.etasmi-theme-toggle {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-text-soft, #475569);
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, transform 0.2s ease;
+}
+
+.etasmi-theme-toggle:hover,
+.etasmi-theme-toggle:focus-visible {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--theme-primary, #0f766e);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+:root[data-theme="dark"] .etasmi-theme-toggle:hover,
+:root[data-theme="dark"] .etasmi-theme-toggle:focus-visible {
+  background: var(--theme-surface-hover) !important;
+  color: var(--theme-primary) !important;
+}
+
+.etasmi-theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.etasmi-theme-toggle .etasmi-theme-toggle__sun {
+  display: none;
+}
+
+.etasmi-theme-toggle .etasmi-theme-toggle__moon {
+  display: inline-block;
+}
+
+:root[data-theme="dark"] .etasmi-theme-toggle .etasmi-theme-toggle__sun {
+  display: inline-block;
+}
+
+:root[data-theme="dark"] .etasmi-theme-toggle .etasmi-theme-toggle__moon {
+  display: none;
+}
+
+/* Variant for the plain public/.topbar header layout */
+.topbar .etasmi-theme-toggle {
+  color: var(--ink-soft, #64748b);
+}
+
+/* Auth pages — floating theme toggle */
+.etasmi-auth-theme-toggle {
+  flex-shrink: 0;
+}
+
+.auth-nav-actions .etasmi-auth-theme-toggle,
+.auth-nav .etasmi-auth-theme-toggle {
+  margin-inline-start: 0.25rem;
+}
+
+body.etasmi-login-dual .etasmi-auth-theme-toggle--floating {
+  position: fixed;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 1000;
+  background: var(--theme-surface, #fff);
+  border: 1px solid var(--theme-border, #e2e8f0);
+  box-shadow: var(--theme-shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.08));
+}
+
+:root[data-theme="dark"] body.etasmi-login-dual .etasmi-auth-theme-toggle--floating,
+:root[data-theme="dark"] body.auth-body .etasmi-auth-theme-toggle--floating {
+  background: var(--theme-surface);
+  border-color: var(--theme-border);
+}
+
+body.auth-body .etasmi-auth-theme-toggle--floating {
+  position: fixed;
+  top: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 1000;
+  background: var(--theme-surface, #fff);
+  border: 1px solid var(--theme-border, #e2e8f0);
+  box-shadow: var(--theme-shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.08));
+}
+
+body.etasmi-auth-v2 .etasmi-auth-home-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+body.etasmi-auth-v2 .etasmi-auth-home-row .etasmi-auth-home-link {
+  margin-bottom: 0;
+}
+
+/* Legacy auth shell (pages.css auth-body) */
+:root[data-theme="dark"] body.auth-body .auth-nav-link,
+:root[data-theme="dark"] body.auth-body .auth-brand-mark span,
+:root[data-theme="dark"] body.auth-body .auth-subtitle {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-nav-link.is-active,
+:root[data-theme="dark"] body.auth-body .auth-nav-link:hover,
+:root[data-theme="dark"] body.auth-body .auth-nav-link:focus-visible {
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-btn-secondary {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-control input,
+:root[data-theme="dark"] body.auth-body .auth-control select,
+:root[data-theme="dark"] body.auth-body .auth-control textarea {
+  background: var(--theme-surface-raised) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-chip {
+  background: var(--theme-surface-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-soft) !important;
+}
+
+:root[data-theme="dark"] body.auth-body .auth-inline-panel,
+:root[data-theme="dark"] body.auth-body .auth-divider {
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text-muted) !important;
+}
+
+/* ============================================================
+ * 19. PUBLIC HOMEPAGE (home.jsp — Tailwind CDN)
+ * ============================================================ */
+
+:root[data-theme="dark"] .lp-page-bg {
+  background-color: var(--theme-bg) !important;
+  background-image:
+    radial-gradient(ellipse 100% 55% at 50% -8%, rgba(45, 212, 191, 0.10), transparent 55%),
+    linear-gradient(180deg, #0b1220 0%, #0d1629 45%, #0b1220 100%) !important;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .bg-white,
+:root[data-theme="dark"] [class*="bg-white\/"] {
+  background-color: var(--theme-surface) !important;
+}
+
+/* Bootstrap 5 + LearnHub landing utilities */
+:root[data-theme="dark"] .bg-light,
+:root[data-theme="dark"] [class*="bg-light"] {
+  background-color: var(--theme-surface-muted) !important;
+}
+
+:root[data-theme="dark"] .bg-body,
+:root[data-theme="dark"] .bg-body-tertiary,
+:root[data-theme="dark"] .bg-secondary {
+  background-color: var(--theme-bg) !important;
+}
+
+:root[data-theme="dark"] .text-dark,
+:root[data-theme="dark"] .text-body-emphasis {
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .text-muted,
+:root[data-theme="dark"] .text-body-secondary {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] .border,
+:root[data-theme="dark"] .border-light {
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .navbar,
+:root[data-theme="dark"] .navbar.bg-white {
+  background-color: var(--theme-surface) !important;
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .navbar .nav-link {
+  color: var(--theme-text-soft);
+}
+
+:root[data-theme="dark"] .navbar .nav-link:hover,
+:root[data-theme="dark"] .navbar .nav-link:focus {
+  color: var(--theme-primary);
+}
+
+:root[data-theme="dark"] .navbar-toggler {
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .shadow-sm,
+:root[data-theme="dark"] .shadow {
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+:root[data-theme="dark"] .dropdown-menu {
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .dropdown-item {
+  color: var(--theme-text-soft);
+}
+
+:root[data-theme="dark"] .dropdown-item:hover,
+:root[data-theme="dark"] .dropdown-item:focus {
+  background-color: var(--theme-surface-hover);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .modal-content {
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .modal-header,
+:root[data-theme="dark"] .modal-footer {
+  border-color: var(--theme-border);
+}
+
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .form-select {
+  background-color: var(--theme-surface-raised);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .form-control:focus,
+:root[data-theme="dark"] .form-select:focus {
+  background-color: var(--theme-surface-raised);
+  border-color: var(--theme-primary);
+  color: var(--theme-text);
+}
+
+:root[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+:root[data-theme="dark"] .alert {
+  border-color: var(--theme-border);
+}
+
+:root[data-theme="dark"] .table {
+  --bs-table-bg: var(--theme-surface);
+  --bs-table-color: var(--theme-text);
+  --bs-table-border-color: var(--theme-border);
+  --bs-table-striped-bg: var(--theme-surface-muted);
+  --bs-table-hover-bg: var(--theme-surface-hover);
+}
+
+:root[data-theme="dark"] .bg-surface,
+:root[data-theme="dark"] [class*="bg-surface\/"],
+:root[data-theme="dark"] .bg-canvas,
+:root[data-theme="dark"] [class*="bg-canvas\/"] {
+  background-color: var(--theme-surface) !important;
+}
+
+:root[data-theme="dark"] .bg-surfaceDeep,
+:root[data-theme="dark"] [class*="bg-surfaceDeep\/"] {
+  background-color: var(--theme-surface-muted) !important;
+}
+
+:root[data-theme="dark"] [class*="border-emerald-100"],
+:root[data-theme="dark"] [class*="divide-emerald"] {
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .divide-line> :not([hidden])~ :not([hidden]),
+:root[data-theme="dark"] .divide-slate-100> :not([hidden])~ :not([hidden]) {
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] .text-brand {
+  color: var(--theme-primary) !important;
+}
+
+:root[data-theme="dark"] .bg-slate-200,
+:root[data-theme="dark"] .bg-slate-300,
+:root[data-theme="dark"] .bg-ink\/10 {
+  background-color: var(--theme-border-strong) !important;
+}
+
+:root[data-theme="dark"] .bg-line {
+  background-color: var(--theme-border) !important;
+}
+
+/* ============================================================
+ * 20. AUTH PAGES (etasmi-auth-v2, auth-body)
+ * ============================================================ */
+
+:root[data-theme="dark"] body.etasmi-auth-v2,
+:root[data-theme="dark"] body.auth-body {
+  background-color: var(--theme-bg) !important;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(45, 212, 191, 0.12), transparent 55%),
+    radial-gradient(circle at 1px 1px, rgba(45, 212, 191, 0.05) 1px, transparent 0) !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] .etasmi-auth-card,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-card,
+:root[data-theme="dark"] body.etasmi-auth-v2 .auth-card.etasmi-auth-card,
+:root[data-theme="dark"] body.etasmi-login-dual #container,
+:root[data-theme="dark"] body.etasmi-login-dual .container.auth-card,
+:root[data-theme="dark"] body.etasmi-login-dual .row {
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+  box-shadow: var(--theme-shadow-lg) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-login-dual .form-wrapper,
+:root[data-theme="dark"] body.etasmi-login-dual .form {
+  background: transparent !important;
+  color: var(--theme-text) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-login-dual .input-group input,
+:root[data-theme="dark"] body.etasmi-login-dual .input-group select,
+:root[data-theme="dark"] body.etasmi-login-dual .input-group textarea {
+  background: var(--theme-surface-raised) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-home-link {
+  color: var(--theme-text-muted) !important;
+}
+
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-home-link:hover,
+:root[data-theme="dark"] body.etasmi-auth-v2 .etasmi-auth-home-link:focus-visible {
+  color: var(--theme-primary) !important;
+}
+
+/* ============================================================
+ * 21. MISC ENHANCEMENTS
+ * ============================================================ */
+
+:root[data-theme="dark"] ::selection {
+  background: rgba(45, 212, 191, 0.35);
+  color: #fff;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--theme-bg);
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--theme-border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--theme-bg);
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-text-muted);
+}
+
+/* Smooth theme transition on primary surfaces */
+html,
+body,
+.sd-card,
+.admin-panel,
+.content-card,
+.page-block,
+.card,
+.ssess-card,
+.rec-card,
+.notification-item,
+.table-wrap,
+.admin-shell-topbar,
+.instructor-shell-topbar,
+.student-shell-topbar,
+.topbar,
+.admin-shell-sidebar__panel,
+.instructor-shell-sidebar__panel,
+.student-shell-sidebar__panel {
+  transition: background-color 0.25s ease, color 0.25s ease,
+    border-color 0.25s ease, box-shadow 0.25s ease;
+}

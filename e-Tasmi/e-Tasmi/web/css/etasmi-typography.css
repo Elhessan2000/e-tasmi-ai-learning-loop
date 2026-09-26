@@ -1,0 +1,584 @@
+/**
+ * e-Tasmi — Global typography system (balanced scale, May 2026 rev.2)
+ * Inter (UI) + Poppins (display). ~12–15% smaller headings vs rev.1;
+ * body stays readable at 15–16px root.
+ */
+
+:root {
+  --etasmi-font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --etasmi-font-display: "Poppins", var(--etasmi-font-sans);
+
+  /* Root: 15px mobile → 15.5px desktop */
+  --etasmi-text-root: clamp(0.9375rem, 0.12vw + 0.9rem, 0.96875rem);
+
+  /* Type scale — balanced SaaS */
+  --etasmi-text-xs: 0.75rem;      /* 12px — captions, table headers */
+  --etasmi-text-sm: 0.875rem;     /* 14px — labels, sidebar, buttons */
+  --etasmi-text-base: 0.9375rem; /* 15px — body */
+  --etasmi-text-md: 0.96875rem;  /* 15.5px — emphasized body */
+  --etasmi-text-lg: 1rem;        /* 16px — card titles */
+  --etasmi-text-xl: 1.0625rem;   /* 17px — section headings */
+  --etasmi-text-2xl: 1.25rem;    /* 20px — panel / module titles */
+  --etasmi-text-3xl: 1.5rem;     /* 24px — page titles */
+  --etasmi-text-4xl: 1.75rem;    /* 28px — hero titles */
+  --etasmi-text-5xl: 2.125rem;   /* 34px — dashboard welcome peak */
+
+  --etasmi-leading-tight: 1.22;
+  --etasmi-leading-snug: 1.38;
+  --etasmi-leading-normal: 1.52;
+  --etasmi-leading-relaxed: 1.6;
+
+  --etasmi-weight-normal: 400;
+  --etasmi-weight-medium: 500;
+  --etasmi-weight-semibold: 600;
+  --etasmi-weight-bold: 700;
+
+  --etasmi-tracking-tight: -0.02em;
+  --etasmi-tracking-normal: 0;
+  --etasmi-tracking-wide: 0.035em;
+  --etasmi-tracking-wider: 0.07em;
+
+  --etasmi-section-gap: 1.25rem;
+  --etasmi-stack-gap: 0.625rem;
+}
+
+body {
+  font-family: var(--etasmi-font-sans);
+  font-size: var(--etasmi-text-base);
+  line-height: var(--etasmi-leading-normal);
+}
+
+html {
+  font-size: var(--etasmi-text-root);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body.student-package-page,
+body.instructor-package-page,
+body.admin-package-page,
+body.student-workspace-page,
+body.instructor-workspace-page,
+body.admin-workspace-page {
+  font-family: var(--etasmi-font-sans);
+  font-size: var(--etasmi-text-base);
+  font-weight: var(--etasmi-weight-normal);
+  line-height: var(--etasmi-leading-normal);
+  letter-spacing: var(--etasmi-tracking-normal);
+  color: var(--theme-text, #0f172a);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Semantic headings — restrained hierarchy */
+body.student-package-page h1,
+body.instructor-package-page h1,
+body.admin-package-page h1,
+body.student-package-page .etasmi-type-h1,
+body.instructor-package-page .etasmi-type-h1,
+body.admin-package-page .etasmi-type-h1 {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-3xl);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-tight);
+  letter-spacing: var(--etasmi-tracking-tight);
+}
+
+body.student-package-page h2,
+body.instructor-package-page h2,
+body.admin-package-page h2 {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-2xl);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+  letter-spacing: var(--etasmi-tracking-tight);
+}
+
+body.student-package-page h3,
+body.instructor-package-page h3,
+body.admin-package-page h3 {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-xl);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+  letter-spacing: -0.012em;
+}
+
+body.student-package-page h4,
+body.instructor-package-page h4,
+body.admin-package-page h4 {
+  font-size: var(--etasmi-text-lg);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+}
+
+body.student-package-page h5,
+body.instructor-package-page h5,
+body.admin-package-page h5 {
+  font-size: var(--etasmi-text-md);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+}
+
+body.student-package-page h6,
+body.instructor-package-page h6,
+body.admin-package-page h6 {
+  font-size: var(--etasmi-text-base);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+}
+
+body.student-package-page p,
+body.instructor-package-page p,
+body.admin-package-page p {
+  line-height: var(--etasmi-leading-normal);
+}
+
+small,
+.caption,
+.etasmi-type-caption {
+  font-size: var(--etasmi-text-xs);
+  line-height: var(--etasmi-leading-snug);
+  color: var(--theme-text-muted, #64748b);
+}
+
+/* Shell — topbar & sidebar */
+.student-shell-topbar__brand strong,
+.instructor-shell-topbar__brand strong,
+.admin-shell-topbar__brand strong {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-md);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-tight);
+  line-height: var(--etasmi-leading-tight);
+}
+
+.student-shell-sidebar__brand-copy strong,
+.instructor-shell-sidebar__brand-copy strong,
+.admin-shell-sidebar__brand-copy strong {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-sm);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-tight);
+}
+
+.student-shell-sidebar__link span,
+.instructor-shell-sidebar__link span,
+.admin-shell-sidebar__link span {
+  font-size: var(--etasmi-text-sm);
+  font-weight: var(--etasmi-weight-medium);
+  letter-spacing: -0.008em;
+  line-height: var(--etasmi-leading-snug);
+}
+
+.student-shell-sidebar__link small,
+.instructor-shell-sidebar__link small,
+.admin-shell-sidebar__link small {
+  font-size: var(--etasmi-text-xs);
+  line-height: var(--etasmi-leading-snug);
+}
+
+.student-shell-sidebar__section-label,
+.instructor-shell-sidebar__section-label,
+.admin-shell-sidebar__section-label {
+  font-size: var(--etasmi-text-xs);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-wider);
+  text-transform: uppercase;
+}
+
+/* Breadcrumbs & page heroes */
+.ar-breadcrumb,
+.profile-breadcrumb,
+.mys-crumb,
+.isess-breadcrumb,
+.student-breadcrumb-hero,
+.instructor-breadcrumb-hero,
+.admin-breadcrumb-hero {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-snug);
+}
+
+.ar-breadcrumb a,
+.profile-breadcrumb a,
+.mys-crumb a,
+.isess-breadcrumb a {
+  font-weight: var(--etasmi-weight-medium);
+}
+
+.student-breadcrumb-hero h1,
+.instructor-breadcrumb-hero h1,
+.admin-breadcrumb-hero h1,
+.sd-hero-title,
+.student-dashboard-clean__hero-copy h2 {
+  font-family: var(--etasmi-font-display);
+  font-size: clamp(1.375rem, 2.4vw, var(--etasmi-text-4xl));
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-tight);
+  letter-spacing: var(--etasmi-tracking-tight);
+}
+
+.student-breadcrumb-hero p,
+.instructor-breadcrumb-hero p,
+.admin-breadcrumb-hero p,
+.sd-hero-subtitle,
+.student-dashboard-clean__hero-copy p {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-relaxed);
+  color: var(--theme-text-soft, #475569);
+}
+
+.sd-hero-kicker,
+.student-dashboard-clean__eyebrow,
+.ar-hero__eyebrow {
+  font-size: var(--etasmi-text-xs);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-wider);
+  text-transform: uppercase;
+}
+
+.ar-hero__title {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-2xl);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-tight);
+  line-height: var(--etasmi-leading-tight);
+}
+
+.ar-hero__sub {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-relaxed);
+}
+
+/* Dashboard welcome */
+body.student-dashboard-page.student-package-page .student-dashboard-greet__eyebrow {
+  font-size: var(--etasmi-text-xs);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: 0.16em;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-greet__name {
+  font-family: var(--etasmi-font-display);
+  font-size: clamp(1.625rem, 3.6vw, var(--etasmi-text-5xl));
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: 1.12;
+  letter-spacing: var(--etasmi-tracking-tight);
+}
+
+/* Statistics */
+.ar-stat__label,
+.ar-stat__kicker,
+.sd-progress-metric__label {
+  font-size: var(--etasmi-text-xs);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-wide);
+  text-transform: uppercase;
+  line-height: var(--etasmi-leading-snug);
+}
+
+.ar-stat__value,
+.sd-progress-metric__value {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-2xl);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-tight);
+  line-height: var(--etasmi-leading-tight);
+}
+
+.ar-stat__hint,
+.sd-progress-metric__hint,
+.ar-stat__sub {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-snug);
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-kicker {
+  font-size: var(--etasmi-text-xs) !important;
+  font-weight: var(--etasmi-weight-semibold) !important;
+  letter-spacing: var(--etasmi-tracking-wide) !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-value {
+  font-family: var(--etasmi-font-display) !important;
+  font-size: 1.375rem !important;
+  font-weight: var(--etasmi-weight-semibold) !important;
+  letter-spacing: var(--etasmi-tracking-tight) !important;
+  line-height: 1.15 !important;
+}
+
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-trend,
+body.student-dashboard-page.student-package-page .student-dashboard-clean__stat-desc {
+  font-size: var(--etasmi-text-xs) !important;
+  line-height: var(--etasmi-leading-snug) !important;
+}
+
+/* Section titles */
+.ar-section__title,
+.qlx-home-section-title,
+.student-dashboard-clean__panel-head h3,
+.mys-section-title,
+.instructor-panel__title,
+.admin-panel__title {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-lg);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: var(--etasmi-leading-snug);
+}
+
+.ar-section__lead,
+.ar-section p {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-relaxed);
+}
+
+/* Cards */
+.mys-card__title,
+.mys-card h3,
+.student-session-card__title,
+.ar-quick-card__title {
+  font-size: var(--etasmi-text-md);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+  letter-spacing: -0.008em;
+}
+
+.mys-card__meta,
+.mys-card__sub,
+.student-session-card__meta,
+.ar-quick-card__sub {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-snug);
+}
+
+/* Notifications */
+.notif-crumb {
+  font-size: var(--etasmi-text-sm);
+}
+
+.notif-banner__title {
+  font-family: var(--etasmi-font-display);
+  font-size: clamp(1.25rem, 2.2vw, var(--etasmi-text-3xl));
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-tight);
+  line-height: var(--etasmi-leading-tight);
+}
+
+.notif-banner__sub {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-relaxed);
+}
+
+.notif-banner__mark {
+  font-size: var(--etasmi-text-sm);
+  font-weight: var(--etasmi-weight-semibold);
+}
+
+.notif-card__title {
+  font-size: var(--etasmi-text-md);
+  font-weight: var(--etasmi-weight-semibold);
+  line-height: var(--etasmi-leading-snug);
+}
+
+.notif-card__body,
+.notif-card__text {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-normal);
+}
+
+.notif-card__time,
+.notif-card__meta {
+  font-size: var(--etasmi-text-xs);
+}
+
+/* Profile */
+.profile-hero__name,
+.profile-card h2,
+.ar-profile__name {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-2xl);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-tight);
+  line-height: var(--etasmi-leading-tight);
+}
+
+.profile-field label,
+.form-label,
+.ar-form label {
+  font-size: var(--etasmi-text-sm);
+  font-weight: var(--etasmi-weight-medium);
+  line-height: var(--etasmi-leading-snug);
+  letter-spacing: 0.01em;
+}
+
+/* Buttons */
+.button,
+.btn,
+.auth-btn,
+.auth-btn-secondary,
+.admin-btn,
+.student-btn,
+.instructor-btn,
+.qlx-topbar__pick,
+.qlx-home-hero__cta,
+.qlx-home-continue__btn {
+  font-family: var(--etasmi-font-sans);
+  font-size: var(--etasmi-text-sm);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+
+/* Tables */
+.ar-table th,
+table thead th,
+.admin-table th,
+.instructor-table th {
+  font-size: var(--etasmi-text-xs);
+  font-weight: var(--etasmi-weight-semibold);
+  letter-spacing: var(--etasmi-tracking-wide);
+  text-transform: uppercase;
+  line-height: var(--etasmi-leading-snug);
+}
+
+.ar-table td,
+table tbody td,
+.admin-table td,
+.instructor-table td {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-normal);
+}
+
+/* Forms */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+select,
+textarea,
+.form-control,
+.ar-form input,
+.ar-form select,
+.ar-form textarea {
+  font-size: var(--etasmi-text-base);
+  line-height: var(--etasmi-leading-snug);
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-size: var(--etasmi-text-sm);
+  color: var(--theme-text-muted, #94a3b8);
+}
+
+/* Quran Library */
+.qlx-topbar__title {
+  font-family: var(--etasmi-font-display);
+  font-size: var(--etasmi-text-md);
+  font-weight: var(--etasmi-weight-semibold);
+}
+
+.qlx-topbar__title small {
+  font-size: var(--etasmi-text-xs);
+  font-weight: var(--etasmi-weight-medium);
+}
+
+.qlx-topbar__nav button {
+  font-size: var(--etasmi-text-sm);
+  font-weight: var(--etasmi-weight-medium);
+}
+
+.qlx-home-hero--compact .qlx-home-hero__title {
+  font-family: var(--etasmi-font-display);
+  font-size: clamp(1.0625rem, 1.8vw, var(--etasmi-text-xl));
+  font-weight: var(--etasmi-weight-semibold);
+}
+
+.qlx-home-hero--compact .qlx-home-hero__lead {
+  font-size: var(--etasmi-text-sm);
+  line-height: var(--etasmi-leading-relaxed);
+}
+
+.qlx-rcx-hero__title {
+  font-family: var(--etasmi-font-display);
+  font-size: clamp(1.25rem, 2vw, var(--etasmi-text-2xl)) !important;
+  font-weight: var(--etasmi-weight-semibold) !important;
+  line-height: var(--etasmi-leading-tight) !important;
+}
+
+.qlx-rcx-hero__eyebrow {
+  font-size: var(--etasmi-text-xs) !important;
+}
+
+.qlx-rcx-hero__count {
+  font-size: var(--etasmi-text-xs) !important;
+}
+
+.qlx-rcx-card__name,
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__name {
+  font-size: var(--etasmi-text-md) !important;
+  font-weight: var(--etasmi-weight-semibold) !important;
+}
+
+.qlx-rcx-card__style,
+.qlx-reciter-card.qlx-rcx-card .qlx-rcx-card__style {
+  font-size: var(--etasmi-text-xs) !important;
+}
+
+.qlx-rcx-prof__name,
+.qlx-root .qlx-profile__name.qlx-rcx-prof__name {
+  font-family: var(--etasmi-font-display);
+  font-size: clamp(1.125rem, 2vw, var(--etasmi-text-2xl)) !important;
+  font-weight: var(--etasmi-weight-semibold) !important;
+}
+
+.qlx-rcx-prof__eyebrow {
+  font-size: var(--etasmi-text-xs) !important;
+}
+
+/* Section rhythm */
+body.student-module-page .sd-hero + *,
+body.student-module-page .ar-hero + * {
+  margin-top: var(--etasmi-section-gap);
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  :root {
+    --etasmi-text-root: 0.9375rem;
+  }
+
+  body.student-package-page h1,
+  body.instructor-package-page h1,
+  body.admin-package-page h1 {
+    font-size: var(--etasmi-text-2xl);
+  }
+
+  body.student-package-page h2,
+  body.instructor-package-page h2,
+  body.admin-package-page h2 {
+    font-size: var(--etasmi-text-xl);
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --etasmi-section-gap: 1.375rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.student-dashboard-page.student-package-page .student-dashboard-greet__name {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,115 @@
+/* Full-page Zoom Meeting SDK shell (student) */
+.zoom-live-page {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--etasmi-bg, #0f1419);
+  color: var(--etasmi-text, #e8edf5);
+}
+
+.zoom-live-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: color-mix(in srgb, var(--etasmi-surface, #1a222c) 92%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--etasmi-border, #2a3441) 80%, transparent);
+}
+
+.zoom-live-topbar__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55vw;
+}
+
+.zoom-live-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.zoom-live-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--etasmi-border, #2a3441) 70%, transparent);
+  background: color-mix(in srgb, var(--etasmi-surface, #1a222c) 88%, transparent);
+  color: var(--etasmi-text, #e8edf5);
+  cursor: pointer;
+}
+
+.zoom-live-btn:hover {
+  background: color-mix(in srgb, var(--etasmi-accent, #3b82f6) 18%, var(--etasmi-surface, #1a222c));
+}
+
+.zoom-live-btn--primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-color: transparent;
+  color: #fff;
+}
+
+.zoom-live-btn--primary:hover {
+  filter: brightness(1.06);
+}
+
+.zoom-live-status {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--etasmi-surface, #1a222c) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--etasmi-border, #2a3441) 65%, transparent);
+}
+
+.zoom-live-status--error {
+  border-color: color-mix(in srgb, #f87171 45%, transparent);
+}
+
+.zoom-live-status__title {
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.zoom-live-status__detail {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.88;
+  line-height: 1.5;
+}
+
+.zoom-live-status--error .zoom-live-status__detail {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.8125rem;
+}
+
+.zoom-live-status__actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.zoom-live-hint {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  margin: 0.75rem 0 0;
+}
+
+/* Zoom injects #zmmtg-root; keep page scroll sensible */
+#zmmtg-root {
+  min-height: calc(100vh - 52px);
+}

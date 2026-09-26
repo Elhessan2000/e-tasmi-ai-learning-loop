@@ -1,0 +1,173 @@
+/**
+ * e-Tasmi — platform-wide UI polish (visual only).
+ * Loads after package CSS. Keeps teal + warm identity; improves rhythm, focus, and realism.
+ */
+
+:root {
+  --etasmi-brand: #0f766e;
+  --etasmi-brand-dark: #0d5c56;
+  --etasmi-brand-soft: rgba(15, 118, 110, 0.08);
+  --etasmi-ink: #0f172a;
+  --etasmi-ink-soft: #64748b;
+  --etasmi-line: #e5e7eb;
+  --etasmi-surface: #ffffff;
+  --etasmi-page-max: 1200px;
+  --etasmi-radius-card: 10px;
+  --etasmi-radius-btn: 10px;
+  --etasmi-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --etasmi-shadow-card-hover: 0 2px 6px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.08);
+  --etasmi-transition: 0.18s ease;
+  /* Shared workspace shell (Student / Instructor / Admin) */
+  --etasmi-shell-sidebar-width: 272px;
+  --etasmi-shell-sidebar-width-md: 256px;
+  --etasmi-shell-sidebar-width-collapsed: 76px;
+  --etasmi-shell-column-gap: 28px;
+  --etasmi-shell-content-padding-block: 20px;
+  --etasmi-shell-content-padding-inline-end: 28px;
+  --etasmi-shell-content-padding-inline-start: 32px;
+}
+
+/* Typography scale: see etasmi-typography.css (loaded after this file in ui_head) */
+
+/* Focus — professional, accessible, not flashy */
+:focus-visible {
+  outline: 2px solid var(--etasmi-brand);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-offset: 1px;
+}
+
+/* Breadcrumb: tighter hierarchy */
+.ar-breadcrumb,
+.profile-breadcrumb {
+  letter-spacing: 0.01em;
+}
+
+/* Hero blocks: less “banner ad”, more product UI */
+.ar-hero {
+  padding: 1.5rem 1.75rem;
+  border-radius: var(--etasmi-radius-card);
+  box-shadow: var(--etasmi-shadow-card);
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfa 100%);
+  border-color: var(--etasmi-line);
+}
+
+.ar-hero__sub {
+  max-width: 42rem;
+}
+
+/* Stat cards: consistent elevation */
+.ar-stat {
+  border-radius: var(--etasmi-radius-card);
+  box-shadow: var(--etasmi-shadow-card);
+  transition: box-shadow var(--etasmi-transition), border-color var(--etasmi-transition);
+}
+
+.ar-stat:hover {
+  box-shadow: var(--etasmi-shadow-card-hover);
+}
+
+.ar-stat__value {
+  letter-spacing: -0.03em;
+}
+
+/* Section panels */
+.ar-section {
+  border-radius: var(--etasmi-radius-card);
+  box-shadow: var(--etasmi-shadow-card);
+  padding: 1.35rem 1.5rem;
+}
+
+.ar-section__title {
+  letter-spacing: -0.01em;
+}
+
+/* Tables: clearer header, calmer rows */
+.ar-table-wrap {
+  border-radius: var(--etasmi-radius-card);
+  border-color: var(--etasmi-line);
+}
+
+.ar-table thead {
+  background: #f8fafc;
+}
+
+.ar-table th {
+  font-weight: 650;
+  color: #475569;
+  border-bottom-color: var(--etasmi-line);
+}
+
+.ar-table td {
+  vertical-align: middle;
+}
+
+.ar-table tbody tr {
+  transition: background var(--etasmi-transition);
+}
+
+/* Quick action cards */
+.ar-quick-card {
+  border-radius: var(--etasmi-radius-card);
+  transition: box-shadow var(--etasmi-transition), border-color var(--etasmi-transition), transform var(--etasmi-transition);
+}
+
+.ar-quick-card:hover {
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+}
+
+.ar-quick-card__text {
+  letter-spacing: -0.01em;
+}
+
+/* Empty state */
+.ar-empty {
+  padding: 2rem 1.5rem;
+}
+
+.ar-empty__title {
+  letter-spacing: -0.02em;
+}
+
+/* Profile: align eyebrow with brand (was generic blue) */
+.profile-hero__text .profile-hero__eyebrow {
+  color: var(--etasmi-brand);
+}
+
+.profile-stat-card,
+.profile-sidebar-card {
+  border-radius: var(--etasmi-radius-card);
+  box-shadow: var(--etasmi-shadow-card);
+}
+
+/* Student / instructor cards that share common class names */
+body.student-package-page .ssess-card,
+body.student-package-page .rec-card,
+body.student-package-page .sd-card,
+body.student-package-page .notification-item,
+body.student-package-page .student-dashboard-clean__panel,
+body.instructor-package-page .instructor-dashboard-clean__panel,
+body.instructor-package-page .isess-hero,
+body.instructor-package-page .isess-table-wrap {
+  border-radius: var(--etasmi-radius-card) !important;
+  box-shadow: var(--etasmi-shadow-card) !important;
+  transition: box-shadow var(--etasmi-transition), border-color var(--etasmi-transition);
+}
+
+body.student-package-page .ssess-card:hover,
+body.student-package-page .rec-card:hover {
+  box-shadow: var(--etasmi-shadow-card-hover) !important;
+}
+
+/* Table wrappers in module pages */
+.table-wrap {
+  border-radius: var(--etasmi-radius-card);
+  overflow: hidden;
+}

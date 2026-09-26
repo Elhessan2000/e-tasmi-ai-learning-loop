@@ -1,0 +1,1226 @@
+/*
+ * e-Tasmi — Mobile responsive polish (frontend only)
+ * --------------------------------------------------
+ * This stylesheet is purely additive. It only contains rules inside
+ * `@media (max-width: ...)` blocks, so it never alters the desktop
+ * design. It tightens spacing, reflows grids, scales typography, and
+ * makes the existing drawer/topbar/cards/tables/forms feel native on
+ * phones (360–430px) and small tablets (≤768px).
+ *
+ * Roles covered:
+ *   • Student workspace (student-package-page, student-dashboard-page)
+ *   • Instructor workspace (instructor-package-page)
+ *   • Admin workspace (admin-package-page)
+ *   • Auth pages (login dual, register, etc.)
+ *
+ * Loaded from each *_ui_head.jspf (and login.jsp) AFTER all role
+ * stylesheets so its mobile-only overrides win the cascade.
+ *
+ * Breakpoints:
+ *   ≤ 1100px  workspace drawer kicks in (handled elsewhere; we tighten)
+ *   ≤ 768px   tablet portrait + small laptops, single column flows
+ *   ≤ 600px   typical phone landscape
+ *   ≤ 480px   phone portrait (390–430px)
+ *   ≤ 360px   small phones
+ */
+
+/* =============================================================
+ * 0. Global safety nets — prevent horizontal page scroll
+ * ============================================================= */
+@media (max-width: 1100px) {
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Common shells and content wrappers should never overflow */
+  .app-shell,
+  .app-main,
+  .admin-shell,
+  .admin-layout,
+  .admin-main,
+  .student-shell-layout,
+  .student-shell-content,
+  .instructor-shell-layout,
+  .instructor-shell-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Common content blocks should respect the viewport */
+  .container,
+  .sd-container,
+  .student-workspace-shell,
+  .instructor-workspace-shell,
+  .admin-workspace-view,
+  .student-workspace-view,
+  .instructor-workspace-view {
+    max-width: 100%;
+  }
+
+  /* Stop long unbroken strings (URLs, ids, emails) from blowing
+     out card/table widths */
+  .ssess-card,
+  .ar-stat,
+  .ar-quick-card,
+  .student-dashboard-clean__panel,
+  .student-dashboard-clean__hero,
+  .student-dashboard-clean__welcome-card,
+  .instructor-dashboard-clean__panel,
+  .instructor-dashboard-clean__hero,
+  .table-wrap,
+  .ar-table-wrap,
+  .ip-table-wrap,
+  .isess-table-wrap,
+  .eval-table-wrap {
+    min-width: 0;
+  }
+
+  /* Long text inside cards should wrap, not push the layout */
+  .ssess-card__title,
+  .ssess-card__instructor,
+  .ssess-card__desc,
+  .ar-stat__value,
+  .ar-quick-card__sub,
+  .ar-section__title,
+  .student-dashboard-clean__session-title-row,
+  .student-dashboard-clean__session-meta-row,
+  .ip-card__title,
+  .isess-card__title {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* =============================================================
+ * 1. Topbars — student / instructor / admin
+ * Tighten paddings, scale icons, prevent overflow
+ * ============================================================= */
+@media (max-width: 768px) {
+  .student-shell-topbar__inner,
+  .instructor-shell-topbar__inner,
+  .admin-shell-topbar__inner {
+    padding-inline-start: 14px !important;
+    padding-inline-end: 14px !important;
+    gap: 10px;
+  }
+
+  .student-shell-topbar__brandbar,
+  .instructor-shell-topbar__brandbar,
+  .admin-shell-topbar__brandbar {
+    gap: 8px;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .student-shell-topbar__brand,
+  .instructor-shell-topbar__brand,
+  .admin-shell-topbar__brand {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .student-shell-topbar__brand strong,
+  .instructor-shell-topbar__brand strong,
+  .admin-shell-topbar__brand strong {
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  .student-shell-topbar__brand-mark,
+  .instructor-shell-topbar__brand-mark,
+  .admin-shell-topbar__brand-mark {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+  }
+
+  .student-shell-topbar__brand-mark svg,
+  .instructor-shell-topbar__brand-mark svg,
+  .admin-shell-topbar__brand-mark svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .student-shell-topbar__actions,
+  .instructor-shell-topbar__actions,
+  .admin-shell-topbar__actions {
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  .student-shell-topbar__iconbtn,
+  .instructor-shell-topbar__iconbtn,
+  .admin-shell-topbar__iconbtn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px;
+    padding: 0;
+  }
+
+  .student-shell-topbar__iconbtn svg,
+  .instructor-shell-topbar__iconbtn svg,
+  .admin-shell-topbar__iconbtn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .student-shell-topbar__menu,
+  .instructor-shell-topbar__menu,
+  .admin-shell-topbar__menu {
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px;
+    padding: 9px 8px;
+  }
+
+  /* Profile pill — keep avatar visible, drop label/chevron if any */
+  .student-shell-profile,
+  .instructor-shell-profile,
+  .admin-shell-profile {
+    padding: 2px;
+    gap: 0;
+  }
+
+  .student-shell-profile__avatar,
+  .instructor-shell-profile__avatar,
+  .admin-shell-profile__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .student-shell-profile__image,
+  .instructor-shell-profile__image,
+  .admin-shell-profile__image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .student-shell-topbar__spacer,
+  .instructor-shell-topbar__spacer,
+  .admin-shell-topbar__spacer {
+    display: none;
+  }
+
+  /* Notify badge: tighten size so it does not overlap the icon */
+  .student-shell-topbar__badge,
+  .instructor-shell-topbar__badge,
+  .admin-shell-topbar__badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+    padding: 0 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-shell-topbar__inner,
+  .instructor-shell-topbar__inner,
+  .admin-shell-topbar__inner {
+    padding-inline-start: 10px !important;
+    padding-inline-end: 10px !important;
+    gap: 8px;
+  }
+
+  .student-shell-topbar__brand strong,
+  .instructor-shell-topbar__brand strong,
+  .admin-shell-topbar__brand strong {
+    max-width: 90px;
+    font-size: 0.95rem;
+  }
+
+  .student-shell-topbar__iconbtn,
+  .instructor-shell-topbar__iconbtn,
+  .admin-shell-topbar__iconbtn,
+  .student-shell-topbar__menu,
+  .instructor-shell-topbar__menu,
+  .admin-shell-topbar__menu {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+  }
+}
+
+@media (max-width: 360px) {
+  .student-shell-topbar__brand strong,
+  .instructor-shell-topbar__brand strong,
+  .admin-shell-topbar__brand strong {
+    display: none;
+  }
+
+  .student-shell-topbar__inner,
+  .instructor-shell-topbar__inner,
+  .admin-shell-topbar__inner {
+    gap: 6px;
+  }
+}
+
+/* =============================================================
+ * 2. Sidebars — drawer polish (mechanic already exists)
+ * Tighten size, ensure scrim is full-screen, raise z-index
+ * ============================================================= */
+@media (max-width: 1100px) {
+  .student-shell-sidebar__scrim,
+  .instructor-shell-sidebar__scrim,
+  .admin-shell-sidebar__scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 199;
+  }
+
+  body.student-nav-open .student-shell-sidebar__scrim,
+  body.instructor-nav-open .instructor-shell-sidebar__scrim,
+  body.admin-nav-open .admin-shell-sidebar__scrim {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .student-shell-sidebar,
+  .instructor-shell-sidebar,
+  .admin-shell-sidebar {
+    z-index: 200;
+  }
+
+  /* Cap drawer width so a portion of the page remains visible */
+  body.student-package-page .student-shell-sidebar,
+  body.student-dashboard-page .student-shell-sidebar,
+  body.instructor-package-page .instructor-shell-sidebar,
+  body.admin-package-page .admin-shell-sidebar {
+    width: min(86vw, 320px) !important;
+    max-width: 320px;
+  }
+
+  /* Large, comfortable nav items inside the drawer */
+  .student-shell-sidebar__link,
+  .instructor-shell-sidebar__link,
+  .admin-shell-sidebar__link {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  /* Make sure the close button is easy to tap */
+  .student-shell-sidebar__close,
+  .instructor-shell-sidebar__close,
+  .admin-shell-sidebar__close {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* When the drawer is open, lock body scroll so the page behind
+   does not scroll along with the drawer */
+@media (max-width: 1100px) {
+  body.student-nav-open,
+  body.instructor-nav-open,
+  body.admin-nav-open {
+    overflow: hidden !important;
+    touch-action: none;
+  }
+}
+
+/* =============================================================
+ * 3. Main content padding — breathing room without overflow
+ * ============================================================= */
+@media (max-width: 768px) {
+  body.student-package-page.student-module-page .student-shell-content,
+  body.student-dashboard-page.student-package-page .student-shell-content,
+  body.instructor-package-page.instructor-module-page .instructor-shell-content,
+  body.admin-package-page.admin-module-page .admin-main {
+    padding-inline-start: 14px !important;
+    padding-inline-end: 14px !important;
+  }
+
+  body.student-package-page .container.sd-container.student-workspace-shell,
+  body.student-dashboard-page .container.sd-container.student-workspace-shell,
+  body.instructor-package-page .container.sd-container.instructor-workspace-shell {
+    width: 100% !important;
+    padding-inline-start: 0 !important;
+    padding-inline-end: 0 !important;
+  }
+
+  .admin-workspace-view,
+  .student-workspace-view,
+  .instructor-workspace-view {
+    padding-inline-start: 0;
+    padding-inline-end: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  body.student-package-page.student-module-page .student-shell-content,
+  body.student-dashboard-page.student-package-page .student-shell-content,
+  body.instructor-package-page.instructor-module-page .instructor-shell-content,
+  body.admin-package-page.admin-module-page .admin-main {
+    padding-inline-start: 10px !important;
+    padding-inline-end: 10px !important;
+  }
+}
+
+/* =============================================================
+ * 4. Hero sections — calmer typography & spacing on mobile
+ * ============================================================= */
+@media (max-width: 768px) {
+  .ssess-hero,
+  .isess-hero,
+  .ar-hero,
+  .student-dashboard-clean__hero,
+  .instructor-dashboard-clean__hero,
+  .ip-hero,
+  .eval-hero,
+  .student-payment-page__hero {
+    padding: 1.25rem 1rem !important;
+    gap: 14px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    border-radius: 14px;
+  }
+
+  .ssess-hero__title,
+  .isess-hero__title,
+  .ar-hero__title,
+  .ip-hero__title,
+  .eval-hero__title {
+    font-size: 1.4rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.4rem;
+  }
+
+  .ssess-hero__sub,
+  .isess-hero__sub,
+  .ar-hero__sub,
+  .ip-hero__sub,
+  .eval-hero__sub {
+    font-size: 0.9rem !important;
+    line-height: 1.5;
+  }
+
+  .ssess-hero__actions,
+  .isess-hero__actions,
+  .ar-hero__actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ssess-hero__actions > *,
+  .isess-hero__actions > *,
+  .ar-hero__actions > * {
+    flex: 1 1 auto;
+  }
+
+  .student-dashboard-clean__welcome-card h2,
+  .student-dashboard-clean__welcome-banner h2,
+  .instructor-dashboard-clean__welcome-card h2 {
+    font-size: 1.35rem !important;
+  }
+
+  /* Hero secondary panels (e.g. progress, stats) stack below */
+  .student-dashboard-clean__hero,
+  .instructor-dashboard-clean__hero {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ssess-hero__title,
+  .isess-hero__title,
+  .ar-hero__title,
+  .ip-hero__title,
+  .eval-hero__title {
+    font-size: 1.2rem !important;
+  }
+
+  .ssess-hero,
+  .isess-hero,
+  .ar-hero,
+  .ip-hero,
+  .eval-hero,
+  .student-dashboard-clean__hero,
+  .instructor-dashboard-clean__hero {
+    padding: 1rem 0.85rem !important;
+  }
+
+  .ar-breadcrumb,
+  .student-breadcrumb,
+  .instructor-breadcrumb {
+    font-size: 0.78rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* =============================================================
+ * 5. Stats grids & card grids — stack to 1 column at small widths
+ * ============================================================= */
+@media (max-width: 768px) {
+  .ar-stats,
+  .ar-stats--4,
+  .ar-stats--3,
+  .ar-quick-actions,
+  .ssess-summary-bar,
+  .student-dashboard-clean__stats,
+  .student-dashboard-clean__actions,
+  .instructor-dashboard-clean__stats,
+  .instructor-dashboard-clean__actions,
+  .sd-alerts,
+  .sd-quick-actions,
+  .sd-payment-review,
+  .ip-summary,
+  .eval-summary,
+  .ip-card-grid,
+  .isess-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .ssess-card-grid,
+  .card-grid,
+  .ssess-card-grid--two,
+  .ssess-card-grid--three {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ar-stats,
+  .ar-stats--4,
+  .ar-stats--3,
+  .ar-quick-actions,
+  .ssess-summary-bar,
+  .student-dashboard-clean__stats,
+  .student-dashboard-clean__actions,
+  .instructor-dashboard-clean__stats,
+  .instructor-dashboard-clean__actions,
+  .sd-alerts,
+  .sd-quick-actions,
+  .sd-payment-review,
+  .ip-summary,
+  .eval-summary,
+  .ip-card-grid,
+  .isess-card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .ar-stat,
+  .ssess-summary-item,
+  .student-dashboard-clean__stat-card,
+  .instructor-dashboard-clean__stat-card,
+  .ar-quick-card {
+    padding: 0.9rem 1rem !important;
+    min-height: auto !important;
+  }
+
+  .ar-stat__value,
+  .student-dashboard-clean__stat-card strong,
+  .instructor-dashboard-clean__stat-card strong {
+    font-size: 1.4rem !important;
+  }
+
+  .ar-quick-card {
+    flex-wrap: nowrap;
+  }
+}
+
+/* =============================================================
+ * 6. Cards — comfortable padding, full-width media
+ * ============================================================= */
+@media (max-width: 768px) {
+  .ssess-card,
+  .ip-card,
+  .isess-card,
+  .student-dashboard-clean__panel,
+  .instructor-dashboard-clean__panel {
+    border-radius: 14px;
+  }
+
+  .ssess-card__body,
+  .ip-card__body,
+  .isess-card__body {
+    padding: 1rem !important;
+    gap: 0.6rem !important;
+  }
+
+  .ssess-card__banner {
+    aspect-ratio: 16 / 9;
+    height: auto !important;
+  }
+
+  .ssess-card__banner img,
+  .ip-card__banner img,
+  .isess-card__banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Bottom action rows wrap naturally */
+  .ssess-card__bottom,
+  .ip-card__footer,
+  .isess-card__footer,
+  .student-dashboard-clean__session-card-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ssess-card__actions,
+  .ip-card__actions,
+  .isess-card__actions {
+    width: 100%;
+  }
+
+  .ssess-card__actions > *,
+  .ip-card__actions > *,
+  .isess-card__actions > * {
+    flex: 1 1 auto;
+  }
+
+  /* Session meta rows wrap when titles are long */
+  .student-dashboard-clean__session-title-row,
+  .student-dashboard-clean__session-meta-row,
+  .ssess-card__status-row,
+  .ssess-card__datetime,
+  .ssess-card__meta {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+
+  .ssess-card__title,
+  .ip-card__title,
+  .isess-card__title {
+    font-size: 1.05rem !important;
+    line-height: 1.35 !important;
+  }
+}
+
+/* =============================================================
+ * 7. Forms — single column, full-width inputs and submit buttons
+ * ============================================================= */
+@media (max-width: 768px) {
+  .student-shell-content form,
+  .instructor-shell-content form,
+  .admin-main form,
+  .ssess-search-bar,
+  .ar-form,
+  .student-form,
+  .instructor-form,
+  .form-grid,
+  .form-row,
+  .auth-form {
+    width: 100%;
+  }
+
+  .form-grid,
+  .form-row,
+  .ar-form-grid,
+  .student-form-grid,
+  .instructor-form-grid,
+  .profile-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Inputs / selects / textareas: full-width and tap-friendly */
+  .student-shell-content input[type="text"],
+  .student-shell-content input[type="email"],
+  .student-shell-content input[type="password"],
+  .student-shell-content input[type="tel"],
+  .student-shell-content input[type="search"],
+  .student-shell-content input[type="number"],
+  .student-shell-content input[type="date"],
+  .student-shell-content input[type="time"],
+  .student-shell-content input[type="datetime-local"],
+  .student-shell-content input[type="url"],
+  .student-shell-content input[type="file"],
+  .student-shell-content select,
+  .student-shell-content textarea,
+  .instructor-shell-content input[type="text"],
+  .instructor-shell-content input[type="email"],
+  .instructor-shell-content input[type="password"],
+  .instructor-shell-content input[type="tel"],
+  .instructor-shell-content input[type="search"],
+  .instructor-shell-content input[type="number"],
+  .instructor-shell-content input[type="date"],
+  .instructor-shell-content input[type="time"],
+  .instructor-shell-content input[type="datetime-local"],
+  .instructor-shell-content input[type="url"],
+  .instructor-shell-content input[type="file"],
+  .instructor-shell-content select,
+  .instructor-shell-content textarea,
+  .admin-main input[type="text"],
+  .admin-main input[type="email"],
+  .admin-main input[type="password"],
+  .admin-main input[type="tel"],
+  .admin-main input[type="search"],
+  .admin-main input[type="number"],
+  .admin-main input[type="date"],
+  .admin-main input[type="time"],
+  .admin-main input[type="datetime-local"],
+  .admin-main input[type="url"],
+  .admin-main input[type="file"],
+  .admin-main select,
+  .admin-main textarea {
+    width: 100%;
+    max-width: 100%;
+    font-size: 16px;       /* iOS: prevents zoom on focus */
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .student-shell-content textarea,
+  .instructor-shell-content textarea,
+  .admin-main textarea {
+    min-height: 96px;
+  }
+
+  /* Search/toolbar bars: stack their search field + buttons */
+  .ssess-search-bar,
+  .ssess-search-bar--toolbar,
+  .ar-toolbar,
+  .ar-section__head,
+  .ip-toolbar,
+  .isess-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .ssess-search-bar input[type="text"],
+  .ssess-search-bar--toolbar input[type="text"],
+  .ar-toolbar input[type="text"],
+  .ar-section__head input.ar-input {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .ssess-search-bar > *,
+  .ssess-search-bar--toolbar > *,
+  .ar-toolbar > * {
+    width: 100%;
+  }
+
+  /* Field labels keep their size but with comfortable spacing */
+  .ar-form label,
+  .student-form label,
+  .instructor-form label,
+  .profile-form label {
+    font-size: 0.85rem;
+  }
+}
+
+/* =============================================================
+ * 8. Buttons — full-width primary actions, tap-friendly heights
+ * ============================================================= */
+@media (max-width: 600px) {
+  .ssess-btn,
+  .ar-btn,
+  .ip-btn,
+  .isess-btn,
+  .eval-btn,
+  .btn,
+  .btn-primary,
+  .btn-outline,
+  .btn-ghost,
+  button.primary,
+  button.secondary {
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+
+  /* Action rows where buttons should fill full width on phones */
+  .ssess-card__actions .ssess-btn,
+  .ip-card__actions .ip-btn,
+  .isess-card__actions .isess-btn,
+  .student-dashboard-clean__hero .btn,
+  .instructor-dashboard-clean__hero .btn,
+  .ar-hero__actions .ar-btn,
+  .ssess-hero__actions .ssess-btn,
+  .isess-hero__actions .isess-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Single-button form submit row */
+  .form-actions,
+  .ar-form__actions,
+  .student-form__actions,
+  .instructor-form__actions,
+  .profile-form__actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-actions > .btn,
+  .form-actions > button,
+  .ar-form__actions > *,
+  .student-form__actions > *,
+  .instructor-form__actions > *,
+  .profile-form__actions > * {
+    width: 100%;
+  }
+}
+
+/* =============================================================
+ * 9. Tables — make them horizontally scrollable with affordances
+ * Most tables already have `.*-table-wrap`; we just polish them.
+ * ============================================================= */
+@media (max-width: 1100px) {
+  .table-wrap,
+  .ar-table-wrap,
+  .ip-table-wrap,
+  .isess-table-wrap,
+  .eval-table-wrap,
+  .report-table-wrap {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .table-wrap > table,
+  .ar-table-wrap > table,
+  .ip-table-wrap > table,
+  .isess-table-wrap > table,
+  .eval-table-wrap > table,
+  .report-table-wrap > table {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Make table cells slightly tighter and easier to read */
+  .ar-table th,
+  .ar-table td,
+  .ip-table th,
+  .ip-table td,
+  .isess-table th,
+  .isess-table td,
+  .eval-table th,
+  .eval-table td,
+  .student-payment-table th,
+  .student-payment-table td,
+  .report-table th,
+  .report-table td {
+    padding: 0.55rem 0.75rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  /* Subtle hint that the table can be scrolled horizontally */
+  .table-wrap,
+  .ar-table-wrap,
+  .ip-table-wrap,
+  .isess-table-wrap,
+  .eval-table-wrap,
+  .report-table-wrap {
+    border-radius: 12px;
+    background-image:
+      linear-gradient(to right, var(--theme-surface, #fff), rgba(255,255,255,0)),
+      linear-gradient(to left, var(--theme-surface, #fff), rgba(255,255,255,0)),
+      linear-gradient(to right, rgba(15,23,42,0.06), rgba(15,23,42,0)),
+      linear-gradient(to left, rgba(15,23,42,0.06), rgba(15,23,42,0));
+    background-position: 0 0, 100% 0, 0 0, 100% 0;
+    background-size: 24px 100%, 24px 100%, 12px 100%, 12px 100%;
+    background-repeat: no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+}
+
+/* =============================================================
+ * 10. Alerts — keep readable on narrow viewports
+ * ============================================================= */
+@media (max-width: 600px) {
+  .ar-alert,
+  .ssess-alert,
+  .ip-alert,
+  .isess-alert,
+  .eval-alert,
+  .student-alert,
+  .instructor-alert {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+  }
+
+  .ar-alert svg,
+  .ssess-alert svg,
+  .ip-alert svg,
+  .isess-alert svg,
+  .eval-alert svg,
+  .student-alert svg,
+  .instructor-alert svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+}
+
+/* =============================================================
+ * 11. Media (audio/video/iframe/img) responsive
+ * ============================================================= */
+@media (max-width: 1100px) {
+  .student-shell-content video,
+  .student-shell-content audio,
+  .student-shell-content iframe,
+  .student-shell-content img,
+  .instructor-shell-content video,
+  .instructor-shell-content audio,
+  .instructor-shell-content iframe,
+  .instructor-shell-content img,
+  .admin-main video,
+  .admin-main audio,
+  .admin-main iframe,
+  .admin-main img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .student-shell-content audio,
+  .instructor-shell-content audio,
+  .admin-main audio {
+    width: 100%;
+  }
+
+  /* Live session embed: never wider than viewport */
+  .student-live-embed,
+  .live-zoom-embed,
+  .zoom-frame,
+  .live-session-frame {
+    width: 100% !important;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Audio/video players: stretch to card width */
+  .recitation-card audio,
+  .recitation-card video,
+  .eval-card audio,
+  .eval-card video,
+  .ip-card audio,
+  .ip-card video,
+  .isess-card audio,
+  .isess-card video {
+    width: 100%;
+  }
+}
+
+/* =============================================================
+ * 12. Profile pages — single-column avatar + form
+ * ============================================================= */
+@media (max-width: 768px) {
+  .profile-redesign-grid,
+  .profile-grid,
+  .profile-layout,
+  .profile-card-grid,
+  .student-profile-grid,
+  .instructor-profile-grid,
+  .admin-profile-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .profile-avatar-card,
+  .student-profile-avatar,
+  .instructor-profile-avatar {
+    text-align: center;
+  }
+
+  .profile-avatar-card img,
+  .student-profile-avatar img,
+  .instructor-profile-avatar img {
+    max-width: 140px;
+    margin: 0 auto;
+  }
+}
+
+/* =============================================================
+ * 13. Sessions — dashboard upcoming session card spacing
+ * ============================================================= */
+@media (max-width: 768px) {
+  .student-dashboard-clean__session-card,
+  .instructor-dashboard-clean__session-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .student-dashboard-clean__session-actions,
+  .instructor-dashboard-clean__session-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .student-dashboard-clean__session-actions > *,
+  .instructor-dashboard-clean__session-actions > * {
+    flex: 1 1 auto;
+  }
+}
+
+/* =============================================================
+ * 14. Auth pages — login dual / register / shared auth shell
+ * ============================================================= */
+@media (max-width: 900px) {
+  /* Dual-column login: collapse to single column */
+  body.etasmi-login-dual {
+    overflow: auto !important;
+  }
+
+  body.etasmi-login-dual #container {
+    min-height: auto;
+  }
+
+  body.etasmi-login-dual #container .row {
+    flex-direction: column;
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  body.etasmi-login-dual #container .col {
+    width: 100% !important;
+    min-height: auto !important;
+  }
+
+  body.etasmi-login-dual #container > .row:not(.content-row) > .col {
+    padding: 1.5rem 1.25rem;
+  }
+
+  body.etasmi-login-dual #container > .row:not(.content-row) .col.flex-col.align-items-center {
+    min-height: auto;
+  }
+
+  body.etasmi-login-dual #container .form.sign-in,
+  body.etasmi-login-dual #container .form.sign-up {
+    width: 100%;
+    max-width: 460px;
+    padding: 24px;
+    margin: 0 auto;
+  }
+
+  /* Hide the decorative "content-row" panel on mobile, the form
+     is enough on its own */
+  body.etasmi-login-dual #container .content-row {
+    position: relative;
+    pointer-events: auto;
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  body.etasmi-login-dual #container .form.sign-in,
+  body.etasmi-login-dual #container .form.sign-up {
+    padding: 20px 16px;
+    border-radius: 1rem;
+  }
+
+  body.etasmi-login-dual #container .input-group input {
+    font-size: 1rem;
+    min-height: 46px;
+  }
+
+  body.etasmi-login-dual #container .form button {
+    min-height: 46px;
+    font-size: 1rem;
+  }
+
+  body.etasmi-dual-home {
+    font-size: 0.85rem;
+  }
+}
+
+/* Shared auth-shell (register, forgot-password, etc.) */
+@media (max-width: 600px) {
+  body.etasmi-auth-v2 .etasmi-auth-shell,
+  body.etasmi-auth-v2--register .etasmi-auth-shell,
+  body.etasmi-auth-v2--role .etasmi-auth-shell {
+    max-width: 100%;
+    padding: 0 4px;
+  }
+
+  body.etasmi-auth-v2 .auth-page,
+  body.etasmi-auth-v2--register .auth-page {
+    padding: 0.85rem 0.85rem 1.5rem;
+  }
+
+  body.etasmi-auth-v2 .etasmi-auth-card,
+  body.etasmi-auth-v2 .auth-card,
+  body.etasmi-auth-v2 .auth-panel {
+    border-radius: 14px;
+  }
+
+  body.etasmi-auth-v2 .etasmi-auth-card__hero {
+    padding: 1rem 1rem;
+  }
+
+  body.etasmi-auth-v2 input[type="text"],
+  body.etasmi-auth-v2 input[type="email"],
+  body.etasmi-auth-v2 input[type="password"],
+  body.etasmi-auth-v2 input[type="tel"],
+  body.etasmi-auth-v2 select,
+  body.etasmi-auth-v2 textarea {
+    font-size: 16px;
+    min-height: 44px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  body.etasmi-auth-v2 .auth-form button[type="submit"],
+  body.etasmi-auth-v2 .etasmi-auth-card__cta,
+  body.etasmi-auth-v2 button.primary {
+    width: 100%;
+    min-height: 46px;
+  }
+}
+
+/* =============================================================
+ * 15. Notifications page — list items wrap nicely
+ * ============================================================= */
+@media (max-width: 600px) {
+  .notification-item,
+  .notif-card,
+  .notif-row,
+  .notifications-list__item {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    padding: 12px 14px !important;
+  }
+
+  .notification-item__meta,
+  .notif-card__meta {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* =============================================================
+ * 16. Dashboard quick-action cards — proper tap area
+ * ============================================================= */
+@media (max-width: 600px) {
+  .ar-quick-card {
+    padding: 0.85rem 1rem !important;
+    gap: 10px;
+  }
+
+  .ar-quick-card__icon {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+
+  .ar-quick-card__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ar-quick-card__text {
+    font-size: 0.95rem;
+  }
+
+  .ar-quick-card__sub {
+    font-size: 0.78rem;
+  }
+}
+
+/* =============================================================
+ * 17. Footer — tidy paddings on small screens
+ * ============================================================= */
+@media (max-width: 600px) {
+  .footer,
+  .app-footer,
+  .public-footer,
+  .student-footer,
+  .instructor-footer,
+  .admin-footer {
+    padding: 14px 12px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+}
+
+/* =============================================================
+ * 18. Dark mode polish on mobile
+ * Uses the existing data-theme="dark" attribute set by the inline
+ * pre-paint script. Most colors come from --theme-* tokens, so we
+ * only fine-tune surfaces that previously baked light values.
+ * ============================================================= */
+@media (max-width: 1100px) {
+  :root[data-theme="dark"] body.student-nav-open .student-shell-sidebar__scrim,
+  :root[data-theme="dark"] body.instructor-nav-open .instructor-shell-sidebar__scrim,
+  :root[data-theme="dark"] body.admin-nav-open .admin-shell-sidebar__scrim {
+    background: rgba(2, 6, 23, 0.62);
+  }
+
+  :root[data-theme="dark"] .student-shell-sidebar,
+  :root[data-theme="dark"] .instructor-shell-sidebar,
+  :root[data-theme="dark"] .admin-shell-sidebar {
+    background: var(--theme-surface, #0f172a);
+    border-color: var(--theme-border, #1e293b);
+  }
+}
+
+@media (max-width: 768px) {
+  :root[data-theme="dark"] .table-wrap,
+  :root[data-theme="dark"] .ar-table-wrap,
+  :root[data-theme="dark"] .ip-table-wrap,
+  :root[data-theme="dark"] .isess-table-wrap,
+  :root[data-theme="dark"] .eval-table-wrap,
+  :root[data-theme="dark"] .report-table-wrap {
+    background-image:
+      linear-gradient(to right, var(--theme-surface, #0f172a), rgba(15,23,42,0)),
+      linear-gradient(to left, var(--theme-surface, #0f172a), rgba(15,23,42,0)),
+      linear-gradient(to right, rgba(255,255,255,0.06), rgba(255,255,255,0)),
+      linear-gradient(to left, rgba(255,255,255,0.06), rgba(255,255,255,0));
+  }
+}
+
+/* =============================================================
+ * 19. Misc safety — ensure long words break inside text blocks
+ * ============================================================= */
+@media (max-width: 600px) {
+  .student-shell-content p,
+  .instructor-shell-content p,
+  .admin-main p,
+  .auth-form p,
+  .etasmi-auth-card p,
+  .ssess-card__desc,
+  .ar-section__title,
+  .ar-section__kicker,
+  .student-dashboard-clean__welcome,
+  .instructor-dashboard-clean__welcome {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* =============================================================
+ * 20. Touch targets — boost interactive elements
+ * ============================================================= */
+@media (hover: none) and (pointer: coarse) {
+  .student-shell-sidebar__link,
+  .instructor-shell-sidebar__link,
+  .admin-shell-sidebar__link,
+  .student-shell-topbar__iconbtn,
+  .instructor-shell-topbar__iconbtn,
+  .admin-shell-topbar__iconbtn,
+  .ssess-btn,
+  .ar-btn,
+  .ip-btn,
+  .isess-btn,
+  .btn,
+  .btn-primary {
+    min-height: 44px;
+  }
+}

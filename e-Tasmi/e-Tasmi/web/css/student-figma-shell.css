@@ -1,0 +1,207 @@
+/**
+ * Student workspace shell — Figma reference (sidebar #004D40, light content #F8FAFC).
+ * Loaded for all student-module pages; pairs with student-dashboard-layout.css on dashboard only.
+ */
+
+body.student-package-page {
+  /* Unified emerald — matches the Browse Sessions sidebar across every student page */
+  --figma-sidebar: #064e46;
+  --figma-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --figma-sidebar-active: rgba(255, 255, 255, 0.16);
+}
+
+body.student-package-page .student-shell-sidebar__panel {
+  background: var(--figma-sidebar) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12) !important;
+  padding: 18px 14px 16px !important;
+  gap: 0 !important;
+}
+
+body.student-package-page .student-shell-sidebar__panel--minimal {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  padding: 12px 14px 16px !important;
+}
+
+body.student-package-page .student-shell-sidebar__mobile-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 4px 2px 12px;
+}
+
+@media (min-width: 1101px) {
+  body.student-package-page .student-shell-sidebar__mobile-bar {
+    display: none;
+  }
+}
+
+body.student-package-page .student-shell-sidebar__panel--minimal .student-shell-sidebar__nav {
+  flex: 1;
+}
+
+body.student-package-page .student-shell-sidebar__footer--logout {
+  margin-top: auto !important;
+  padding-top: 16px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+body.student-package-page .student-shell-sidebar__logout--solid {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px !important;
+  margin-top: 0 !important;
+  border-radius: 12px !important;
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  color: #b91c1c !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+body.student-package-page .student-shell-sidebar__logout--solid:hover {
+  background: #fee2e2 !important;
+  border-color: #f87171 !important;
+  color: #991b1b !important;
+}
+
+body.student-package-page .student-shell-sidebar__logout--solid .student-shell-sidebar__icon {
+  color: #b91c1c !important;
+}
+
+body.student-package-page .student-shell-sidebar__logout--solid:hover .student-shell-sidebar__icon {
+  color: #991b1b !important;
+}
+
+body.student-package-page .student-shell-sidebar__link::before {
+  /* Modern active indicator: an accent bar that grows in from the inline-start edge */
+  display: block !important;
+  content: "" !important;
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  transform-origin: center;
+  width: 3px;
+  height: 22px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #5eead4, #16a34a);
+  opacity: 0;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+
+body.student-package-page .student-shell-sidebar__link {
+  position: relative;
+  border-radius: 12px !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid transparent !important;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease !important;
+}
+
+body.student-package-page .student-shell-sidebar__link:hover {
+  background: var(--figma-sidebar-hover) !important;
+  color: #fff !important;
+  transform: translateX(3px);
+}
+
+[dir="rtl"] body.student-package-page .student-shell-sidebar__link:hover {
+  transform: translateX(-3px);
+}
+
+body.student-package-page .student-shell-sidebar__link.is-active {
+  background: var(--figma-sidebar-active) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+  /* Soft glow + soft shadow for a premium active state */
+  box-shadow:
+    0 0 0 1px rgba(94, 234, 212, 0.08) inset,
+    0 8px 20px rgba(0, 0, 0, 0.22),
+    0 0 18px rgba(94, 234, 212, 0.16) !important;
+}
+
+body.student-package-page .student-shell-sidebar__link.is-active::before {
+  transform: translateY(-50%) scaleY(1);
+  opacity: 1;
+}
+
+body.student-package-page .student-shell-sidebar__link.is-active::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  margin-inline-start: auto;
+  background: #5eead4;
+  box-shadow: 0 0 8px rgba(94, 234, 212, 0.7);
+  flex-shrink: 0;
+}
+
+body.student-package-page .student-shell-sidebar__icon {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+body.student-package-page .student-shell-sidebar__link.is-active .student-shell-sidebar__icon,
+body.student-package-page .student-shell-sidebar__link:hover .student-shell-sidebar__icon {
+  color: #fff !important;
+}
+
+body.student-package-page .student-shell-sidebar__label {
+  flex: 1;
+}
+
+body.student-package-page .student-shell-sidebar__footer:not(.student-shell-sidebar__footer--logout) {
+  border-top: none !important;
+  padding-top: 0 !important;
+}
+
+@media (min-width: 1101px) {
+  body.student-package-page .student-shell-sidebar__panel .student-shell-sidebar__close {
+    display: none !important;
+  }
+}
+
+body.student-package-page .student-shell-sidebar__close {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Dashboard header: avatar-only profile chip */
+body.student-dashboard-page.student-package-page .student-shell-profile--dashboard {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0 !important;
+  padding: 2px !important;
+  border-radius: 999px !important;
+  max-width: none;
+}
+
+body.student-dashboard-page.student-package-page .student-shell-profile--dashboard:hover {
+  background: #f1f5f9 !important;
+}
+
+body.student-dashboard-page.student-package-page .student-shell-profile--dashboard .student-shell-profile__avatar {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+body.student-dashboard-page.student-package-page .student-shell-profile--dashboard .student-shell-profile__fallback {
+  font-size: 14px !important;
+}
