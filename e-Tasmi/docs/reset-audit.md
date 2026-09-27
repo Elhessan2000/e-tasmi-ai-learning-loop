@@ -81,8 +81,11 @@ Demo emails:
 - `instructor.demo@etasmi.local`
 
 ## Where to inspect the data
-- App: `http://localhost:8080/`
-- phpMyAdmin: `http://localhost:8081/`
+This challenge copy is isolated from the original e-Tasmi installation.
+
+- App: `http://localhost:8084/`
+- phpMyAdmin: `http://localhost:8083/`
+- MySQL host port: `3317`
 
 phpMyAdmin login:
 - Host: `db`

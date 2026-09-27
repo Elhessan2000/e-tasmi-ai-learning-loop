@@ -7,10 +7,15 @@
 # Docker Compose automatically loads it for ${VAR} substitution in `environment:` below.
 # The `app` service also uses `env_file: .env` so variables are passed into the Tomcat
 # container even when not listed explicitly (Java reads them via System.getenv).
+#
+# AI Challenge isolation: this Compose project, its container names, host ports,
+# image tag, and named volumes are separate from the original e-Tasmi installation.
+name: etasmi-ai-challenge
+
 services:
   db:
     image: mysql:8.4
-    container_name: etasmi-db
+    container_name: etasmi-challenge-db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: etasmi
@@ -18,7 +23,7 @@ services:
       MYSQL_USER: etasmi
       MYSQL_PASSWORD: etasmi123
     ports:
-      - "3306:3306"
+      - "3317:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./e-Tasmi/setup/etasmi_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
@@ -30,11 +35,11 @@ services:
       start_period: 20s
 
   app:
-    image: etasmi-tomcat:latest
+    image: etasmi-challenge-tomcat:latest
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: etasmi-app
+    container_name: etasmi-challenge-app
     restart: unless-stopped
     env_file:
       - .env
@@ -105,23 +110,23 @@ services:
     volumes:
       - etasmi-uploads:/usr/local/tomcat/etasmi_uploads
     ports:
-      - "8080:8080"
+      - "8084:8080"
 
   # Optional HTTPS front-end (e.g. local TLS). Students join Zoom via redirect, not in-page SDK.
   caddy:
     image: caddy:2-alpine
-    container_name: etasmi-caddy
+    container_name: etasmi-challenge-caddy
     restart: unless-stopped
     depends_on:
       - app
     ports:
-      - "8443:443"
+      - "8444:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
 
   phpmyadmin:
     image: phpmyadmin:5-apache
-    container_name: etasmi-phpmyadmin
+    container_name: etasmi-challenge-phpmyadmin
     restart: unless-stopped
     depends_on:
       db:
@@ -132,8 +137,10 @@ services:
       PMA_USER: etasmi
       PMA_PASSWORD: etasmi123
     ports:
-      - "8081:80"
+      - "8083:80"
 
 volumes:
   mysql-data:
+    name: etasmi-ai-challenge_mysql-data
   etasmi-uploads:
+    name: etasmi-ai-challenge_etasmi-uploads

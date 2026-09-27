@@ -1,5 +1,5 @@
 # Optional local HTTPS for e-Tasmi (same app as :8080, different origin for cookies).
-# Use: https://localhost:8443/ or https://YOUR_LAN_IP:8443/
+# Use: https://localhost:8444/ or https://YOUR_LAN_IP:8444/
 # First visit: browser may warn about the local CA — Advanced → proceed (or trust Caddy's local CA).
 
 :443 {

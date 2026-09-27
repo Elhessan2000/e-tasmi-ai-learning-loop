@@ -1,6 +1,8 @@
 # e-Tasmi
 
-This repository is being reset from an old NetBeans + XAMPP setup to a VS Code + Docker workflow.
+This repository is the isolated AI Challenge copy. It does not share Docker containers, host ports, the image tag, or data volumes with the original e-Tasmi installation on the same computer.
+
+Run Compose from the `e-Tasmi` directory. The Compose project name is `etasmi-ai-challenge`.
 
 ## Current stack
 - Java Servlet/JSP web application
@@ -74,10 +76,12 @@ docker compose up -d --build app
 ```
 
 ### Open the services
-- App (HTTP): http://localhost:8080/
-- App (HTTPS, for **embedded Zoom** on LAN / phones): https://localhost:8443/ — first visit may show a certificate warning (Caddy `tls internal`); accept it or trust Caddy’s local CA. Use this URL (with your machine’s LAN IP instead of `localhost` when joining from another device). Plain `http://192.168.x.x:8080` cannot run the in-browser Zoom SDK; use **:8443** instead.
-- phpMyAdmin: http://localhost:8081/
-- MySQL: `localhost:3306`
+These are the isolated AI Challenge host addresses. Inside Docker, Tomcat remains on 8080, MySQL on 3306, phpMyAdmin on 80, and Caddy on 443.
+
+- App (HTTP): http://localhost:8084/
+- App (HTTPS, for **embedded Zoom** on LAN / phones): https://localhost:8444/ — first visit may show a certificate warning (Caddy `tls internal`); accept it or trust Caddy’s local CA. Use this URL (with your machine’s LAN IP instead of `localhost` when joining from another device). Plain `http://192.168.x.x:8084` cannot run the in-browser Zoom SDK; use **:8444** instead.
+- phpMyAdmin: http://localhost:8083/
+- MySQL host port: `localhost:3317`
 
 ### Default database credentials
 - Database: `etasmi`
@@ -142,5 +146,5 @@ docker compose down
 Re-import sample data into the running DB:
 
 ```powershell
-Get-Content e-Tasmi\setup\sample_data.sql | docker exec -i etasmi-db mysql -uetasmi -petasmi123
+Get-Content e-Tasmi\setup\sample_data.sql | docker exec -i etasmi-challenge-db mysql -uetasmi -petasmi123
 ```
