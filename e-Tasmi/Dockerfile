@@ -33,6 +33,12 @@ COPY --from=build /workspace/e-Tasmi.war /usr/local/tomcat/webapps/ROOT.war
 RUN sed -i 's|port="8080" protocol="HTTP/1.1"|port="${port.http}" address="0.0.0.0" protocol="HTTP/1.1"|' \
     /usr/local/tomcat/conf/server.xml
 
+# Copy the startup script and make it executable
+COPY e-Tasmi/start-tomcat.sh /usr/local/tomcat/bin/start-tomcat.sh
+RUN chmod +x /usr/local/tomcat/bin/start-tomcat.sh
+
 EXPOSE 8080
 
-CMD ["sh", "-c", "CATALINA_OPTS=\"-Dport.http=${PORT:-8080} ${CATALINA_OPTS:-}\" exec catalina.sh run"]
+# Start Tomcat using the startup script that ensures environment variables are properly exported.
+CMD ["/usr/local/tomcat/bin/start-tomcat.sh"]
+
