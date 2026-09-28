@@ -3,40 +3,36 @@
 <p align="center">
   <img
     src="documentation/assets/e-tasmi-ai-loop.gif"
-    width="100%"
+    width="85%"
     alt="e-Tasmi AI Learning Loop"
   />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/AI%20CHALLENGE-IN%20SERVICE%20OF%20ISLAMIC%20CONTENT%202026-2563EB?style=for-the-badge&logo=openai&logoColor=white" alt="AI Challenge in Service of Islamic Content 2026">
-  <img src="https://img.shields.io/badge/TRACK%2003-INTERACTIVE%20EXPERIENCES-0F766E?style=for-the-badge" alt="Track 03">
+  <strong>AI Challenge in Service of Islamic Content 2026</strong>
+  &nbsp;•&nbsp;
+  <strong>Track 03</strong>
 </p>
 
-<h2 align="center">
-  From AI-Assisted Recitation Analysis<br>
-  to Instructor-Verified Learning
-</h2>
-
 <p align="center">
-  <em>Turning verified findings into the learner's next practice step.</em>
+  <em>AI-assisted Qur'an recitation → Instructor verification → Targeted learning</em>
 </p>
 
 <p align="center">
   <a href="https://e-tasmi.com">
-    <img src="https://img.shields.io/badge/🌐%20LIVE%20SYSTEM-e--tasmi.com-16A34A?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live System">
+    <img src="https://img.shields.io/badge/🌐%20LIVE-e--tasmi.com-16A34A?style=for-the-badge" alt="Live System">
   </a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-17-F97316?style=flat-square&logo=openjdk&logoColor=white" alt="Java 17">
-  <img src="https://img.shields.io/badge/MySQL-8.4-2563EB?style=flat-square&logo=mysql&logoColor=white" alt="MySQL 8.4">
-  <img src="https://img.shields.io/badge/Tomcat-9-F97316?style=flat-square&logo=apachetomcat&logoColor=white" alt="Tomcat 9">
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker Compose">
+  <img src="https://img.shields.io/badge/Java-17-F97316?style=flat-square&logo=openjdk&logoColor=white">
+  <img src="https://img.shields.io/badge/MySQL-8.4-2563EB?style=flat-square&logo=mysql&logoColor=white">
+  <img src="https://img.shields.io/badge/Tomcat-9-F97316?style=flat-square&logo=apachetomcat&logoColor=white">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white">
 </p>
 
 <p align="center">
-  <a href="#-what-is-e-tasmi">What is e-Tasmi</a>
+  <a href="#-what-is-e-tasmi">About</a>
   •
   <a href="#-the-learning-loop">Learning Loop</a>
   •
@@ -48,7 +44,6 @@
 </p>
 
 ---
-
 ## 🏆 AI Challenge in Service of Islamic Content 2026
 
 ### Track 03 — Interactive Experiences & Learning Journeys for Islam
