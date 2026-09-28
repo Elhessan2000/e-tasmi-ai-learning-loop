@@ -47,14 +47,6 @@
 </p>
 
 **Live:** https://e-tasmi.com
-
-e-Tasmi is a web-based Qur'an recitation learning platform designed to connect learners and instructors through structured recitation sessions, assessment, feedback, and progress tracking.
-
-> **The existing e-Tasmi platform is the foundation.  
-> The AI Learning Loop is the challenge contribution built on top of it.**
-
----
-
 # 🕌 What is e-Tasmi?
 
 **e-Tasmi** is a web-based Qur'an recitation learning and assessment platform designed to support structured interaction between learners and instructors.
