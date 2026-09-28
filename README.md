@@ -73,8 +73,3 @@ flowchart LR
     R --> I["👨‍🏫 Instructor<br/><br/>Review Submission<br/>Assess Recitation"]
 
     I --> E["📊 Evaluation<br/><br/>Score<br/>Feedback<br/>Progress"]
-
-    E --> S2["👨‍🎓 Student<br/><br/>View Result<br/>Read Feedback<br/>Continue Learning"]
-
-    S2 -. "Continue Learning" .-> S
-```
