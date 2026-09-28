@@ -9,6 +9,7 @@ import model.service.RegistrationRequest;
 import model.service.RegistrationResult;
 import model.service.RegistrationService;
 import model.service.ServiceResult;
+import util.EmailVerificationConfig;
 import util.JsonUtil;
 import util.QualificationFileUtil;
 import util.RateLimiter;
@@ -217,6 +218,21 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("error", result.getError());
             attachInlineError(request, result.getError());
             request.getRequestDispatcher("/jsp/auth/register.jsp").forward(request, response);
+            return;
+        }
+
+        if (!EmailVerificationConfig.isEnabled()) {
+            String redirect = request.getContextPath() + "/auth/login"
+                    + (parsedRole == UserRole.INSTRUCTOR ? "?pending=1" : "?registered=1");
+            if (isAjax(request)) {
+                response.setContentType("application/json;charset=UTF-8");
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("success", true);
+                payload.put("redirect", redirect);
+                response.getWriter().write(JsonUtil.obj(payload));
+                return;
+            }
+            response.sendRedirect(redirect);
             return;
         }
 

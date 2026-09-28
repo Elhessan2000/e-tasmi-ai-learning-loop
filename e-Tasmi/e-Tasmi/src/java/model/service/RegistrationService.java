@@ -10,6 +10,7 @@ import model.dao.impl.StudentDaoJdbc;
 import model.dao.impl.UserDaoJdbc;
 import model.entity.*;
 import util.Db;
+import util.EmailVerificationConfig;
 import util.PasswordUtil;
 
 import java.sql.Connection;
@@ -80,12 +81,16 @@ public class RegistrationService {
             if (existing.isPresent()) {
                 connection.rollback();
                 User existingUser = existing.get();
+                if (!EmailVerificationConfig.isEnabled()) {
+                    return RegistrationResult.failure("Email is already registered.");
+                }
                 if (!existingUser.isEmailVerified()) {
                     return RegistrationResult.existingUnverified(existingUser.getUserId(), existingUser.getEmail());
                 }
                 return RegistrationResult.failure("Email is already registered.");
             }
 
+            boolean verificationEnabled = EmailVerificationConfig.isEnabled();
             User user = new User();
 
             user.setFullName(request.getFullName().trim());
@@ -94,7 +99,11 @@ public class RegistrationService {
             user.setPasswordHash(PasswordUtil.hashPassword(request.getPassword()));
             user.setActive(true);
             user.setRole(request.getRole());
-            user.setStatus(UserStatus.INACTIVE);
+            if (!verificationEnabled && request.getRole() == UserRole.STUDENT) {
+                user.setStatus(UserStatus.ACTIVE);
+            } else {
+                user.setStatus(UserStatus.INACTIVE);
+            }
             user.setEmailVerified(false);
             user.setEmailVerifiedAt(null);
             user.setCreatedAt(Instant.now());
@@ -111,7 +120,9 @@ public class RegistrationService {
 
                     Notification n = new Notification();
                     n.setUserId(userId);
-                    n.setMessage("Registration successful. Please verify your email to activate your student account.");
+                    n.setMessage(verificationEnabled
+                            ? "Registration successful. Please verify your email to activate your student account."
+                            : "Registration successful. Your student account is active.");
                     n.setCreatedAt(Instant.now());
                     notificationDao.insert(connection, n);
                     break;
@@ -126,7 +137,9 @@ public class RegistrationService {
 
                     Notification n = new Notification();
                     n.setUserId(userId);
-                    n.setMessage("Registration received. Please verify your email first. After that, your instructor account will remain pending admin verification.");
+                    n.setMessage(verificationEnabled
+                            ? "Registration received. Please verify your email first. After that, your instructor account will remain pending admin verification."
+                            : "Registration successful. Your instructor account is pending admin approval.");
                     n.setCreatedAt(Instant.now());
                     notificationDao.insert(connection, n);
                     break;

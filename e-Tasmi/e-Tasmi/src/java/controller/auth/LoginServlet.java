@@ -41,6 +41,12 @@ public class LoginServlet extends HttpServlet {
         if ("1".equals(request.getParameter("verified"))) {
             request.setAttribute("success", "Email verified successfully. You can now log in.");
         }
+        if ("1".equals(request.getParameter("registered"))) {
+            request.setAttribute("success", "Registration successful. You can log in now.");
+        }
+        if ("1".equals(request.getParameter("pending"))) {
+            request.setAttribute("success", "Registration successful. Your instructor account is pending admin approval.");
+        }
         request.getRequestDispatcher("/jsp/auth/login.jsp").forward(request, response);
     }
 

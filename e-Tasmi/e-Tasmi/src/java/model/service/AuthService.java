@@ -8,6 +8,7 @@ import model.entity.Instructor;
 import model.entity.User;
 import model.entity.UserRole;
 import util.Db;
+import util.EmailVerificationConfig;
 import util.PasswordUtil;
 
 import java.sql.Connection;
@@ -72,13 +73,14 @@ public class AuthService {
 
             // Admins are not self-registered; they must be able to sign in for operations even if
             // email_verified drifted to 0 after a DB restore. Students/instructors must verify (unless env bypass).
-            boolean emailBypass = isLoginWithoutEmailVerificationEnabled();
+            boolean emailBypass = !EmailVerificationConfig.isEnabled()
+                    || isLoginWithoutEmailVerificationEnabled();
             boolean adminSkipsEmailGate = user.getRole() == UserRole.ADMIN;
             if (!user.isEmailVerified() && !emailBypass && !adminSkipsEmailGate) {
                 return AuthResult.failure("Please verify your email before logging in.");
             }
             if (!user.isEmailVerified() && emailBypass) {
-                LOGGER.info("Login: allowing unverified user (ETASMI_ALLOW_LOGIN_WITHOUT_EMAIL_VERIFICATION is enabled). userId=" + user.getUserId());
+                LOGGER.info("Login: allowing unverified user (email verification disabled or login bypass enabled). userId=" + user.getUserId());
             }
 
             String instructorStatus = null;
@@ -114,7 +116,8 @@ public class AuthService {
         }
 
         boolean changed = false;
-        boolean allowUnverified = isLoginWithoutEmailVerificationEnabled();
+        boolean allowUnverified = !EmailVerificationConfig.isEnabled()
+                || isLoginWithoutEmailVerificationEnabled();
         if (user.getRole().name().equals("STUDENT")) {
             if (allowUnverified && !user.isEmailVerified() && user.isActive()
                     && user.getStatus() == model.entity.UserStatus.INACTIVE) {
@@ -130,7 +133,9 @@ public class AuthService {
                 }
             }
         } else if (user.getRole().name().equals("INSTRUCTOR")) {
-            if ("APPROVED".equalsIgnoreCase(instructorStatus) && user.isEmailVerified() && user.isActive()
+            if ("APPROVED".equalsIgnoreCase(instructorStatus)
+                    && (user.isEmailVerified() || allowUnverified)
+                    && user.isActive()
                     && user.getStatus() != model.entity.UserStatus.ACTIVE) {
                 user.setStatus(model.entity.UserStatus.ACTIVE);
                 changed = true;

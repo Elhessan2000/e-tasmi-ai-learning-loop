@@ -24,24 +24,13 @@ Run from the repository root:
 docker compose up -d --build
 ```
 
-### Enable real email verification
-The verification flow is now wired into registration, but real email delivery needs SMTP credentials.
+### Email verification (intentionally disabled)
 
-1. Copy `.env.example` to `.env`
-2. Fill in real SMTP values
-3. Rebuild the app container
+Email verification is intentionally disabled in the AI Challenge development environment. Student registration does not require email verification. Instructor registration does not require email verification but remains subject to administrator approval.
 
-Example:
+The switch is `EMAIL_VERIFICATION_ENABLED` (default `false` in Docker Compose and `.env.example`). SMTP, Brevo, and Resend are not required for registration. The original verify-email flow remains in the codebase and can be restored later by setting `EMAIL_VERIFICATION_ENABLED=true`.
 
-```powershell
-Copy-Item .env.example .env
-docker compose up -d --build app
-```
-
-For Gmail:
-- `SMTP_USERNAME` should be your real Gmail address
-- `SMTP_PASSWORD` should be a Google App Password, not your normal Gmail password
-- `SMTP_FROM` should usually be the same address as `SMTP_USERNAME`
+This applies only to this isolated challenge copy. It does not change the original production e-Tasmi system.
 
 ### Enable real Zoom live sessions
 The live-session flow supports:

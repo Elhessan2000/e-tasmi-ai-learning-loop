@@ -94,7 +94,10 @@ services:
       ETASMI_UPLOADS_DIR: /usr/local/tomcat/etasmi_uploads
       # Optional: on each app start, reset admin@etasmi.com password to this value (dev/recovery only).
       ETASMI_BOOTSTRAP_ADMIN_PASSWORD: ${ETASMI_BOOTSTRAP_ADMIN_PASSWORD:-}
-      # Production: omit from .env (default = verification required). Dev only: true = skip email check at login.
+      # Challenge copy: registration email verification is disabled by default.
+      # Set true only to restore the original verify-email / code-send flow.
+      EMAIL_VERIFICATION_ENABLED: ${EMAIL_VERIFICATION_ENABLED:-false}
+      # Optional extra login-only bypass when EMAIL_VERIFICATION_ENABLED=true.
       ETASMI_ALLOW_LOGIN_WITHOUT_EMAIL_VERIFICATION: ${ETASMI_ALLOW_LOGIN_WITHOUT_EMAIL_VERIFICATION:-}
       # Dev only: true = fully disable login/register/reset rate limiting (brute-force lockouts).
       # Leave empty in production. Localhost requests are already bypassed automatically.

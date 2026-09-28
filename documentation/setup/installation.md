@@ -27,6 +27,8 @@ Copy `.env.example` to `.env` inside the `e-Tasmi` directory if a local environm
 
 Leave `MYSQLHOST` unset so the application uses the challenge MySQL container.
 
+Email verification is intentionally disabled in this AI Challenge development environment (`EMAIL_VERIFICATION_ENABLED=false` by default). Student registration does not require email verification. Instructor registration does not require email verification but remains subject to administrator approval. SMTP, Brevo, and Resend are not required for registration.
+
 Do not put API keys, passwords, or other secrets into Git. Keep them only in the ignored `.env` file.
 
 ## Docker setup

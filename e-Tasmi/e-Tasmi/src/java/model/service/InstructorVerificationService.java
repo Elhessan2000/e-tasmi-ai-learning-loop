@@ -12,6 +12,7 @@ import model.entity.Notification;
 import model.entity.User;
 import model.entity.UserStatus;
 import util.Db;
+import util.EmailVerificationConfig;
 import util.QualificationFileUtil;
 
 import java.sql.Connection;
@@ -106,7 +107,9 @@ public class InstructorVerificationService {
             }
 
             User user = userOpt.get();
-            if (newStatus == InstructorVerificationStatus.APPROVED && !user.isEmailVerified()) {
+            if (newStatus == InstructorVerificationStatus.APPROVED
+                    && !user.isEmailVerified()
+                    && EmailVerificationConfig.isEnabled()) {
                 connection.rollback();
                 return InstructorVerificationUpdateResult.failure("This instructor must verify their email before approval.");
             }
