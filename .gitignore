@@ -4,6 +4,12 @@
 !.env.example
 .env.template-overwrite-backup
 
+# Private competition material — keep off the public GitHub repository
+Final PDF/
+**/_preview/
+**/*.pptx
+docs/baseline/_print-source.html
+
 # Local session captures and test artifacts
 *cookies*.txt
 tmp-headers.txt
@@ -33,6 +39,12 @@ e-Tasmi/docs/_temp_docx_extract/
 e-Tasmi/docs/paper-figures/
 *.log
 *.aux
+*.nav
+*.out
+*.snm
+*.toc
+*.fls
+*.fdb_latexmk
 
 # Uploads and local database data
 uploads/

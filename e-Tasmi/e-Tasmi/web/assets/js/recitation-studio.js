@@ -1,16 +1,10 @@
 /* =====================================================================
- * e-Tasmi · Recitation Studio (Session-first)
+ * e-Tasmi · Recitation studio
  *
- * Flow:
- *   1) Student picks an enrolled session from a searchable selector.
- *   2) A summary card + two action cards (Record / Upload) are revealed.
- *   3) The recording or uploaded file is submitted, linked to that
- *      session's enrollmentId.
- *   4) Recent submissions open a detailed evaluation report.
- *
- * Backend contract (StudentRecitationServlet) is unchanged:
- *   POST {endpoint} (multipart, ajax=1)  → { ok, redirect } | { ok:false, error }
- *     fields: enrollmentId, audio (file), duration?
+ * Steps: choose session -> record or upload -> review & submit.
+ * Backend contract (StudentRecitationServlet):
+ *   POST {endpoint} (multipart, ajax=1) -> { ok, redirect } | { ok:false, error }
+ *   fields: enrollmentId, audio, duration?, parentRecitationId? (Practice Again)
  * ===================================================================== */
 (function () {
   'use strict';
@@ -22,61 +16,67 @@
   var root = document.querySelector('[data-rec-root]');
   if (!root) return;
   var ENDPOINT = root.getAttribute('data-rec-endpoint');
-  var $ = function (sel, ctx) { return (ctx || document).querySelector(sel); };
+  var $ = function (sel) { return root.querySelector(sel); };
 
-  /* refs: selector + summary */
-  var select = $('#recSelect');
-  var selectTrigger = $('[data-rec-select-trigger]');
-  var selectPanel = $('#recSelectPanel');
-  var selectLabel = $('#recSelectLabel');
-  var summary = $('#recSummary');
-  var infoInstructor = $('#recInfoInstructor');
-  var infoSchedule = $('#recInfoSchedule');
-  var infoMode = $('#recInfoMode');
-  var infoPortion = $('#recInfoPortion');
+  var viewAll = $('[data-rec-viewall]');
+  if (viewAll) viewAll.addEventListener('click', function () {
+    root.querySelectorAll('[data-rec-more]').forEach(function (row) { row.hidden = false; });
+    viewAll.hidden = true;
+  });
+
+  var studioCard = $('[data-rec-studio]');
+  if (!studioCard) return;
+
+  var steps = studioCard.querySelectorAll('[data-rec-steps] li');
   var step2 = $('#recStep2');
+  var review = $('#recReview');
+  var processing = $('#recProcessing');
 
-  /* refs: upload */
-  var uploadModal = $('#recUploadModal');
-  var uploadFor = $('#recUploadFor');
+  var trigger = $('#recSessionTrigger');
+  var listbox = $('#recSessionList');
+  var placeholder = trigger ? trigger.querySelector('.lx-select__placeholder') : null;
+  var current = $('[data-rec-current]');
+  var chosen = $('#recChosen');
+  var chosenPortion = $('#recChosenPortion');
+  var chosenInstructor = $('#recChosenInstructor');
+  var chosenSchedule = $('#recChosenSchedule');
+
+  var recorderEl = $('#recStudio');
+  var stateLabel = $('#recStateLabel');
+  var timerEl = $('#recTimer');
+  var canvas = $('#recWave');
+  var captureTitle = $('#recCaptureTitle');
+  var captureHint = $('#recCaptureHint');
+  var startBtn = $('[data-rec-start]');
+  var stopBtn = $('[data-rec-stop]');
+  var pauseBtn = $('[data-rec-pause]');
+  var pauseLabel = $('#recPauseLabel');
+
   var fileEl = $('#recFile');
   var fileHint = $('#recFileHint');
   var dropzone = $('#recDropzone');
-  var uploadSubmitBtn = $('#recUploadSubmitBtn');
-  var uploadStatus = $('#recUploadStatus');
+  var reviewFileBtn = $('[data-rec-review-file]');
 
-  /* refs: studio */
-  var studio = $('#recStudio');
-  var studioFor = $('#recStudioFor');
-  var orb = $('#recOrb');
-  var canvas = $('#recWave');
-  var timerEl = $('#recTimer');
-  var elapsedEl = $('#recElapsed');
-  var pauseBtn = $('#recPauseBtn');
-  var pauseLabel = $('#recPauseLabel');
-  var pauseGlyph = $('#recPauseGlyph');
-  var review = $('#recReview');
   var playback = $('#recPlayback');
   var reviewMeta = $('#recReviewMeta');
+  var reviewDuration = $('#recReviewDuration');
+  var reviewSession = $('#recReviewSession');
+  var reviewPassage = $('#recReviewPassage');
   var submitBtn = $('#recSubmitBtn');
+  var submitLabel = $('#recSubmitLabel');
   var submitStatus = $('#recSubmitStatus');
 
-  /* refs: feedback */
-  var fbModal = $('#recFeedbackModal');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="none"><rect x="7" y="5" width="3.5" height="14" rx="1" fill="currentColor"/><rect x="13.5" y="5" width="3.5" height="14" rx="1" fill="currentColor"/></svg>';
-  var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor"/></svg>';
-
-  /* state */
-  var sel = { enrollmentId: '', title: '' };
+  var sel = { enrollmentId: '', title: '', portion: '' };
   var rec = {
-    stream: null, recorder: null, chunks: [], blob: null,
-    mimeType: 'audio/webm', elapsed: 0, tick: null, paused: false,
-    audioCtx: null, analyser: null, raf: null
+    stream: null, recorder: null, chunks: [], blob: null, file: null, objectUrl: null,
+    mimeType: '', elapsed: 0, tick: null, paused: false, ignoreStop: false,
+    audioCtx: null, analyser: null, raf: null, history: []
   };
 
-  /* ---------- helpers ---------- */
-  function fmt(t) { t = Math.max(0, Math.floor(t)); var m = Math.floor(t / 60), s = t % 60; return m + ':' + (s < 10 ? '0' + s : s); }
+  function fmt(s) { s = Math.max(0, Math.floor(s)); var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' + r : r); }
+  function mb(bytes) { return (bytes / (1024 * 1024)).toFixed(2); }
   function supportsRecording() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined'); }
   function pickMimeType() {
     if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
@@ -84,176 +84,197 @@
     for (var i = 0; i < prefs.length; i++) { if (MediaRecorder.isTypeSupported(prefs[i])) return prefs[i]; }
     return '';
   }
-  function post(form) {
-    return fetch(ENDPOINT, { method: 'POST', body: form, credentials: 'same-origin' })
-      .then(function (res) { return res.json().catch(function () { return { ok: false, error: t('errors.unexpectedResponse') }; }); });
-  }
-  function setCell(el, value) {
+  function setI18n(el, key, vars) {
     if (!el) return;
-    el.textContent = (value && String(value).trim()) ? value : '-';
+    el.setAttribute('data-i18n', key);
+    el.textContent = t(key, vars);
   }
-  function escapeHtml(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function setStatus(message, isError) {
+    if (!submitStatus) return;
+    submitStatus.textContent = message || '';
+    submitStatus.classList.toggle('is-error', !!isError);
   }
-  function lockScroll(on) { document.body.style.overflow = on ? 'hidden' : ''; }
-
-  /* ===================================================================
-   * Step 1: session selector (simple dropdown — no search)
-   * ================================================================= */
-  var options = Array.prototype.slice.call(document.querySelectorAll('[data-rec-session]'));
-
-  function isOpen() { return selectPanel && !selectPanel.hidden; }
-  function openPanel() {
-    if (!selectPanel) return;
-    selectPanel.hidden = false;
-    if (selectTrigger) selectTrigger.setAttribute('aria-expanded', 'true');
-    if (select) select.classList.add('is-open');
-  }
-  function closePanel() {
-    if (!selectPanel) return;
-    selectPanel.hidden = true;
-    if (selectTrigger) selectTrigger.setAttribute('aria-expanded', 'false');
-    if (select) select.classList.remove('is-open');
+  function enter(stage) {
+    stage.classList.remove('is-entering');
+    void stage.offsetWidth;
+    stage.classList.add('is-entering');
   }
 
-  if (selectTrigger) selectTrigger.addEventListener('click', function (e) {
-    e.stopPropagation();
-    if (isOpen()) closePanel(); else openPanel();
-  });
-  document.addEventListener('click', function (e) {
-    if (isOpen() && select && !select.contains(e.target)) closePanel();
-  });
+  /* ---------- steps ---------- */
+  function setStep(n) {
+    steps.forEach(function (li) {
+      var s = Number(li.getAttribute('data-step'));
+      li.classList.toggle('is-done', s < n);
+      li.classList.toggle('is-current', s === n);
+      if (s === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+    [[step2, 2], [review, 3], [processing, 4]].forEach(function (pair) {
+      if (!pair[0]) return;
+      var show = pair[1] === n;
+      var wasHidden = pair[0].hidden;
+      pair[0].hidden = !show;
+      if (show && wasHidden) enter(pair[0]);
+    });
+    if (trigger) trigger.disabled = n >= 4;
+  }
 
-  options.forEach(function (o) { o.addEventListener('click', function () { selectSession(o); }); });
+  /* ---------- step 1: session listbox ---------- */
+  var options = Array.prototype.slice.call(root.querySelectorAll('[data-rec-session]'));
+  var activeIndex = -1;
+
+  function isOpen() { return listbox && !listbox.hidden; }
+  function setActive(i) {
+    if (!options.length) return;
+    activeIndex = (i + options.length) % options.length;
+    options.forEach(function (o, k) { o.classList.toggle('is-active', k === activeIndex); });
+    listbox.setAttribute('aria-activedescendant', options[activeIndex].id);
+    var o = options[activeIndex];
+    if (o.offsetTop < listbox.scrollTop) listbox.scrollTop = o.offsetTop;
+    else if (o.offsetTop + o.offsetHeight > listbox.scrollTop + listbox.clientHeight) listbox.scrollTop = o.offsetTop + o.offsetHeight - listbox.clientHeight;
+  }
+  function openList() {
+    if (!listbox || trigger.disabled) return;
+    listbox.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    trigger.parentNode.classList.add('is-open');
+    var selectedIndex = options.findIndex(function (o) { return o.getAttribute('aria-selected') === 'true'; });
+    setActive(selectedIndex >= 0 ? selectedIndex : 0);
+    listbox.focus();
+  }
+  function closeList(refocus) {
+    if (!listbox || listbox.hidden) return;
+    listbox.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.parentNode.classList.remove('is-open');
+    if (refocus) trigger.focus();
+  }
 
   function selectSession(option) {
-    options.forEach(function (o) { o.classList.remove('is-selected'); o.setAttribute('aria-selected', 'false'); });
-    option.classList.add('is-selected');
-    option.setAttribute('aria-selected', 'true');
-
+    var changed = option.getAttribute('data-enrollment-id') !== sel.enrollmentId;
+    options.forEach(function (o) { o.setAttribute('aria-selected', o === option ? 'true' : 'false'); });
     sel.enrollmentId = option.getAttribute('data-enrollment-id') || '';
-    sel.title = option.getAttribute('data-title') || t('common.session');
-
-    if (selectLabel) { selectLabel.textContent = sel.title; selectLabel.classList.add('is-chosen'); }
-    setCell(infoInstructor, option.getAttribute('data-instructor'));
-    setCell(infoSchedule, option.getAttribute('data-schedule'));
-    setCell(infoMode, option.getAttribute('data-mode'));
-    setCell(infoPortion, option.getAttribute('data-portion'));
-    if (summary) summary.hidden = false;
-
-    closePanel();
-    if (step2) {
-      step2.hidden = false;
-      step2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    sel.title = option.getAttribute('data-title') || '';
+    sel.portion = option.getAttribute('data-portion') || '';
+    if (placeholder) placeholder.hidden = true;
+    if (current) { current.hidden = false; current.textContent = sel.title; }
+    trigger.classList.add('has-value');
+    if (chosenPortion) chosenPortion.textContent = sel.portion || '—';
+    if (chosenInstructor) chosenInstructor.textContent = option.getAttribute('data-instructor') || '—';
+    if (chosenSchedule) chosenSchedule.textContent = option.getAttribute('data-schedule') || '—';
+    if (chosen) {
+      var first = chosen.hidden;
+      chosen.hidden = false;
+      if (first || changed) enter(chosen);
     }
+    if (reviewSession) reviewSession.textContent = sel.title || '—';
+    if (reviewPassage) reviewPassage.textContent = sel.portion || '—';
+    if (review && !review.hidden) return;
+    if (step2 && step2.hidden) { showMethod('record'); setStep(2); }
   }
 
-  function requireSession() {
-    if (!sel.enrollmentId) { alert(t('student.recitations.selectSessionFirst')); if (selectTrigger) selectTrigger.focus(); return false; }
-    return true;
+  if (trigger && listbox) {
+    trigger.addEventListener('click', function () { if (isOpen()) closeList(true); else openList(); });
+    trigger.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openList();
+      }
+    });
+    listbox.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(activeIndex + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIndex - 1); }
+      else if (e.key === 'Home') { e.preventDefault(); setActive(0); }
+      else if (e.key === 'End') { e.preventDefault(); setActive(options.length - 1); }
+      else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (activeIndex >= 0) selectSession(options[activeIndex]);
+        closeList(true);
+      } else if (e.key === 'Escape' || e.key === 'Tab') {
+        if (e.key === 'Escape') e.preventDefault();
+        closeList(e.key === 'Escape');
+      }
+    });
+    options.forEach(function (o, i) {
+      o.addEventListener('mousemove', function () { if (activeIndex !== i) setActive(i); });
+      o.addEventListener('click', function () { selectSession(o); closeList(true); });
+    });
+    document.addEventListener('mousedown', function (e) {
+      if (isOpen() && !trigger.parentNode.contains(e.target)) closeList(false);
+    });
   }
 
-  /* ===================================================================
-   * Upload flow
-   * ================================================================= */
-  document.querySelectorAll('[data-rec-upload]').forEach(function (el) {
-    el.addEventListener('click', function () {
-      if (!requireSession()) return;
-      if (uploadFor) uploadFor.textContent = t('student.recitations.forSession', { name: sel.title });
-      if (uploadStatus) { uploadStatus.textContent = ''; uploadStatus.classList.remove('is-error'); }
-      if (uploadSubmitBtn) { uploadSubmitBtn.disabled = true; uploadSubmitBtn.textContent = t('student.recitations.submitRecitation'); }
-      if (fileEl) fileEl.value = '';
-      if (fileHint) fileHint.textContent = t('student.recitations.fileFormatsHint');
-      uploadModal.hidden = false;
-      lockScroll(true);
+  /* ---------- step 2: method ---------- */
+  function showMethod(method) {
+    root.querySelectorAll('[data-rec-method]').forEach(function (btn) {
+      var on = btn.getAttribute('data-rec-method') === method;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    root.querySelectorAll('[data-rec-pane]').forEach(function (pane) {
+      pane.hidden = pane.getAttribute('data-rec-pane') !== method;
+    });
+  }
+  root.querySelectorAll('[data-rec-method]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (recorderEl && recorderEl.getAttribute('data-state') !== 'idle') return;
+      showMethod(btn.getAttribute('data-rec-method'));
     });
   });
-  document.querySelectorAll('[data-rec-modal-dismiss]').forEach(function (el) {
-    el.addEventListener('click', function () { uploadModal.hidden = true; lockScroll(false); });
-  });
-  if (fileEl) fileEl.addEventListener('change', function () {
-    var has = fileEl.files && fileEl.files.length > 0;
-    uploadSubmitBtn.disabled = !has;
-    if (has && fileHint) {
-      var f = fileEl.files[0];
-      fileHint.textContent = f.name + '  -  ' + (f.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+  /* ---------- recorder ---------- */
+  function setRecorderState(state) {
+    if (!recorderEl) return;
+    recorderEl.setAttribute('data-state', state);
+    var live = state !== 'idle';
+    if (startBtn) startBtn.hidden = live;
+    if (stopBtn) stopBtn.hidden = !live;
+    if (pauseBtn) pauseBtn.hidden = !live;
+    if (trigger) trigger.disabled = live;
+    if (state === 'idle') {
+      setI18n(stateLabel, 'student.recitations.readyToRecord');
+      setI18n(captureTitle, 'student.recitations.tapToStart');
+      setI18n(captureHint, 'student.recitations.tapToStartHint');
+      if (timerEl) timerEl.textContent = '0:00';
+    } else if (state === 'paused') {
+      setI18n(stateLabel, 'student.recitations.recordingPaused');
+      setI18n(captureTitle, 'student.recitations.recordingPaused');
+      setI18n(captureHint, 'student.recitations.recordingPausedHint');
+      setI18n(pauseLabel, 'student.recitations.resume');
+    } else {
+      setI18n(stateLabel, 'student.recitations.recordingLive');
+      setI18n(captureTitle, 'student.recitations.recordingInProgress');
+      setI18n(captureHint, 'student.recitations.recordingInProgressHint');
+      setI18n(pauseLabel, 'student.recitations.pause');
     }
-  });
-  if (dropzone && fileEl) {
-    ['dragenter', 'dragover'].forEach(function (ev) {
-      dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.add('is-drag'); });
-    });
-    ['dragleave', 'drop'].forEach(function (ev) {
-      dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.remove('is-drag'); });
-    });
-    dropzone.addEventListener('drop', function (e) {
-      var files = e.dataTransfer && e.dataTransfer.files;
-      if (!files || !files.length) return;
-      try { var dt = new DataTransfer(); dt.items.add(files[0]); fileEl.files = dt.files; fileEl.dispatchEvent(new Event('change', { bubbles: true })); } catch (err) {}
-    });
+    if (pauseBtn) pauseBtn.setAttribute('aria-pressed', state === 'paused' ? 'true' : 'false');
   }
-  if (uploadSubmitBtn) uploadSubmitBtn.addEventListener('click', function () {
-    if (!fileEl || !fileEl.files || !fileEl.files.length || !requireSession()) return;
-    uploadSubmitBtn.disabled = true;
-    uploadSubmitBtn.textContent = t('student.recitations.uploading');
-    if (uploadStatus) uploadStatus.classList.remove('is-error');
 
-    var form = new FormData();
-    form.append('ajax', '1');
-    form.append('enrollmentId', sel.enrollmentId);
-    form.append('audio', fileEl.files[0]);
-
-    post(form).then(function (data) {
-      if (data && data.ok) { window.location.href = data.redirect || (ENDPOINT + '?submitted=1'); }
-      else {
-        uploadSubmitBtn.disabled = false; uploadSubmitBtn.textContent = t('student.recitations.submitRecitation');
-        if (uploadStatus) { uploadStatus.classList.add('is-error'); uploadStatus.textContent = (data && data.error) || t('student.recitations.uploadFailed'); }
-      }
-    }).catch(function () {
-      uploadSubmitBtn.disabled = false; uploadSubmitBtn.textContent = t('student.recitations.submitRecitation');
-      if (uploadStatus) { uploadStatus.classList.add('is-error'); uploadStatus.textContent = t('errors.networkError'); }
-    });
+  if (startBtn) startBtn.addEventListener('click', function () {
+    if (!sel.enrollmentId) return;
+    if (!supportsRecording()) { alert(t('student.recitations.recordingNotSupported')); return; }
+    startBtn.disabled = true;
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function (stream) { rec.stream = stream; startBtn.disabled = false; startRecording(); })
+      .catch(function (err) {
+        startBtn.disabled = false;
+        alert(err && err.name === 'NotAllowedError' ? t('student.recitations.micBlocked') : t('student.recitations.recordingFailed'));
+      });
   });
 
-  /* ===================================================================
-   * Recording flow
-   * ================================================================= */
-  document.querySelectorAll('[data-rec-start]').forEach(function (el) {
-    el.addEventListener('click', function () {
-      if (!requireSession()) return;
-      if (!supportsRecording()) {
-        alert(t('student.recitations.recordingNotSupported'));
-        return;
-      }
-      el.disabled = true;
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(function (stream) { rec.stream = stream; el.disabled = false; launchStudio(); })
-        .catch(function (err) {
-          el.disabled = false;
-          alert(err && err.name === 'NotAllowedError'
-            ? t('student.recitations.micBlocked')
-            : t('student.recitations.recordingFailed'));
-        });
-    });
-  });
-
-  function launchStudio() {
-    rec.chunks = []; rec.blob = null; rec.elapsed = 0; rec.paused = false;
+  function startRecording() {
+    rec.chunks = []; rec.blob = null; rec.file = null; rec.elapsed = 0; rec.paused = false; rec.history = [];
     rec.mimeType = pickMimeType();
-    if (studioFor) studioFor.textContent = t('student.recitations.recordingFor', { name: sel.title });
-    timerEl.textContent = '0:00'; elapsedEl.textContent = '0:00';
-    setPausedUi(false);
-    studio.hidden = false; review.hidden = true;
-    lockScroll(true);
-
     try {
       rec.recorder = rec.mimeType ? new MediaRecorder(rec.stream, { mimeType: rec.mimeType }) : new MediaRecorder(rec.stream);
     } catch (e) { rec.recorder = new MediaRecorder(rec.stream); }
+    if (!rec.mimeType) rec.mimeType = rec.recorder.mimeType || 'audio/webm';
     rec.recorder.ondataavailable = function (e) { if (e.data && e.data.size > 0) rec.chunks.push(e.data); };
-    rec.recorder.onstop = handleStop;
+    rec.recorder.onstop = function () { if (!rec.ignoreStop) finishRecording(); };
     rec.recorder.start(250);
+    setRecorderState('live');
     startTimer();
     startVisualizer();
+    if (stopBtn) stopBtn.focus();
   }
 
   function startTimer() {
@@ -261,8 +282,7 @@
     rec.tick = setInterval(function () {
       if (rec.paused) return;
       rec.elapsed += 1;
-      timerEl.textContent = fmt(rec.elapsed);
-      elapsedEl.textContent = fmt(rec.elapsed);
+      if (timerEl) timerEl.textContent = fmt(rec.elapsed);
     }, 1000);
   }
   function stopTimer() { if (rec.tick) { clearInterval(rec.tick); rec.tick = null; } }
@@ -273,35 +293,47 @@
       rec.audioCtx = new AC();
       var src = rec.audioCtx.createMediaStreamSource(rec.stream);
       rec.analyser = rec.audioCtx.createAnalyser();
-      rec.analyser.fftSize = 256;
+      rec.analyser.fftSize = 512;
       src.connect(rec.analyser);
     } catch (e) { rec.analyser = null; }
     drawWave();
   }
+
+  /* Scrolling level history: each bar is one frame's loudness, newest on the right. */
   function drawWave() {
+    if (!canvas) return;
     var ctx = canvas.getContext('2d');
-    var len = rec.analyser ? rec.analyser.frequencyBinCount : 64;
-    var data = new Uint8Array(len);
+    var data = new Uint8Array(rec.analyser ? rec.analyser.fftSize : 512);
+    var bars = 64;
+    var styles = getComputedStyle(recorderEl);
+    var live = (styles.getPropertyValue('--lx-wave') || '#7ee2c3').trim();
+    var idle = (styles.getPropertyValue('--lx-wave-idle') || 'rgba(255,255,255,0.2)').trim();
+    var frameCount = 0;
     function frame() {
       rec.raf = requestAnimationFrame(frame);
-      var w = canvas.width, h = canvas.height;
+      frameCount++;
+      if (frameCount % 3 !== 0) return;
+      var level = 0;
+      if (rec.analyser && !rec.paused) {
+        rec.analyser.getByteTimeDomainData(data);
+        var sum = 0;
+        for (var i = 0; i < data.length; i++) { var v = (data[i] - 128) / 128; sum += v * v; }
+        level = Math.min(1, Math.sqrt(sum / data.length) * 4);
+      }
+      if (rec.paused) return;
+      rec.history.push(level);
+      if (rec.history.length > bars) rec.history.shift();
+      var w = canvas.width, h = canvas.height, gap = 4, barW = (w - gap * (bars - 1)) / bars, mid = h / 2;
       ctx.clearRect(0, 0, w, h);
-      if (rec.analyser && !rec.paused) rec.analyser.getByteFrequencyData(data);
-      var bars = 48, gap = 3, barW = (w - gap * (bars - 1)) / bars, mid = h / 2, amp = 0;
-      for (var i = 0; i < bars; i++) {
-        var idx = Math.floor(i / bars * len);
-        var v = rec.paused ? 6 : (data[idx] || 0);
-        amp += v;
-        var bh = Math.max(4, (v / 255) * (h * 0.92));
-        var x = i * (barW + gap);
-        var grad = ctx.createLinearGradient(0, mid - bh / 2, 0, mid + bh / 2);
-        grad.addColorStop(0, '#2dd4bf'); grad.addColorStop(1, '#0f766e');
-        ctx.fillStyle = grad;
+      var offset = bars - rec.history.length;
+      for (var b = 0; b < bars; b++) {
+        var val = b < offset ? 0 : rec.history[b - offset];
+        var bh = Math.max(4, val * h * 0.9);
+        ctx.fillStyle = b < offset ? idle : live;
+        var x = b * (barW + gap);
         roundRect(ctx, x, mid - bh / 2, barW, bh, Math.min(barW / 2, 3));
         ctx.fill();
       }
-      var level = rec.paused ? 0 : Math.min(1, (amp / bars) / 120);
-      if (orb) orb.style.transform = 'scale(' + (1 + level * 0.12).toFixed(3) + ')';
     }
     frame();
   }
@@ -314,202 +346,186 @@
     if (rec.raf) { cancelAnimationFrame(rec.raf); rec.raf = null; }
     if (rec.audioCtx) { try { rec.audioCtx.close(); } catch (e) {} rec.audioCtx = null; }
     rec.analyser = null;
-    if (orb) orb.style.transform = '';
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   }
 
   if (pauseBtn) pauseBtn.addEventListener('click', function () {
     if (!rec.recorder) return;
     if (rec.paused) {
       if (rec.recorder.state === 'paused') rec.recorder.resume();
-      if (rec.audioCtx && rec.audioCtx.state === 'suspended') rec.audioCtx.resume();
       rec.paused = false;
+      setRecorderState('live');
     } else {
       if (rec.recorder.state === 'recording') rec.recorder.pause();
       rec.paused = true;
+      setRecorderState('paused');
     }
-    setPausedUi(rec.paused);
   });
-  function setPausedUi(paused) {
-    studio.classList.toggle('is-paused', paused);
-    pauseLabel.textContent = paused ? t('student.recitations.resume') : t('student.recitations.pause');
-    pauseGlyph.innerHTML = paused ? ICON_PLAY : ICON_PAUSE;
+
+  if (stopBtn) stopBtn.addEventListener('click', function () {
+    if (!rec.recorder) return;
+    stopTimer();
+    if (rec.recorder.state !== 'inactive') rec.recorder.stop();
+  });
+
+  function finishRecording() {
+    stopVisualizer();
+    stopStream();
+    rec.blob = new Blob(rec.chunks, { type: rec.mimeType || 'audio/webm' });
+    rec.recorder = null;
+    setRecorderState('idle');
+    openReview(rec.blob, fmt(rec.elapsed), '');
   }
 
-  document.querySelectorAll('[data-rec-stop]').forEach(function (el) {
-    el.addEventListener('click', function () {
-      if (!rec.recorder) return;
-      if (rec.recorder.state !== 'inactive') rec.recorder.stop();
-      stopTimer();
+  function stopStream() {
+    if (rec.stream) { rec.stream.getTracks().forEach(function (track) { track.stop(); }); rec.stream = null; }
+  }
+
+  /* ---------- upload ---------- */
+  if (fileEl) fileEl.addEventListener('change', function () {
+    var f = fileEl.files && fileEl.files[0];
+    if (reviewFileBtn) reviewFileBtn.disabled = !f;
+    if (dropzone) dropzone.classList.toggle('has-file', !!f);
+    if (fileHint) {
+      if (f) { fileHint.removeAttribute('data-i18n'); fileHint.textContent = f.name + ' · ' + mb(f.size) + ' MB'; }
+      else setI18n(fileHint, 'student.recitations.fileFormatsHint');
+    }
+  });
+  if (dropzone && fileEl) {
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.add('is-drag'); });
     });
+    ['dragleave', 'drop'].forEach(function (ev) {
+      dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.remove('is-drag'); });
+    });
+    dropzone.addEventListener('drop', function (e) {
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      try {
+        var dt = new DataTransfer(); dt.items.add(files[0]);
+        fileEl.files = dt.files;
+        fileEl.dispatchEvent(new Event('change', { bubbles: true }));
+      } catch (err) {}
+    });
+  }
+  if (reviewFileBtn) reviewFileBtn.addEventListener('click', function () {
+    var f = fileEl && fileEl.files && fileEl.files[0];
+    if (!f || !sel.enrollmentId) return;
+    rec.blob = null;
+    rec.file = f;
+    openReview(f, '', f.name + ' · ' + mb(f.size) + ' MB');
   });
 
-  function handleStop() {
-    stopVisualizer();
-    var type = rec.mimeType || 'audio/webm';
-    rec.blob = new Blob(rec.chunks, { type: type });
-    if (playback) playback.src = URL.createObjectURL(rec.blob);
-    if (reviewMeta) reviewMeta.textContent = t('student.recitations.reviewFor', {
-      name: sel.title,
-      duration: fmt(rec.elapsed),
-      size: (rec.blob.size / (1024 * 1024)).toFixed(2)
-    });
-    if (submitStatus) { submitStatus.textContent = ''; submitStatus.classList.remove('is-error'); }
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = t('student.recitations.submitRecitation'); }
-    review.hidden = false;
+  /* ---------- step 3: review & submit ---------- */
+  if (playback) playback.addEventListener('durationchange', function () {
+    if (reviewDuration && isFinite(playback.duration) && playback.duration > 0) {
+      reviewDuration.textContent = fmt(playback.duration);
+    }
+  });
+
+  function openReview(media, duration, meta) {
+    if (rec.objectUrl) URL.revokeObjectURL(rec.objectUrl);
+    rec.objectUrl = URL.createObjectURL(media);
+    if (reviewDuration) reviewDuration.textContent = duration || '—';
+    if (reviewSession) reviewSession.textContent = sel.title || '—';
+    if (reviewPassage) reviewPassage.textContent = sel.portion || '—';
+    if (reviewMeta) { reviewMeta.textContent = meta || ''; reviewMeta.hidden = !meta; }
+    if (playback) { playback.src = rec.objectUrl; playback.load(); }
+    setStatus('');
+    setSubmitting(false);
+    setStep(3);
+    if (submitBtn && studioCard.getBoundingClientRect().top < 0) {
+      review.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+
+  function setSubmitting(on) {
+    if (!submitBtn) return;
+    submitBtn.disabled = on;
+    submitBtn.classList.toggle('is-busy', on);
+    var discard = $('[data-rec-discard]');
+    if (discard) discard.disabled = on;
+    setI18n(submitLabel, on ? 'student.recitations.uploading' : 'student.recitations.submitRecitationBtn');
+  }
+
+  function appendPracticeParent(form) {
+    var parentId = root.getAttribute('data-practice-parent') || '';
+    var enrollmentId = root.getAttribute('data-practice-enrollment') || '';
+    if (parentId && enrollmentId && sel.enrollmentId === enrollmentId) {
+      form.append('parentRecitationId', parentId);
+    }
   }
 
   if (submitBtn) submitBtn.addEventListener('click', function () {
-    if (!rec.blob || !requireSession()) return;
-    submitBtn.disabled = true;
-    submitStatus.classList.remove('is-error');
-    submitStatus.textContent = t('student.recitations.uploadingRecitation');
+    if ((!rec.blob && !rec.file) || !sel.enrollmentId) return;
+    if (playback) { try { playback.pause(); } catch (e) {} }
+    setSubmitting(true);
+    setStatus(t('student.recitations.uploadingRecitation'));
 
-    var ext = rec.mimeType.indexOf('ogg') >= 0 ? 'ogg' : (rec.mimeType.indexOf('mp4') >= 0 ? 'm4a' : 'webm');
     var form = new FormData();
     form.append('ajax', '1');
     form.append('enrollmentId', sel.enrollmentId);
-    form.append('duration', rec.elapsed);
-    form.append('audio', rec.blob, 'recitation.' + ext);
-
-    post(form).then(function (data) {
-      if (data && data.ok) { window.location.href = data.redirect || (ENDPOINT + '?submitted=1'); }
-      else { submitBtn.disabled = false; submitStatus.classList.add('is-error'); submitStatus.textContent = (data && data.error) || t('student.recitations.submissionFailed'); }
-    }).catch(function () {
-      submitBtn.disabled = false; submitStatus.classList.add('is-error'); submitStatus.textContent = t('errors.networkError');
-    });
-  });
-
-  document.querySelectorAll('[data-rec-discard]').forEach(function (el) {
-    el.addEventListener('click', function () { review.hidden = true; launchStudio(); });
-  });
-  document.querySelectorAll('[data-rec-cancel]').forEach(function (el) { el.addEventListener('click', cancelStudio); });
-  function cancelStudio() {
-    stopTimer(); stopVisualizer();
-    if (rec.recorder && rec.recorder.state !== 'inactive') { try { rec.recorder.stop(); } catch (e) {} }
-    rec.recorder = null; rec.blob = null; rec.chunks = [];
-    if (rec.stream) { rec.stream.getTracks().forEach(function (t) { t.stop(); }); rec.stream = null; }
-    studio.hidden = true; review.hidden = true;
-    lockScroll(false);
-  }
-
-  /* ===================================================================
-   * Recent submissions: inline play + feedback report
-   * ================================================================= */
-  document.querySelectorAll('[data-rec-play]').forEach(function (btn) {
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var item = btn.closest('.rec-sub');
-      var player = item ? item.querySelector('.rec-sub__player') : null;
-      if (!player) return;
-      player.hidden = !player.hidden;
-      btn.classList.toggle('is-on', !player.hidden);
-      var audio = player.querySelector('audio');
-      if (audio) { if (player.hidden) audio.pause(); else audio.play().catch(function () {}); }
-    });
-  });
-
-  var fb = fbModal ? {
-    title: $('#recFbTitle'), info: $('#recFbInfo'), audio: $('#recFbAudio'),
-    result: $('#recFbResult'), ring: $('#recFbRing'), score: $('#recFbScore'),
-    badge: $('#recFbBadge'), scoreDesc: $('#recFbScoreDesc'), feedback: $('#recFbFeedback'),
-    pending: $('#recFbPending')
-  } : null;
-
-  function scoreDesc(kind) {
-    if (kind === 'excellent') return t('student.recitations.scoreExcellent');
-    if (kind === 'reviewed') return t('student.recitations.scoreReviewed');
-    if (kind === 'improve') return t('student.recitations.scoreImprove');
-    return '';
-  }
-  var RING_COLOR = { excellent: '#059669', reviewed: '#0f766e', improve: '#d97706' };
-
-  function openFeedback(card) {
-    if (!fb) return;
-    var d = function (k) { return card.getAttribute('data-' + k) || ''; };
-    var evaluated = d('evaluated') === 'true';
-    var kind = d('status-kind') || 'pending';
-
-    fb.title.textContent = d('title') || t('student.recitations.title');
-    fb.info.innerHTML = ''
-      + infoRow(t('student.recitations.infoInstructor'), d('instructor'))
-      + infoRow(t('student.recitations.infoSubmitted'), d('date'))
-      + infoRow(t('student.recitations.infoType'), d('mode'))
-      + infoRow(t('student.recitations.infoScheduled'), d('schedule'))
-      + infoRow(t('student.recitations.infoPortion'), d('portion'));
-
-    var audioUrl = d('audio');
-    if (audioUrl) { fb.audio.src = audioUrl; fb.audio.parentElement.hidden = false; }
-    else { fb.audio.removeAttribute('src'); fb.audio.parentElement.hidden = true; }
-
-    if (evaluated) {
-      var score = parseInt(d('score'), 10); if (isNaN(score)) score = 0;
-      var color = RING_COLOR[kind] || '#0f766e';
-      fb.score.textContent = score;
-      fb.ring.style.background = 'conic-gradient(' + color + ' ' + (score * 3.6) + 'deg, var(--rec-line) 0)';
-      fb.ring.style.setProperty('--ring-color', color);
-      fb.badge.className = 'rec-badge rec-badge--' + kind;
-      fb.badge.textContent = d('status-label');
-      fb.scoreDesc.textContent = scoreDesc(kind);
-      var fbk = d('feedback');
-      fb.feedback.textContent = fbk && fbk.trim() ? fbk : t('student.recitations.noWrittenFeedback');
-      fb.result.hidden = false;
-      fb.pending.hidden = true;
+    if (rec.blob) {
+      var ext = rec.mimeType.indexOf('ogg') >= 0 ? 'ogg' : (rec.mimeType.indexOf('mp4') >= 0 ? 'm4a' : 'webm');
+      form.append('duration', rec.elapsed);
+      form.append('audio', rec.blob, 'recitation.' + ext);
     } else {
-      fb.result.hidden = true;
-      fb.pending.hidden = false;
+      form.append('audio', rec.file);
     }
+    appendPracticeParent(form);
 
-    fbModal.hidden = false;
-    lockScroll(true);
-  }
-  function infoRow(label, value) {
-    if (!value || !value.trim()) return '';
-    return '<div class="rec-fb__info-row"><span>' + escapeHtml(label) + '</span><strong>' + escapeHtml(value) + '</strong></div>';
-  }
-  function closeFeedback() {
-    if (!fbModal) return;
-    fbModal.hidden = true;
-    if (fb && fb.audio) fb.audio.pause();
-    lockScroll(false);
-  }
+    fetch(ENDPOINT, { method: 'POST', body: form, credentials: 'same-origin' })
+      .then(function (res) { return res.json().catch(function () { return { ok: false, error: t('errors.unexpectedResponse') }; }); })
+      .then(function (data) {
+        if (data && data.ok) {
+          var target = data.redirect || (ENDPOINT + '?submitted=1');
+          closeList(false);
+          setStep(4);
+          steps.forEach(function (li) { li.classList.add('is-done'); li.classList.remove('is-current'); });
+          setTimeout(function () { window.location.href = target; }, reduceMotion ? 300 : 1600);
+          return;
+        }
+        setSubmitting(false);
+        setStatus((data && data.error) || t('student.recitations.submissionFailed'), true);
+      })
+      .catch(function () {
+        setSubmitting(false);
+        setStatus(t('errors.networkError'), true);
+      });
+  });
 
-  document.querySelectorAll('[data-rec-feedback]').forEach(function (card) {
-    card.addEventListener('click', function () { openFeedback(card); });
-    card.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFeedback(card); }
+  root.querySelectorAll('[data-rec-discard]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var method = rec.file ? 'upload' : 'record';
+      releaseCapture(false);
+      showMethod(method);
+      setStep(2);
     });
   });
-  document.querySelectorAll('[data-rec-fb-dismiss]').forEach(function (el) {
-    el.addEventListener('click', closeFeedback);
-  });
 
-  var viewAllBtn = $('[data-rec-viewall]');
-  if (viewAllBtn) viewAllBtn.addEventListener('click', function () {
-    document.querySelectorAll('.rec-row--more').forEach(function (r) { r.hidden = false; });
-    var foot = viewAllBtn.closest('.rec-recent__foot');
-    if (foot) foot.hidden = true;
-  });
+  function releaseCapture(clearFile) {
+    stopTimer(); stopVisualizer();
+    rec.ignoreStop = true;
+    if (rec.recorder && rec.recorder.state !== 'inactive') { try { rec.recorder.stop(); } catch (e) {} }
+    rec.ignoreStop = false;
+    rec.recorder = null; rec.blob = null; rec.chunks = []; rec.paused = false;
+    if (clearFile) {
+      rec.file = null;
+      if (fileEl) { fileEl.value = ''; fileEl.dispatchEvent(new Event('change')); }
+    }
+    stopStream();
+    setRecorderState('idle');
+    if (playback) { try { playback.pause(); } catch (e) {} playback.removeAttribute('src'); playback.load(); }
+    if (rec.objectUrl) { URL.revokeObjectURL(rec.objectUrl); rec.objectUrl = null; }
+  }
 
-  /* ---------- global escape ---------- */
-  document.addEventListener('etasmi:localechange', function () {
-    if (uploadSubmitBtn && !uploadSubmitBtn.disabled) {
-      uploadSubmitBtn.textContent = t('student.recitations.submitRecitation');
-    }
-    if (submitBtn && !submitBtn.disabled) {
-      submitBtn.textContent = t('student.recitations.submitRecitation');
-    }
-    if (fileHint && fileEl && (!fileEl.files || !fileEl.files.length)) {
-      fileHint.textContent = t('student.recitations.fileFormatsHint');
-    }
-    if (pauseLabel) {
-      pauseLabel.textContent = rec.paused ? t('student.recitations.resume') : t('student.recitations.pause');
-    }
-  });
+  window.addEventListener('beforeunload', function () { stopStream(); });
 
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape') return;
-    if (uploadModal && !uploadModal.hidden) { uploadModal.hidden = true; lockScroll(false); }
-    else if (fbModal && !fbModal.hidden) { closeFeedback(); }
-    else if (selectPanel && !selectPanel.hidden) { closePanel(); }
-  });
+  /* Practice Again: preselect the parent enrollment so the attempt is linked. */
+  var practiceEnrollment = root.getAttribute('data-practice-enrollment');
+  if (practiceEnrollment) {
+    options.forEach(function (option) {
+      if (option.getAttribute('data-enrollment-id') === practiceEnrollment) selectSession(option);
+    });
+  }
 })();

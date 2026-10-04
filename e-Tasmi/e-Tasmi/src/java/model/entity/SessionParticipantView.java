@@ -11,6 +11,7 @@ public class SessionParticipantView {
     private String registrationNumber;
     private EnrollmentStatus enrollmentStatus;
     private PaymentStatus paymentStatus;
+    private boolean accountRemoved;
 
     public long getSessionId() {
         return sessionId;
@@ -90,5 +91,13 @@ public class SessionParticipantView {
 
     public void setPaymentStatus(PaymentStatus paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public boolean isAccountRemoved() {
+        return accountRemoved;
+    }
+
+    public void setAccountRemoved(boolean accountRemoved) {
+        this.accountRemoved = accountRemoved;
     }
 }

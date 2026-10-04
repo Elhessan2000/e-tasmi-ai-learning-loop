@@ -73,6 +73,20 @@ public class UserDaoJdbc implements UserDao {
     }
 
     @Override
+    public Optional<User> findAnyById(Connection connection, long userId) throws SQLException {
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM " + TABLE + " WHERE " + COL_USER_ID + " = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return Optional.empty();
+                }
+                return Optional.of(map(rs));
+            }
+        }
+    }
+
+    @Override
     public long insert(Connection connection, User user) throws SQLException {
         String sql = "INSERT INTO " + TABLE + " (" +
                 COL_FULL_NAME + "," + COL_EMAIL + "," + COL_PHONE + "," + COL_PASSWORD_HASH + "," +

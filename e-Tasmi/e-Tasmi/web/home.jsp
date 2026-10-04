@@ -415,63 +415,63 @@
           </div>
 
           <div class="row g-4" data-reveal-group>
-            <!-- Instructor card 1 · Ustaz Abass -->
+            <!-- Instructor card 1 · demo -->
             <div class="col-lg-3 col-md-6 mb-4" data-reveal>
               <div class="card shadow-sm h-100 rounded-5 overflow-hidden border-0 etasmi-instructor-card card-lift">
                 <div class="etasmi-instructor-card-media">
-                  <img src="<%= ctx %>/assets/img/instructors/instructor-abass.png" alt="Ustaz Abass"
+                  <img src="<%= ctx %>/assets/img/instructors/instructor-abass.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.abass.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
-                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.abass.name">Ustaz Abass</h3>
-                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.abass.country">Nigeria</p>
+                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.abass.name">Demo Instructor 1</h3>
+                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.abass.country">Demo profile</p>
                 </div>
               </div>
             </div>
-            <!-- Instructor card 2 · Ustaz Shoaib -->
+            <!-- Instructor card 2 · demo -->
             <div class="col-lg-3 col-md-6 mb-4" data-reveal>
               <div class="card shadow-sm h-100 rounded-5 overflow-hidden border-0 etasmi-instructor-card card-lift">
                 <div class="etasmi-instructor-card-media">
-                  <img src="<%= ctx %>/assets/img/instructors/instructor-shoaib.png" alt="Ustaz Shoaib"
+                  <img src="<%= ctx %>/assets/img/instructors/instructor-shoaib.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.shoaib.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
-                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.shoaib.name">Ustaz Shoaib</h3>
-                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.shoaib.country">Tanzania</p>
+                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.shoaib.name">Demo Instructor 2</h3>
+                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.shoaib.country">Demo profile</p>
                 </div>
               </div>
             </div>
-            <!-- Instructor card 3 · Ustaz Ayman -->
+            <!-- Instructor card 3 · demo -->
             <div class="col-lg-3 col-md-6 mb-4" data-reveal>
               <div class="card shadow-sm h-100 rounded-5 overflow-hidden border-0 etasmi-instructor-card card-lift">
                 <div class="etasmi-instructor-card-media">
-                  <img src="<%= ctx %>/assets/img/instructors/instructor-ayman.png" alt="Ustaz Ayman"
+                  <img src="<%= ctx %>/assets/img/instructors/instructor-ayman.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.ayman.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
-                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.ayman.name">Ustaz Ayman</h3>
-                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.ayman.country">Sudan</p>
+                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.ayman.name">Demo Instructor 3</h3>
+                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.ayman.country">Demo profile</p>
                 </div>
               </div>
             </div>
-            <!-- Instructor card 4 · Ustaz Zia'ul Haq -->
+            <!-- Instructor card 4 · demo -->
             <div class="col-lg-3 col-md-6 mb-4" data-reveal>
               <div class="card shadow-sm h-100 rounded-5 overflow-hidden border-0 etasmi-instructor-card card-lift">
                 <div class="etasmi-instructor-card-media">
-                  <img src="<%= ctx %>/assets/img/instructors/instructor-ziaul-haq.png" alt="Ustaz Zia'ul Haq"
+                  <img src="<%= ctx %>/assets/img/instructors/instructor-ziaul-haq.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.ziaulHaq.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
-                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.ziaulHaq.name">Ustaz Zia'ul Haq</h3>
-                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.ziaulHaq.country">Nigeria</p>
+                  <h3 class="etasmi-instructor-card-name mb-0 text-center" data-i18n="landing.instructors.ziaulHaq.name">Demo Instructor 4</h3>
+                  <p class="etasmi-instructor-card-country mb-0 text-center" data-i18n="landing.instructors.ziaulHaq.country">Demo profile</p>
                 </div>
               </div>
             </div>

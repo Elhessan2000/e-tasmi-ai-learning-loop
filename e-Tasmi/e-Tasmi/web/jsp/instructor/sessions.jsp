@@ -333,7 +333,7 @@
                                                     <td>
                                                         <div class="isess-participant-row">
                                                             <span class="isess-participant-avatar"><%= p.getFullName() == null ? "?" : p.getFullName().substring(0,1).toUpperCase() %></span>
-                                                            <div><div class="isess-participant-name"><%= text(p.getFullName()) %></div><div class="isess-participant-email"><%= text(p.getEmail()) %></div></div>
+                                                            <div><div class="isess-participant-name"><%= text(p.getFullName()) %></div><div class="isess-participant-email"><% if (p.isAccountRemoved()) { %><span data-i18n="instructor.sessions.accountRemoved">Account removed</span><% } else { %><%= text(p.getEmail()) %><% } %></div></div>
                                                         </div>
                                                     </td>
                                                     <td><%= text(p.getRegistrationNumber()) %></td>
@@ -478,6 +478,10 @@
                             </select>
                         </div>
                         <div class="isess-field"><label class="isess-label" data-i18n="instructor.sessions.labelRecitationTopic">Recitation / Surah</label><input type="text" name="quranPortion" value="<%= editSession == null || editSession.getQuranPortion() == null ? "" : editSession.getQuranPortion() %>" placeholder="e.g. Surah Al-Baqarah 1–20" data-i18n="instructor.sessions.placeholderRecitationTopic" data-i18n-attr="placeholder"></div>
+                        <div class="isess-field isess-field--range"><label class="isess-label"><span data-i18n="instructor.sessions.labelSurah">Surah</span> <span class="req">*</span></label><input type="number" name="surahNumber" min="1" max="114" inputmode="numeric" value="<%= editSession == null || editSession.getSurahNumber() == null ? "" : editSession.getSurahNumber() %>" placeholder="1–114"></div>
+                        <div class="isess-field isess-field--range"><label class="isess-label"><span data-i18n="instructor.sessions.labelAyahStart">Ayah start</span> <span class="req">*</span></label><input type="number" name="ayahStart" min="1" max="286" inputmode="numeric" value="<%= editSession == null || editSession.getAyahStart() == null ? "" : editSession.getAyahStart() %>" placeholder="First ayah"></div>
+                        <div class="isess-field isess-field--range"><label class="isess-label"><span data-i18n="instructor.sessions.labelAyahEnd">Ayah end</span> <span class="req">*</span></label><input type="number" name="ayahEnd" min="1" max="286" inputmode="numeric" value="<%= editSession == null || editSession.getAyahEnd() == null ? "" : editSession.getAyahEnd() %>" placeholder="Last ayah"></div>
+                        <p class="isess-range-hint full-width" data-i18n="instructor.sessions.structuredRangeHint">Required for AI recitation analysis. Sessions without a structured Surah and ayah range cannot be auto-analyzed.</p>
                     </div>
                 </div>
                 <div class="isess-modal__section">

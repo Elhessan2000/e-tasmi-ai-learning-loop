@@ -57,6 +57,29 @@ public final class QuranBundledCatalog {
         return chaptersCache != null && !chaptersCache.isEmpty();
     }
 
+    /** Display-only transliterated chapter name, or {@code null} when the catalogue is unavailable. */
+    public static String chapterNameSimple(int surah) {
+        if (surah < 1 || surah > 114 || !isReady()) {
+            return null;
+        }
+        try {
+            for (Map<String, Object> chapter : chapters()) {
+                Object id = chapter.get("id");
+                if (id instanceof Number && ((Number) id).intValue() == surah) {
+                    Object name = chapter.get("nameSimple");
+                    if (name == null) {
+                        return null;
+                    }
+                    String trimmed = String.valueOf(name).trim();
+                    return trimmed.isEmpty() ? null : trimmed;
+                }
+            }
+        } catch (IOException ignored) {
+            return null;
+        }
+        return null;
+    }
+
     public static List<Map<String, Object>> chapters() throws IOException {
         List<Map<String, Object>> cached = chaptersCache;
         if (cached == null || cached.isEmpty()) {

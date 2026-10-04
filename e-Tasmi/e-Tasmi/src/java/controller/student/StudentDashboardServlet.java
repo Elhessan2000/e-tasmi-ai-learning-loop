@@ -89,7 +89,7 @@ public class StudentDashboardServlet extends HttpServlet {
                     }
 
                     Map<Long, TasmiSession> upcomingById = new LinkedHashMap<>();
-                    LocalDate today = LocalDate.now();
+                    java.time.Instant now = java.time.Instant.now();
 
                     for (Enrollment e : enrollments) {
                         Payment payment = paymentsByEnrollmentId.get(e.getEnrollmentId());
@@ -110,7 +110,7 @@ public class StudentDashboardServlet extends HttpServlet {
 
                         if (matchesStudentLevel(student, linkedSession)
                                 && isConfirmedEnrollment(linkedSession, e, payment)
-                                && isDashboardUpcoming(linkedSession, today)) {
+                                && isDashboardUpcoming(linkedSession, now)) {
                             upcomingById.put(linkedSession.getSessionId(), linkedSession);
                         }
 
@@ -347,15 +347,14 @@ public class StudentDashboardServlet extends HttpServlet {
                 || (payment != null && payment.getPaymentStatus() == PaymentStatus.APPROVED);
     }
 
-    private boolean isDashboardUpcoming(TasmiSession session, LocalDate today) {
+    private boolean isDashboardUpcoming(TasmiSession session, java.time.Instant now) {
         if (session == null || session.getStatus() == null) {
             return false;
         }
         if (session.getStatus() == TasmiSessionStatus.ONGOING) {
             return true;
         }
-        return session.getStatus() == TasmiSessionStatus.SCHEDULED
-                && (session.getSessionDate() == null || !session.getSessionDate().isBefore(today));
+        return TasmiSessionService.isUpcoming(session, now);
     }
 
     private boolean isActiveInstructorSession(Connection connection, TasmiSession session) throws SQLException {

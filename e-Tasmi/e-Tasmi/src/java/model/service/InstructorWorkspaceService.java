@@ -29,6 +29,7 @@ import model.entity.Student;
 import model.entity.TasmiSession;
 import model.entity.TasmiSessionStatus;
 import model.entity.User;
+import model.entity.UserStatus;
 import util.Db;
 
 import java.sql.Connection;
@@ -40,7 +41,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -107,11 +107,10 @@ public class InstructorWorkspaceService {
                     ongoing++;
                 } else if (session.getStatus() == TasmiSessionStatus.COMPLETED) {
                     completed++;
-                } else if (session.getStatus() == TasmiSessionStatus.SCHEDULED
-                        && isSessionStillUpcoming(session, zone, now)) {
+                } else if (TasmiSessionService.isUpcoming(session, now)) {
                     upcoming++;
                 }
-                students += enrollmentDao.countActiveBySessionId(connection, session.getSessionId());
+                students += enrollmentDao.countOccupyingBySessionId(connection, session.getSessionId());
 
                 if (date != null) {
                     if (date.equals(today)) {
@@ -120,12 +119,9 @@ public class InstructorWorkspaceService {
                     if (!date.isBefore(weekStart) && !date.isAfter(weekEnd)) {
                         weekList.add(session);
                     }
-                    // "Upcoming" must mean: not yet finished. We compare end-of-session to NOW
-                    // (not just the date), so a 3 PM session that the instructor never started
-                    // does not stay on the dashboard at 9 PM.
-                    if (session.getStatus() == TasmiSessionStatus.ONGOING
-                            || (session.getStatus() == TasmiSessionStatus.SCHEDULED
-                                    && isSessionStillUpcoming(session, zone, now))) {
+                    // Upcoming is a future start that the instructor has not opened.
+                    // A started session stays on its own live path and is not listed here.
+                    if (TasmiSessionService.isUpcoming(session, now)) {
                         upcomingList.add(session);
                     }
                 }
@@ -161,13 +157,10 @@ public class InstructorWorkspaceService {
             }
             stats.setPendingEvaluationCount(pendingEval);
 
-            // Cockpit selection: prefer a LIVE session that is still within its window;
-            // otherwise pick the next chronological session whose end-time is still in the
-            // future. This is what makes the countdown automatically roll forward to the
-            // next session once the current one ends.
+            // A live session the instructor already started stays on the countdown.
+            // Otherwise the earliest scheduled session whose start is still in the future.
             TasmiSession nextSession = sessions.stream()
-                    .filter(s -> s != null && s.getStatus() == TasmiSessionStatus.ONGOING
-                            && isSessionStillUpcoming(s, zone, now))
+                    .filter(s -> s != null && s.getStatus() == TasmiSessionStatus.ONGOING)
                     .min(chronoSort)
                     .orElseGet(() -> upcomingList.stream().findFirst().orElse(null));
             stats.setNextSession(nextSession);
@@ -274,11 +267,15 @@ public class InstructorWorkspaceService {
                 if (!seenEnrollments.add(r.getEnrollmentId())) {
                     continue;
                 }
-                String studentName = resolveStudentNameForRecitation(connection, r);
+                HistoricalStudentLabel student = resolveStudentNameForRecitation(connection, r);
+                String studentName = student.name == null ? "A student" : student.name;
+                String body = student.accountRemoved
+                        ? "Account removed. Tap to listen and evaluate."
+                        : "Tap to listen and evaluate.";
                 InstructorActivityItem rec = new InstructorActivityItem(
                         InstructorActivityItem.Kind.RECITATION_SUBMITTED,
-                        (studentName == null ? "A student" : studentName) + " submitted a recitation",
-                        "Tap to listen and evaluate.",
+                        studentName + " submitted a recitation",
+                        body,
                         r.getSubmissionDate(),
                         2
                 );
@@ -324,45 +321,49 @@ public class InstructorWorkspaceService {
     }
 
     /**
-     * True when the session's scheduled end-time is still in the future.
-     *
-     * <p>Sessions without a date or time (legacy/free-form drafts) are treated as
-     * still-upcoming so we don't silently drop them. For sessions with both fields
-     * we add a small grace window (60s) so a session that just-now ticked past its
-     * end-time isn't flagged as stale on the very same heartbeat that would also
-     * naturally promote it to COMPLETED.</p>
+     * Name for a recitation that is already in the activity feed.
+     * A soft-deleted account is loaded only here, and only because the recitation still exists.
      */
-    private static boolean isSessionStillUpcoming(TasmiSession session, ZoneId zone, Instant now) {
-        if (session == null) {
-            return false;
-        }
-        LocalDate date = session.getSessionDate();
-        LocalTime time = session.getSessionTime();
-        if (date == null || time == null) {
-            return true;
-        }
-        int durationMinutes = session.getDurationMinutes() == null ? 60 : session.getDurationMinutes();
-        Instant endAt = LocalDateTime.of(date, time)
-                .atZone(zone)
-                .toInstant()
-                .plusSeconds((long) durationMinutes * 60L);
-        return endAt.isAfter(now.minusSeconds(60));
-    }
-
-    private String resolveStudentNameForRecitation(Connection connection, Recitation recitation) throws SQLException {
+    private HistoricalStudentLabel resolveStudentNameForRecitation(Connection connection, Recitation recitation) throws SQLException {
         if (recitation == null) {
-            return null;
+            return HistoricalStudentLabel.unknown();
         }
         Optional<Enrollment> enrollmentOpt = enrollmentDao.findById(connection, recitation.getEnrollmentId());
         if (enrollmentOpt.isEmpty()) {
-            return null;
+            return HistoricalStudentLabel.unknown();
         }
         Optional<Student> studentOpt = studentDao.findById(connection, enrollmentOpt.get().getStudentId());
         if (studentOpt.isEmpty()) {
-            return null;
+            return HistoricalStudentLabel.unknown();
         }
         Optional<User> userOpt = userDao.findById(connection, studentOpt.get().getUserId());
-        return userOpt.map(User::getFullName).orElse(null);
+        boolean accountRemoved = false;
+        if (userOpt.isEmpty()) {
+            userOpt = userDao.findAnyById(connection, studentOpt.get().getUserId());
+            accountRemoved = userOpt.isEmpty() || userOpt.get().getStatus() == UserStatus.DELETED;
+        }
+        String name = userOpt.map(User::getFullName).orElse(null);
+        if (name != null) {
+            name = name.trim();
+            if (name.isEmpty()) {
+                name = null;
+            }
+        }
+        return new HistoricalStudentLabel(name, accountRemoved);
+    }
+
+    private static final class HistoricalStudentLabel {
+        private final String name;
+        private final boolean accountRemoved;
+
+        private HistoricalStudentLabel(String name, boolean accountRemoved) {
+            this.name = name;
+            this.accountRemoved = accountRemoved;
+        }
+
+        private static HistoricalStudentLabel unknown() {
+            return new HistoricalStudentLabel(null, false);
+        }
     }
 
     public Map<Long, List<SessionParticipantView>> participantsBySession(long instructorUserId, List<TasmiSession> sessions) {
@@ -403,10 +404,13 @@ public class InstructorWorkspaceService {
 
     private List<SessionParticipantView> listParticipants(Connection connection, long sessionId) throws SQLException {
         List<Enrollment> enrollments = enrollmentDao.listBySessionId(connection, sessionId);
+        java.util.Set<Long> withRecitation = enrollmentDao.enrollmentIdsWithRecitations(connection, sessionId);
         Map<Long, Payment> paymentByEnrollment = loadPaymentsBySession(connection, sessionId);
         List<SessionParticipantView> participants = new ArrayList<>();
         for (Enrollment enrollment : enrollments) {
-            if (enrollment == null || enrollment.getEnrollmentStatus() != model.entity.EnrollmentStatus.APPROVED) {
+            if (enrollment == null
+                    || (enrollment.getEnrollmentStatus() != model.entity.EnrollmentStatus.APPROVED
+                    && enrollment.getEnrollmentStatus() != model.entity.EnrollmentStatus.PENDING)) {
                 continue;
             }
             Optional<Student> studentOpt = studentDao.findById(connection, enrollment.getStudentId());
@@ -414,7 +418,17 @@ public class InstructorWorkspaceService {
                 continue;
             }
             Optional<User> userOpt = userDao.findById(connection, studentOpt.get().getUserId());
+            boolean accountRemoved = false;
             if (userOpt.isEmpty()) {
+                userOpt = userDao.findAnyById(connection, studentOpt.get().getUserId());
+                boolean protectedHistory = withRecitation.contains(enrollment.getEnrollmentId());
+                boolean removedAccount = userOpt.isEmpty() || userOpt.get().getStatus() == UserStatus.DELETED;
+                if (removedAccount && !protectedHistory) {
+                    continue;
+                }
+                accountRemoved = removedAccount;
+            }
+            if (userOpt.isEmpty() && !accountRemoved) {
                 continue;
             }
 
@@ -422,12 +436,13 @@ public class InstructorWorkspaceService {
             view.setSessionId(sessionId);
             view.setEnrollmentId(enrollment.getEnrollmentId());
             view.setStudentId(studentOpt.get().getStudentId());
-            view.setUserId(userOpt.get().getUserId());
-            view.setFullName(userOpt.get().getFullName());
-            view.setEmail(userOpt.get().getEmail());
-            view.setPhone(userOpt.get().getPhone());
+            view.setUserId(userOpt.isPresent() ? userOpt.get().getUserId() : studentOpt.get().getUserId());
+            view.setFullName(userOpt.isPresent() ? userOpt.get().getFullName() : "Former student");
+            view.setEmail(accountRemoved || userOpt.isEmpty() ? null : userOpt.get().getEmail());
+            view.setPhone(userOpt.isPresent() ? userOpt.get().getPhone() : null);
             view.setRegistrationNumber(studentOpt.get().getRegistrationNumber());
             view.setEnrollmentStatus(enrollment.getEnrollmentStatus());
+            view.setAccountRemoved(accountRemoved);
 
             Payment payment = paymentByEnrollment.get(enrollment.getEnrollmentId());
             view.setPaymentStatus(payment == null ? null : payment.getPaymentStatus());

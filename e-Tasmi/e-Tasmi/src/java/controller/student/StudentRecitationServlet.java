@@ -4,6 +4,7 @@ import model.dao.EnrollmentDao;
 import model.dao.EvaluationDao;
 import model.dao.InstructorDao;
 import model.dao.PaymentDao;
+import model.dao.RecitationAnalysisDao;
 import model.dao.RecitationDao;
 import model.dao.StudentDao;
 import model.dao.TasmiSessionDao;
@@ -12,6 +13,7 @@ import model.dao.impl.EnrollmentDaoJdbc;
 import model.dao.impl.EvaluationDaoJdbc;
 import model.dao.impl.InstructorDaoJdbc;
 import model.dao.impl.PaymentDaoJdbc;
+import model.dao.impl.RecitationAnalysisDaoJdbc;
 import model.dao.impl.RecitationDaoJdbc;
 import model.dao.impl.StudentDaoJdbc;
 import model.dao.impl.TasmiSessionDaoJdbc;
@@ -23,11 +25,15 @@ import model.entity.Instructor;
 import model.entity.Payment;
 import model.entity.PaymentStatus;
 import model.entity.Recitation;
+import model.entity.RecitationAnalysis;
 import model.entity.Student;
 import model.entity.TasmiSession;
 import model.entity.User;
 import model.service.RecitationService;
 import model.service.RecitationSubmitResult;
+import model.service.StudentRecitationAnalysisPhase;
+import model.service.VerifiedLearningFocusService;
+import model.service.VerifiedRecitationView;
 import util.CloudinaryUtil;
 import util.Db;
 import util.LocalFileUtil;
@@ -96,6 +102,8 @@ public class StudentRecitationServlet extends HttpServlet {
     private final InstructorDao instructorDao = new InstructorDaoJdbc();
     private final UserDao userDao = new UserDaoJdbc();
     private final RecitationDao recitationDao = new RecitationDaoJdbc();
+    private final RecitationAnalysisDao recitationAnalysisDao = new RecitationAnalysisDaoJdbc();
+    private final VerifiedLearningFocusService focusService = new VerifiedLearningFocusService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -103,8 +111,10 @@ public class StudentRecitationServlet extends HttpServlet {
         long userId = readUserId(session);
 
         if ("1".equals(request.getParameter("submitted"))) {
-            request.setAttribute("success", "Recitation submitted. Your instructor will review it soon.");
+            request.setAttribute("successKey", "student.recitations.submittedSuccess");
+            request.setAttribute("success", "Recitation submitted. You can track progress on your result page.");
         }
+        attachPracticeAgain(request, userId);
 
         populatePage(request, userId);
         request.getRequestDispatcher("/jsp/student/recitations.jsp").forward(request, response);
@@ -117,8 +127,9 @@ public class StudentRecitationServlet extends HttpServlet {
         boolean wantsJson = "1".equals(request.getParameter("ajax"));
 
         long enrollmentId = readLong(request.getParameter("enrollmentId"));
+        long parentRecitationId = readLong(request.getParameter("parentRecitationId"));
         if (enrollmentId <= 0) {
-            respond(request, response, wantsJson, false, "Please choose the session you want to submit for.");
+            respond(request, response, wantsJson, false, "Please choose the session you want to submit for.", 0);
             return;
         }
 
@@ -127,13 +138,13 @@ public class StudentRecitationServlet extends HttpServlet {
             audioPart = request.getPart("audio");
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Failed to read recitation media part", ex);
-            respond(request, response, wantsJson, false, "We could not read the uploaded audio. The file may be too large.");
+            respond(request, response, wantsJson, false, "We could not read the uploaded audio. The file may be too large.", 0);
             return;
         }
 
         String validationError = validateMediaPart(audioPart);
         if (validationError != null) {
-            respond(request, response, wantsJson, false, validationError);
+            respond(request, response, wantsJson, false, validationError, 0);
             return;
         }
 
@@ -142,18 +153,18 @@ public class StudentRecitationServlet extends HttpServlet {
             storedPath = saveUpload(audioPart);
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Failed to store recitation media", ex);
-            respond(request, response, wantsJson, false, "We could not save your recitation audio. Please try again.");
+            respond(request, response, wantsJson, false, "We could not save your recitation audio. Please try again.", 0);
             return;
         }
 
-        RecitationSubmitResult result = recitationService.submit(userId, enrollmentId, storedPath);
+        RecitationSubmitResult result = recitationService.submit(userId, enrollmentId, storedPath, parentRecitationId);
         if (result.isSuccess()) {
-            respond(request, response, wantsJson, true, null);
+            respond(request, response, wantsJson, true, null, result.getRecitationId());
             return;
         }
 
         deleteStoredUploadQuietly(request, storedPath);
-        respond(request, response, wantsJson, false, result.getError());
+        respond(request, response, wantsJson, false, result.getError(), 0);
     }
 
     /* ===================================================================
@@ -191,7 +202,7 @@ public class StudentRecitationServlet extends HttpServlet {
                             row.put("title", title);
                             row.put("instructor", instructorName);
                             row.put("schedule", formatSessionSchedule(tasmiSession));
-                            row.put("portion", tasmiSession == null ? "" : nullToEmpty(tasmiSession.getQuranPortion()));
+                            row.put("portion", tasmiSession == null ? "" : model.service.quran.QuranPassageDisplay.format(tasmiSession));
                             row.put("mode", modeLabel(tasmiSession));
                             row.put("fee", feeLabel(tasmiSession == null ? null : tasmiSession.getFee()));
                             eligibleSessions.add(row);
@@ -202,21 +213,34 @@ public class StudentRecitationServlet extends HttpServlet {
                                 continue;
                             }
                             Evaluation evaluation = evaluationDao.findByRecitationId(connection, recitation.getRecitationId()).orElse(null);
-                            int score = evaluation == null ? -1 : evaluation.getScore();
+                            boolean published = evaluation != null && evaluation.getPublishedAt() != null;
+                            Integer score = published ? evaluation.getScore() : null;
                             String statusKind;
                             String statusLabel;
-                            if (evaluation == null) {
+                            String statusI18nKey;
+                            RecitationAnalysis latestAnalysis = recitationAnalysisDao
+                                    .findLatestByRecitationId(connection, recitation.getRecitationId()).orElse(null);
+                            StudentRecitationAnalysisPhase analysisPhase = published
+                                    ? null
+                                    : StudentRecitationAnalysisPhase.resolve(
+                                    evaluation, recitation.getAnalysisJobState(), latestAnalysis,
+                                    recitation.getAnalysisJobStartedAt());
+                            if (!published) {
                                 statusKind = "pending";
-                                statusLabel = "Pending review";
-                            } else if (score >= 85) {
+                                statusLabel = studentPhaseLabel(analysisPhase);
+                                statusI18nKey = studentPhaseI18nKey(analysisPhase);
+                            } else if (score != null && score >= 85) {
                                 statusKind = "excellent";
                                 statusLabel = "Excellent";
-                            } else if (score >= 60) {
+                                statusI18nKey = "student.recitations.instructorVerified";
+                            } else if (score != null && score >= 60) {
                                 statusKind = "reviewed";
                                 statusLabel = "Reviewed";
+                                statusI18nKey = "student.recitations.instructorVerified";
                             } else {
                                 statusKind = "improve";
                                 statusLabel = "Needs improvement";
+                                statusI18nKey = "student.recitations.instructorVerified";
                             }
 
                             Map<String, Object> item = new LinkedHashMap<>();
@@ -224,16 +248,23 @@ public class StudentRecitationServlet extends HttpServlet {
                             item.put("sessionTitle", title);
                             item.put("instructor", instructorName);
                             item.put("schedule", formatSessionSchedule(tasmiSession));
-                            item.put("portion", tasmiSession == null ? "" : nullToEmpty(tasmiSession.getQuranPortion()));
+                            item.put("portion", tasmiSession == null ? "" : model.service.quran.QuranPassageDisplay.format(tasmiSession));
                             item.put("mode", modeLabel(tasmiSession));
                             item.put("date", recitation.getSubmissionDate() == null ? "" : DATE_FMT.format(recitation.getSubmissionDate()));
                             item.put("sortTs", recitation.getSubmissionDate() == null ? 0L : recitation.getSubmissionDate().toEpochMilli());
-                            item.put("evaluated", evaluation != null);
-                            item.put("score", evaluation == null ? null : score);
-                            item.put("feedback", evaluation == null ? "" : nullToEmpty(evaluation.getFeedback()));
+                            item.put("evaluated", published);
+                            item.put("published", published);
+                            item.put("score", score);
+                            item.put("feedback", published ? nullToEmpty(evaluation.getFeedback()) : "");
                             item.put("statusKind", statusKind);
                             item.put("statusLabel", statusLabel);
+                            item.put("statusI18nKey", statusI18nKey);
+                            if (analysisPhase != null) {
+                                item.put("analysisPhase", analysisPhase.name());
+                            }
                             item.put("audioUrl", request.getContextPath() + "/student/recitation-audio?id=" + recitation.getRecitationId());
+                            item.put("resultUrl", request.getContextPath()
+                                    + "/student/recitation-result?id=" + recitation.getRecitationId());
                             historyItems.add(item);
                         }
                     }
@@ -250,7 +281,7 @@ public class StudentRecitationServlet extends HttpServlet {
         int total = historyItems.size();
         int reviewed = 0;
         for (Map<String, Object> item : historyItems) {
-            if (Boolean.TRUE.equals(item.get("evaluated"))) {
+            if (Boolean.TRUE.equals(item.get("published"))) {
                 reviewed++;
             }
         }
@@ -260,6 +291,40 @@ public class StudentRecitationServlet extends HttpServlet {
         request.setAttribute("statTotal", total);
         request.setAttribute("statReviewed", reviewed);
         request.setAttribute("statPending", total - reviewed);
+    }
+
+    /**
+     * Prepares Practice Again only for a published recitation this student owns,
+     * on an enrollment that can still accept a submission.
+     */
+    private void attachPracticeAgain(HttpServletRequest request, long studentUserId) {
+        long practiceId = readLong(request.getParameter("practice"));
+        if (practiceId <= 0 || studentUserId <= 0) {
+            return;
+        }
+        Optional<VerifiedRecitationView> viewOpt = focusService.loadForStudent(studentUserId, practiceId);
+        if (viewOpt.isEmpty() || !viewOpt.get().isPublished()) {
+            return;
+        }
+        VerifiedRecitationView view = viewOpt.get();
+        try (Connection connection = Db.getConnection()) {
+            Optional<Enrollment> enrollmentOpt = enrollmentDao.findById(connection, view.getEnrollmentId());
+            if (enrollmentOpt.isEmpty()) {
+                return;
+            }
+            Enrollment enrollment = enrollmentOpt.get();
+            TasmiSession session = tasmiSessionDao.findById(connection, enrollment.getSessionId()).orElse(null);
+            if (!isEligible(connection, enrollment, session)) {
+                request.setAttribute("error", "This session is not open for another attempt.");
+                return;
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.WARNING, "Could not prepare Practice Again for recitation " + practiceId, ex);
+            return;
+        }
+        request.setAttribute("practiceParentId", Long.valueOf(practiceId));
+        request.setAttribute("practiceEnrollmentId", Long.valueOf(view.getEnrollmentId()));
+        request.setAttribute("practiceFocus", view.getFocusItems());
     }
 
     private boolean isEligible(Connection connection, Enrollment enrollment, TasmiSession tasmiSession) throws SQLException {
@@ -280,8 +345,10 @@ public class StudentRecitationServlet extends HttpServlet {
      * Response helpers
      * ================================================================= */
     private void respond(HttpServletRequest request, HttpServletResponse response,
-                         boolean wantsJson, boolean ok, String error) throws IOException, ServletException {
-        String redirect = request.getContextPath() + "/student/recitations?submitted=1";
+                         boolean wantsJson, boolean ok, String error, long recitationId) throws IOException, ServletException {
+        String redirect = recitationId > 0
+                ? request.getContextPath() + "/student/recitation-result?id=" + recitationId
+                : request.getContextPath() + "/student/recitations?submitted=1";
         if (wantsJson) {
             if (ok) {
                 writeJson(response, HttpServletResponse.SC_OK, "{\"ok\":true,\"redirect\":\"" + jsonEscape(redirect) + "\"}");
@@ -405,6 +472,53 @@ public class StudentRecitationServlet extends HttpServlet {
             sb.append(tasmiSession.getSessionTime().toString());
         }
         return sb.toString();
+    }
+
+    private static String studentPhaseLabel(StudentRecitationAnalysisPhase phase) {
+        if (phase == null) {
+            return "Pending review";
+        }
+        switch (phase) {
+            case ANALYSIS_IN_PROGRESS:
+                return "AI analysis in progress";
+            case SUBMITTED:
+                return "Submitted";
+            case AWAITING_INSTRUCTOR:
+                return "Awaiting instructor review";
+            case REFERENCE_UNAVAILABLE:
+                return "Reference temporarily unavailable";
+            case ANALYSIS_FAILED:
+                return "Analysis could not be completed";
+            case CANNOT_EVALUATE:
+                return "Could not evaluate submission";
+            case REJECTED:
+                return "Awaiting instructor review";
+            default:
+                return "Pending review";
+        }
+    }
+
+    private static String studentPhaseI18nKey(StudentRecitationAnalysisPhase phase) {
+        if (phase == null) {
+            return "student.recitations.statusPending";
+        }
+        switch (phase) {
+            case ANALYSIS_IN_PROGRESS:
+                return "student.recitations.phaseAnalysisTitle";
+            case SUBMITTED:
+                return "student.recitations.phaseSubmittedTitle";
+            case AWAITING_INSTRUCTOR:
+            case REJECTED:
+                return "student.recitations.awaitingReview";
+            case REFERENCE_UNAVAILABLE:
+                return "student.recitations.phaseReferenceTitle";
+            case ANALYSIS_FAILED:
+                return "student.recitations.phaseFailedTitle";
+            case CANNOT_EVALUATE:
+                return "student.recitations.phaseCannotEvaluateTitle";
+            default:
+                return "student.recitations.statusPending";
+        }
     }
 
     private String modeLabel(TasmiSession tasmiSession) {

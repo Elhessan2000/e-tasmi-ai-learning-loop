@@ -119,13 +119,13 @@
     <title data-i18n="meta.studentQrPaymentTitle">Complete Your Payment - e-Tasmi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <%@ include file="/jsp/common/student_ui_head.jspf" %>
-    <link rel="stylesheet" href="<%= ctx %>/css/qr-payment.css?v=20260624-qrpay17">
+    <link rel="stylesheet" href="<%= ctx %>/css/qr-payment.css?v=20261003-receipt-contain">
     <script defer src="<%= ctx %>/assets/js/app.js"></script>
     <style>
         .qrpay-file-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-        .qrpay-receipt-preview{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;box-shadow:0 8px 20px rgba(15,23,42,.05);margin-bottom:14px}
-        .qrpay-receipt-preview__thumb{display:grid;place-items:center;width:60px;height:60px;flex:0 0 auto;border-radius:12px;overflow:hidden;background:#eef2f7;color:#dc2626}
-        .qrpay-receipt-preview__thumb img{width:100%;height:100%;object-fit:cover;display:block}
+        .qrpay-receipt-preview{display:flex;align-items:center;gap:14px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow:hidden;padding:14px 16px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;box-shadow:0 8px 20px rgba(15,23,42,.05);margin-bottom:14px}
+        .qrpay-receipt-preview__thumb{position:relative;display:block;width:60px;height:60px;min-width:60px;max-width:60px;min-height:60px;max-height:60px;flex:0 0 60px;border-radius:12px;overflow:hidden;background:#eef2f7;color:#dc2626}
+        .qrpay-receipt-preview__thumb img{position:absolute;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:cover;object-position:center;display:block}
         .qrpay-receipt-preview__thumb svg{width:30px;height:30px}
         .qrpay-receipt-preview__meta{display:flex;flex-direction:column;min-width:0;flex:1 1 auto;gap:2px}
         .qrpay-receipt-preview__name{font-weight:700;color:#0f172a;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -410,6 +410,13 @@
   const removeBtn = form.querySelector('[data-receipt-remove]');
 
   const PDF_ICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><text x="12" y="18" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor">PDF</text></svg>';
+  let previewUrl = '';
+  const clearPreviewUrl = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = '';
+    }
+  };
 
   const fmtSize = (bytes) => {
     if (!bytes) return '';
@@ -419,6 +426,7 @@
   };
 
   const resetSelection = () => {
+    clearPreviewUrl();
     if (input) input.value = '';
     if (thumb) thumb.innerHTML = '';
     if (nameEl) nameEl.textContent = '';
@@ -439,13 +447,13 @@
     if (nameEl) nameEl.textContent = file.name;
     if (sizeEl) sizeEl.textContent = fmtSize(file.size);
     if (thumb) {
+      clearPreviewUrl();
       thumb.innerHTML = '';
       if (isImage) {
-        const url = URL.createObjectURL(file);
+        previewUrl = URL.createObjectURL(file);
         const img = document.createElement('img');
-        img.src = url;
+        img.src = previewUrl;
         img.alt = 'Receipt preview';
-        img.onload = () => URL.revokeObjectURL(url);
         thumb.appendChild(img);
       } else {
         thumb.innerHTML = PDF_ICON;

@@ -28,6 +28,9 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
     private static final String COL_SESSION_TIME = "session_time";
     private static final String COL_DURATION_MINUTES = "duration_minutes";
     private static final String COL_QURAN_PORTION = "quran_portion";
+    private static final String COL_SURAH_NUMBER = "surah_number";
+    private static final String COL_AYAH_START = "ayah_start";
+    private static final String COL_AYAH_END = "ayah_end";
     private static final String COL_MODE = "mode";
     private static final String COL_FEE = "fee";
     private static final String COL_DESCRIPTION = "description";
@@ -72,13 +75,15 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
         String titleColumn = resolveTitleColumn(connection);
         String sql = "INSERT INTO " + TABLE + " (" +
             COL_INSTRUCTOR_ID + "," + titleColumn + "," + COL_DESCRIPTION + "," + COL_LEVEL + "," + COL_SESSION_DATE + "," + COL_SESSION_TIME + "," +
-                COL_DURATION_MINUTES + "," + COL_QURAN_PORTION + "," + COL_MODE + "," + COL_FEE + "," + COL_CAPACITY + "," +
+                COL_DURATION_MINUTES + "," + COL_QURAN_PORTION + "," +
+                COL_SURAH_NUMBER + "," + COL_AYAH_START + "," + COL_AYAH_END + "," +
+                COL_MODE + "," + COL_FEE + "," + COL_CAPACITY + "," +
                 COL_LIVE_PROVIDER + "," + COL_MEETING_LINK + "," + COL_MEETING_PASSWORD + "," + COL_PASSWORD_VISIBLE + "," +
                 COL_LIVE_STARTED_AT + "," + COL_LIVE_ENDED_AT + "," + COL_RECORDING_STATUS + "," + COL_RECORDING_URL + "," + COL_RECORDING_SYNCED_AT + "," +
                 COL_ZOOM_MEETING_ID + "," + COL_ZOOM_START_URL + "," +
                 COL_BANNER_IMAGE_URL + "," +
                 COL_STATUS +
-                ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, session.getInstructorId());
@@ -89,22 +94,25 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
             ps.setTime(6, Time.valueOf(session.getSessionTime()));
             ps.setInt(7, session.getDurationMinutes() == null || session.getDurationMinutes() <= 0 ? 60 : session.getDurationMinutes());
             ps.setString(8, session.getQuranPortion());
-            ps.setString(9, session.getMode() == null ? null : session.getMode().name());
-            ps.setBigDecimal(10, session.getFee() == null ? BigDecimal.ZERO : session.getFee());
-            ps.setInt(11, session.getCapacity());
-            ps.setString(12, session.getLiveProvider());
-            ps.setString(13, session.getMeetingLink());
-            ps.setString(14, session.getMeetingPassword());
-            ps.setBoolean(15, session.isPasswordVisible());
-            setTimestamp(ps, 16, session.getLiveStartedAt());
-            setTimestamp(ps, 17, session.getLiveEndedAt());
-            ps.setString(18, session.getRecordingStatus() == null ? null : session.getRecordingStatus().name());
-            ps.setString(19, session.getRecordingUrl());
-            setTimestamp(ps, 20, session.getRecordingSyncedAt());
-            setNullableLong(ps, 21, session.getZoomMeetingId());
-            ps.setString(22, session.getZoomStartUrl());
-            ps.setString(23, session.getBannerImageUrl());
-            ps.setString(24, session.getStatus() == null ? null : session.getStatus().name());
+            setNullableInteger(ps, 9, session.getSurahNumber());
+            setNullableInteger(ps, 10, session.getAyahStart());
+            setNullableInteger(ps, 11, session.getAyahEnd());
+            ps.setString(12, session.getMode() == null ? null : session.getMode().name());
+            ps.setBigDecimal(13, session.getFee() == null ? BigDecimal.ZERO : session.getFee());
+            ps.setInt(14, session.getCapacity());
+            ps.setString(15, session.getLiveProvider());
+            ps.setString(16, session.getMeetingLink());
+            ps.setString(17, session.getMeetingPassword());
+            ps.setBoolean(18, session.isPasswordVisible());
+            setTimestamp(ps, 19, session.getLiveStartedAt());
+            setTimestamp(ps, 20, session.getLiveEndedAt());
+            ps.setString(21, session.getRecordingStatus() == null ? null : session.getRecordingStatus().name());
+            ps.setString(22, session.getRecordingUrl());
+            setTimestamp(ps, 23, session.getRecordingSyncedAt());
+            setNullableLong(ps, 24, session.getZoomMeetingId());
+            ps.setString(25, session.getZoomStartUrl());
+            ps.setString(26, session.getBannerImageUrl());
+            ps.setString(27, session.getStatus() == null ? null : session.getStatus().name());
 
             int updated = ps.executeUpdate();
             if (updated != 1) {
@@ -199,6 +207,9 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
             COL_SESSION_TIME + " = ?," +
             COL_DURATION_MINUTES + " = ?," +
             COL_QURAN_PORTION + " = ?," +
+            COL_SURAH_NUMBER + " = ?," +
+            COL_AYAH_START + " = ?," +
+            COL_AYAH_END + " = ?," +
             COL_MODE + " = ?," +
             COL_FEE + " = ?," +
             COL_CAPACITY + " = ?," +
@@ -224,23 +235,26 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
             ps.setTime(5, Time.valueOf(session.getSessionTime()));
             ps.setInt(6, session.getDurationMinutes() == null || session.getDurationMinutes() <= 0 ? 60 : session.getDurationMinutes());
             ps.setString(7, session.getQuranPortion());
-            ps.setString(8, session.getMode() == null ? null : session.getMode().name());
-            ps.setBigDecimal(9, session.getFee() == null ? BigDecimal.ZERO : session.getFee());
-            ps.setInt(10, session.getCapacity());
-            ps.setString(11, session.getLiveProvider());
-            ps.setString(12, session.getMeetingLink());
-            ps.setString(13, session.getMeetingPassword());
-            ps.setBoolean(14, session.isPasswordVisible());
-            setTimestamp(ps, 15, session.getLiveStartedAt());
-            setTimestamp(ps, 16, session.getLiveEndedAt());
-            ps.setString(17, session.getRecordingStatus() == null ? null : session.getRecordingStatus().name());
-            ps.setString(18, session.getRecordingUrl());
-            setTimestamp(ps, 19, session.getRecordingSyncedAt());
-            setNullableLong(ps, 20, session.getZoomMeetingId());
-            ps.setString(21, session.getZoomStartUrl());
-            ps.setString(22, session.getBannerImageUrl());
-            ps.setLong(23, session.getSessionId());
-            ps.setLong(24, session.getInstructorId());
+            setNullableInteger(ps, 8, session.getSurahNumber());
+            setNullableInteger(ps, 9, session.getAyahStart());
+            setNullableInteger(ps, 10, session.getAyahEnd());
+            ps.setString(11, session.getMode() == null ? null : session.getMode().name());
+            ps.setBigDecimal(12, session.getFee() == null ? BigDecimal.ZERO : session.getFee());
+            ps.setInt(13, session.getCapacity());
+            ps.setString(14, session.getLiveProvider());
+            ps.setString(15, session.getMeetingLink());
+            ps.setString(16, session.getMeetingPassword());
+            ps.setBoolean(17, session.isPasswordVisible());
+            setTimestamp(ps, 18, session.getLiveStartedAt());
+            setTimestamp(ps, 19, session.getLiveEndedAt());
+            ps.setString(20, session.getRecordingStatus() == null ? null : session.getRecordingStatus().name());
+            ps.setString(21, session.getRecordingUrl());
+            setTimestamp(ps, 22, session.getRecordingSyncedAt());
+            setNullableLong(ps, 23, session.getZoomMeetingId());
+            ps.setString(24, session.getZoomStartUrl());
+            ps.setString(25, session.getBannerImageUrl());
+            ps.setLong(26, session.getSessionId());
+            ps.setLong(27, session.getInstructorId());
             return ps.executeUpdate() == 1;
         }
     }
@@ -279,6 +293,9 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
             s.setDurationMinutes(durationMinutes);
         }
         s.setQuranPortion(safeGetString(rs, COL_QURAN_PORTION));
+        s.setSurahNumber(safeGetNullableInt(rs, COL_SURAH_NUMBER));
+        s.setAyahStart(safeGetNullableInt(rs, COL_AYAH_START));
+        s.setAyahEnd(safeGetNullableInt(rs, COL_AYAH_END));
         s.setMode(SessionMode.fromString(rs.getString(COL_MODE)));
         s.setFee(rs.getBigDecimal(COL_FEE));
         s.setCapacity(rs.getInt(COL_CAPACITY));
@@ -326,6 +343,23 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
         }
     }
 
+    private Integer safeGetNullableInt(ResultSet rs, String col) {
+        try {
+            int val = rs.getInt(col);
+            return rs.wasNull() ? null : val;
+        } catch (SQLException ignored) {
+            return null;
+        }
+    }
+
+    private void setNullableInteger(PreparedStatement ps, int index, Integer value) throws SQLException {
+        if (value == null) {
+            ps.setNull(index, Types.INTEGER);
+        } else {
+            ps.setInt(index, value);
+        }
+    }
+
     private Long safeGetNullableLong(ResultSet rs, String col) {
         try {
             long val = rs.getLong(col);
@@ -363,8 +397,13 @@ public class TasmiSessionDaoJdbc implements TasmiSessionDao {
             .append(COL_SESSION_DATE).append(',')
             .append(COL_SESSION_TIME).append(',')
             .append(COL_DURATION_MINUTES).append(',')
-            .append(COL_QURAN_PORTION).append(',')
-            .append(COL_MODE).append(',')
+            .append(COL_QURAN_PORTION).append(',');
+        if (hasColumn(connection, TABLE, COL_SURAH_NUMBER)) {
+            sb.append(COL_SURAH_NUMBER).append(',')
+                .append(COL_AYAH_START).append(',')
+                .append(COL_AYAH_END).append(',');
+        }
+        sb.append(COL_MODE).append(',')
             .append(COL_FEE).append(',')
             .append(COL_CAPACITY).append(',')
             .append(COL_STATUS).append(',')

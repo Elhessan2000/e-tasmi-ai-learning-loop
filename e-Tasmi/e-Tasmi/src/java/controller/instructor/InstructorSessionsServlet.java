@@ -157,6 +157,9 @@ public class InstructorSessionsServlet extends HttpServlet {
                 form.time,
                 form.durationMinutes,
                 form.quranPortion,
+                form.surahNumber,
+                form.ayahStart,
+                form.ayahEnd,
                 form.fee,
                 form.capacity
         );
@@ -191,6 +194,9 @@ public class InstructorSessionsServlet extends HttpServlet {
                 form.time,
                 form.durationMinutes,
                 form.quranPortion,
+                form.surahNumber,
+                form.ayahStart,
+                form.ayahEnd,
                 form.fee,
                 form.capacity
         );
@@ -320,6 +326,36 @@ public class InstructorSessionsServlet extends HttpServlet {
         form.description = safe(request.getParameter("description")).trim();
         form.level = StudentLevel.fromString(safe(request.getParameter("level")).trim());
         form.quranPortion = safe(request.getParameter("quranPortion")).trim();
+        String surahRaw = safe(request.getParameter("surahNumber")).trim();
+        String ayahStartRaw = safe(request.getParameter("ayahStart")).trim();
+        String ayahEndRaw = safe(request.getParameter("ayahEnd")).trim();
+        if (!surahRaw.isEmpty()) {
+            try {
+                form.surahNumber = Integer.valueOf(surahRaw);
+            } catch (NumberFormatException ex) {
+                form.valid = false;
+                form.error = "Surah number must be a whole number.";
+                return form;
+            }
+        }
+        if (!ayahStartRaw.isEmpty()) {
+            try {
+                form.ayahStart = Integer.valueOf(ayahStartRaw);
+            } catch (NumberFormatException ex) {
+                form.valid = false;
+                form.error = "The first ayah must be a whole number.";
+                return form;
+            }
+        }
+        if (!ayahEndRaw.isEmpty()) {
+            try {
+                form.ayahEnd = Integer.valueOf(ayahEndRaw);
+            } catch (NumberFormatException ex) {
+                form.valid = false;
+                form.error = "The last ayah must be a whole number.";
+                return form;
+            }
+        }
 
         try {
             form.date = LocalDate.parse(safe(request.getParameter("sessionDate")).trim());
@@ -424,6 +460,9 @@ public class InstructorSessionsServlet extends HttpServlet {
         LocalTime time;
         Integer durationMinutes;
         String quranPortion;
+        Integer surahNumber;
+        Integer ayahStart;
+        Integer ayahEnd;
         BigDecimal fee;
         int capacity;
         boolean valid;

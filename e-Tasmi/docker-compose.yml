@@ -86,9 +86,15 @@ services:
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      # Must support verbose_json for duration + segment confidence gating in the recitation pipeline.
-      OPENAI_RECITATION_MODEL: ${OPENAI_RECITATION_MODEL:-whisper-1}
-      OPENAI_CLASSIFIER_MODEL: ${OPENAI_CLASSIFIER_MODEL:-gpt-4o-mini}
+      # Empty means the app default: gpt-4o-transcribe. Do not default to whisper-1 here.
+      OPENAI_RECITATION_MODEL: ${OPENAI_RECITATION_MODEL:-}
+      # Empty means the app default: gpt-4o. OPENAI_CLASSIFIER_MODEL is a legacy alias only.
+      OPENAI_EVALUATOR_MODEL: ${OPENAI_EVALUATOR_MODEL:-}
+      OPENAI_CLASSIFIER_MODEL: ${OPENAI_CLASSIFIER_MODEL:-}
+      # Empty means OpenAI speech-to-text. Set elevenlabs to use Scribe. No silent fallback.
+      STT_PROVIDER: ${STT_PROVIDER:-}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      ELEVENLABS_STT_MODEL: ${ELEVENLABS_STT_MODEL:-}
       # Optional: full HTTPS URL for login page background (e.g. Cloudinary image/upload/...).
       ETASMI_LOGIN_BG_URL: ${ETASMI_LOGIN_BG_URL:-}
       ETASMI_UPLOADS_DIR: /usr/local/tomcat/etasmi_uploads
@@ -110,6 +116,8 @@ services:
       QF_AUTH_ENDPOINT: ${QF_AUTH_ENDPOINT:-}
       QF_OAUTH_SCOPE: ${QF_OAUTH_SCOPE:-}
       QF_SEARCH_API_BASE: ${QF_SEARCH_API_BASE:-}
+      # Quranpedia content API. No API key. Empty disables it. Unset uses the documented base in the app.
+      QURANPEDIA_API_ENDPOINT: ${QURANPEDIA_API_ENDPOINT:-https://api.quranpedia.net/v1}
     volumes:
       - etasmi-uploads:/usr/local/tomcat/etasmi_uploads
     ports:

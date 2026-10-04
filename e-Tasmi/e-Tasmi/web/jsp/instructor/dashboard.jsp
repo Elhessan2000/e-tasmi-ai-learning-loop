@@ -458,9 +458,9 @@
                                 <% } %>
                             </article>
                         </section>
-
-                        <%@ include file="/jsp/common/app_footer.jspf" %>
                     </div>
+
+                    <%@ include file="/jsp/common/app_footer.jspf" %>
 
                     <%-- Overlays (position:fixed) — kept OUTSIDE .idash-stagger so the
                          entrance animation can never override their own transform.

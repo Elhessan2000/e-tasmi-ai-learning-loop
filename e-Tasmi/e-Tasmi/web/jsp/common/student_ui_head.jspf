@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-typography.css?v=20260520-type-balanced">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;600&family=Scheherazade+New:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/quran-assistant.css?v=20260628-eqa-greet1">
-<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-shell-override.css?v=20260624-student-redesign1">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/student-shell-override.css?v=20261003-footer-shell">
 <script defer src="<%= request.getContextPath() %>/assets/js/student-workspace.js?v=20260420-student-polish2"></script>
 <script defer src="<%= request.getContextPath() %>/assets/js/etasmi-theme.js?v=20260609-theme-unified"></script>
 <script defer src="<%= request.getContextPath() %>/assets/js/quran-assistant.js?v=20260628-eqa-greet1"></script>

@@ -6,8 +6,10 @@ import model.entity.EnrollmentStatus;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class EnrollmentDaoJdbc implements EnrollmentDao {
     private static final String TABLE = "enrollment";
@@ -130,6 +132,43 @@ public class EnrollmentDaoJdbc implements EnrollmentDao {
                 return rs.getInt("c");
             }
         }
+    }
+
+    @Override
+    public int countOccupyingBySessionId(Connection connection, long sessionId) throws SQLException {
+        String sql = "SELECT COUNT(*) AS c FROM " + TABLE + " e "
+                + "JOIN student st ON st.student_id = e.student_id "
+                + "LEFT JOIN `user` u ON u.user_id = st.user_id "
+                + "WHERE e.session_id = ? "
+                + "AND e.enrollment_status IN ('PENDING','APPROVED') "
+                + "AND ((u.user_id IS NOT NULL AND u.status <> 'DELETED') "
+                + "OR EXISTS (SELECT 1 FROM recitation r WHERE r.enrollment_id = e.enrollment_id))";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return 0;
+                }
+                return rs.getInt("c");
+            }
+        }
+    }
+
+    @Override
+    public Set<Long> enrollmentIdsWithRecitations(Connection connection, long sessionId) throws SQLException {
+        String sql = "SELECT DISTINCT r.enrollment_id FROM recitation r "
+                + "JOIN " + TABLE + " e ON e.enrollment_id = r.enrollment_id "
+                + "WHERE e.session_id = ?";
+        Set<Long> ids = new HashSet<>();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getLong("enrollment_id"));
+                }
+            }
+        }
+        return ids;
     }
 
     private Enrollment map(ResultSet rs) throws SQLException {

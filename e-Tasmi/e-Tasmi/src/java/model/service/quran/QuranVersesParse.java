@@ -362,6 +362,7 @@ public final class QuranVersesParse {
             displayArabic = joinWordGlyphsFromWordsArray(verseObject);
         }
         m.put("textArabic", nullToEmpty(displayArabic));
+        m.put("textUthmani", nullToEmpty(uthmani));
         if ((displayArabic == null || displayArabic.isBlank()) && LOGGER.isLoggable(Level.FINE)) {
             LOGGER.log(Level.FINE,
                     "Unresolved Arabic after parse: verseKey={0}, hasWordsArray={1}",

@@ -1,0 +1,673 @@
+<%
+  boolean analysisOk = analysis != null && analysis.isSuccess();
+  Status analysisStatus = analysis == null ? null : analysis.getStatus();
+  boolean analysingNow = analysisInProgress && analysis == null;
+  boolean aiSuggests = analysisOk && analysis.isMatchesExpectedPassage();
+
+  int findingTotal = 0;
+  int studentFocusCount = 0;
+  for (RecitationFindingRecord countFinding : storedFindings) {
+    if (countFinding == null || countFinding.getFindingType() == null) continue;
+    findingTotal++;
+    if (studentFacing(countFinding.getInstructorStatus())) studentFocusCount++;
+  }
+  int verifiedCount = Math.max(0, findingTotal - pendingFindingCount);
+  int verifiedPct = findingTotal == 0 ? 100 : (int) Math.round(verifiedCount * 100.0 / findingTotal);
+
+  String publishBlockKey = null;
+  String publishBlockText = null;
+  if (!hasExpectedPortion) {
+    publishBlockKey = "publishNeedsPortion"; publishBlockText = "Set the session's Qur'an passage before publishing.";
+  } else if (analysingNow) {
+    publishBlockKey = "publishWaitAnalysis"; publishBlockText = "Publishing opens when the AI analysis finishes.";
+  } else if (analysis == null) {
+    publishBlockKey = "publishNeedsAnalysis"; publishBlockText = "Run the AI analysis before publishing.";
+  } else if (analysisStatus == Status.FAILED || analysisStatus == Status.CANNOT_EVALUATE) {
+    publishBlockKey = "publishNeedsRetry"; publishBlockText = "Retry the analysis before publishing.";
+  } else if (pendingFindingCount == 1) {
+    publishBlockKey = "publishPendingOne"; publishBlockText = "1 finding still requires verification.";
+  } else if (pendingFindingCount > 1) {
+    publishBlockKey = "publishPendingMany"; publishBlockText = pendingFindingCount + " findings still require verification.";
+  }
+  long rid = r.getRecitationId();
+  String evalFormId = "lx-eval-form-" + rid;
+  String gateId = "lx-gate-" + rid;
+
+  List<TrustedReference.Verse> displayVerses =
+          displayVersesByRecitationId.getOrDefault(rid, java.util.Collections.emptyList());
+  String p = r.getAudioFilePath();
+  String lowerMediaPath = p == null ? "" : p.toLowerCase();
+  boolean looksLikeAudio = lowerMediaPath.contains(".wav")
+          || lowerMediaPath.contains(".mp3")
+          || lowerMediaPath.contains(".m4a")
+          || lowerMediaPath.contains(".ogg")
+          || lowerMediaPath.contains(".webm")
+          || lowerMediaPath.contains(".aac");
+  boolean isVideo = !looksLikeAudio && (
+          lowerMediaPath.endsWith(".mp4")
+          || lowerMediaPath.endsWith(".mov")
+          || lowerMediaPath.contains("/video/upload/"));
+  String mediaSource = null;
+  if (p != null && !p.trim().isEmpty()) {
+    if (p.startsWith("http://") || p.startsWith("https://")) mediaSource = p;
+    else if (p.startsWith("/")) mediaSource = request.getContextPath() + p;
+  }
+  String referenceLabel = analysis == null ? "Quranpedia" : referenceSourceDisplay(analysis);
+  if ("—".equals(referenceLabel)) referenceLabel = "Quranpedia";
+%>
+<article class="lx-workspace" data-recitation-detail="<%= rid %>" data-session-id="<%= escapeHtml(sessionIdValue) %>"<%= analysingNow ? " data-lx-analysing" : "" %>>
+
+  <section class="lx-card lx-evalhead lx-enter" aria-labelledby="lx-eval-title-<%= rid %>">
+    <div class="lx-head__top">
+      <div class="lx-who">
+        <span class="lx-avatar lx-avatar--lg" aria-hidden="true"><%= escapeHtml(studentInitials(studentName)) %></span>
+        <div>
+          <p class="lx-eyebrow" data-i18n="instructor.evaluations.evaluationEyebrow">Recitation evaluation</p>
+          <h1 class="lx-title" id="lx-eval-title-<%= rid %>"><%= escapeHtml(studentName) %></h1>
+          <% if (studentIdentifier != null && !studentIdentifier.isBlank() && !"-".equals(studentIdentifier)) { %>
+          <p class="lx-note"><%= escapeHtml(studentIdentifier) %></p>
+          <% } %>
+          <% if (studentAccountRemoved) { %>
+          <p class="lx-note" data-i18n="instructor.evaluations.accountRemoved">Account removed</p>
+          <% } %>
+        </div>
+      </div>
+      <div class="lx-head__status">
+        <%= statePill(reviewStateKey) %>
+      </div>
+    </div>
+
+    <ul class="lx-meta">
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5" stroke-linecap="round"/></svg>
+        <span class="lx-visually-hidden" data-i18n="instructor.evaluations.metaSessionShort">Session</span>
+        <span><%= escapeHtml(sessionTitle) %></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13" stroke-linejoin="round"/></svg>
+        <span class="lx-visually-hidden" data-i18n="instructor.evaluations.metaPassage">Passage</span>
+        <% if (hasExpectedPortion) { %><strong><%= escapeHtml(quranPortion) %></strong><% } else { %><span class="is-warn" data-i18n="instructor.evaluations.noPortionShort">No passage set</span><% } %>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6M20 4v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i18n="instructor.evaluations.attemptLabel" data-i18n-n="<%= r.getAttemptNumber() %>">Attempt <%= r.getAttemptNumber() %></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke-linecap="round"/></svg>
+        <span class="lx-visually-hidden" data-i18n="instructor.evaluations.metaSubmittedAt">Submitted</span>
+        <span><%= escapeHtml(submittedLabel(r.getSubmissionDate())) %></span>
+      </li>
+    </ul>
+
+    <% if (mediaSource == null) { %>
+    <p class="lx-media-missing" data-i18n="instructor.evaluations.audioUnavailable">Audio file unavailable.</p>
+    <% } else if (isVideo) { %>
+    <div class="lx-player lx-player--video"><video controls preload="metadata"><source src="<%= mediaSource %>"></video></div>
+    <% } else { %>
+    <div class="lx-player lx-player--wave lx-player--lg" data-rr-player dir="ltr">
+      <audio data-rr-audio preload="metadata"><source src="<%= mediaSource %>"></audio>
+      <button type="button" class="lx-player__play" data-rr-play aria-label="Play recitation" data-label-play="Play recitation" data-label-pause="Pause">
+        <svg class="lx-i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="lx-i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <div class="lx-player__track">
+        <canvas class="lx-player__wave" data-rr-wave aria-hidden="true"></canvas>
+        <input class="lx-player__seek" data-rr-seek type="range" min="0" max="1000" value="0" aria-label="Seek">
+      </div>
+      <span class="lx-player__time" data-rr-time>0:00</span>
+      <button type="button" class="lx-player__mute" data-rr-mute aria-label="Mute" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4zM16 9.5a5 5 0 010 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="lx-player__rate" data-rr-rate aria-label="Playback speed">1x</button>
+    </div>
+    <% } %>
+  </section>
+
+  <% if (!hasExpectedPortion) { %>
+  <div class="lx-alert" role="status">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01" stroke-linecap="round"/></svg>
+    <div>
+      <strong data-i18n="instructor.evaluations.noPortionTitle">No Qur'an passage is set for this session.</strong>
+      <span data-i18n="instructor.evaluations.noPortionSub">AI analysis stays off until the session's passage is defined.</span>
+    </div>
+  </div>
+  <% } %>
+
+  <% if (analysisOk || analysingNow) { %>
+  <section class="lx-card lx-comparecard lx-enter<%= analysingNow ? " is-loading" : "" %>" aria-labelledby="lx-compare-title-<%= rid %>">
+    <h2 class="lx-visually-hidden" id="lx-compare-title-<%= rid %>" data-i18n="instructor.evaluations.compareTitle">Reference and recitation</h2>
+    <div class="lx-compare">
+      <div class="lx-pane lx-pane--ref">
+        <div class="lx-pane__head">
+          <span class="lx-pane__label" data-i18n="instructor.evaluations.trustedReferenceLabel">Trusted reference</span>
+          <small><%= escapeHtml(referenceLabel) %> · Hafs</small>
+        </div>
+        <div class="lx-pane__body lx-arabic lx-quran" lang="ar">
+          <% if (analysingNow) { %>
+          <div class="lx-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+          <% } else {
+               String referenceText = analysis.getReferenceText();
+               boolean showReference = referenceText != null && !referenceText.isBlank();
+               if (!showReference && analysis.getExpectedText() != null && !analysis.getExpectedText().isBlank()) {
+                 referenceText = analysis.getExpectedText();
+                 showReference = true;
+               }
+               if (!displayVerses.isEmpty()) {
+                 for (TrustedReference.Verse verse : displayVerses) {
+                   int ayah = ayahNumber(verse);
+          %>
+          <p class="lx-verse" data-verse-key="<%= escapeHtml(verse.getVerseKey()) %>"><%= escapeHtml(verse.getUthmaniText()) %><% if (ayah > 0) { %><span class="lx-ayah__n" dir="ltr"><%= ayah %></span><% } %></p>
+          <%     }
+               } else if (showReference) { %>
+          <p><%= escapeHtml(referenceText) %></p>
+          <%   } else { %>
+          <p class="lx-note" dir="auto" data-i18n="instructor.evaluations.referenceNotStored">Reference text was not stored.</p>
+          <%   }
+             } %>
+        </div>
+      </div>
+      <div class="lx-pane lx-pane--heard">
+        <div class="lx-pane__head">
+          <span class="lx-pane__label" data-i18n="instructor.evaluations.studentRecitation">Student recitation</span>
+          <small data-i18n="instructor.evaluations.speechToText">Speech-to-text</small>
+        </div>
+        <div class="lx-pane__body lx-arabic" lang="ar">
+          <% if (analysingNow) { %>
+          <div class="lx-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+          <% } else { %>
+          <%= highlightHeard(analysis.getTranscript(), storedFindings) %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% if (analysisOk) { %>
+    <p class="lx-note lx-note--gap" data-i18n="instructor.evaluations.transcriptCaution">The transcript may contain recognition errors. Verify it against the audio and the trusted reference.</p>
+    <% } %>
+  </section>
+  <% } %>
+
+  <div class="lx-grid">
+    <section class="lx-card lx-analysis lx-enter" aria-labelledby="lx-ai-title-<%= rid %>">
+      <div class="lx-card__head">
+        <span class="lx-card__icon lx-card__icon--ai" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z" stroke-linejoin="round"/><path d="M18.5 16v4M16.5 18h4" stroke-linecap="round"/></svg></span>
+        <div>
+          <h2 class="lx-card__title" id="lx-ai-title-<%= rid %>" data-i18n="instructor.evaluations.aiSummary">AI Analysis Summary</h2>
+          <p class="lx-card__sub" data-i18n="instructor.evaluations.aiSummarySub">Advisory only. You verify every finding before anything reaches the student.</p>
+        </div>
+        <span class="lx-pill lx-pill--ai lx-pill--sm" data-i18n="instructor.evaluations.advisoryPill">Advisory</span>
+      </div>
+
+      <% if (analysingNow) { %>
+      <div class="lx-status-box lx-status-box--ai" aria-live="polite">
+        <span class="lx-processing__orb lx-processing__orb--sm" aria-hidden="true"><span></span><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z" stroke-linejoin="round"/></svg></span>
+        <div>
+          <h3 data-i18n="instructor.evaluations.statusAnalyzing">AI analysis in progress</h3>
+          <p data-i18n="instructor.evaluations.statusAnalyzingAuto">This page refreshes by itself when the analysis is ready.</p>
+        </div>
+      </div>
+      <% } else if (analysisOk) {
+           boolean passageMatches = analysis.isMatchesExpectedPassage();
+           boolean hasSummary = analysis.getSummary() != null && !analysis.getSummary().isBlank();
+      %>
+      <% if (hasSummary && passageMatches) { %>
+      <p class="lx-summary"><%= escapeHtml(analysis.getSummary()) %></p>
+      <% } %>
+      <dl class="lx-chips-dl">
+        <div><dt data-i18n="instructor.evaluations.referenceLabel">Reference</dt><dd><%= escapeHtml(referenceLabel) %></dd></div>
+        <div>
+          <dt data-i18n="instructor.evaluations.resultLabel">Result</dt>
+          <dd class="<%= passageMatches ? "is-ok" : "is-wait" %>" data-i18n="instructor.evaluations.<%= passageMatches ? "passageMatched" : "passageMismatchTitle" %>"><%= passageMatches ? "Passage matched" : "Passage mismatch" %></dd>
+        </div>
+        <div><dt data-i18n="instructor.evaluations.findingsTitle">Findings</dt><dd><%= findingTotal %></dd></div>
+      </dl>
+
+      <% if (!passageMatches) {
+           String matchNote = analysis.getMatchedPassageNote();
+           if (matchNote == null || matchNote.isBlank()) {
+             matchNote = "This submission does not match the session's assigned passage. Word-level lists may be withheld.";
+           }
+      %>
+      <div class="lx-insight" role="note">
+        <span class="lx-insight__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13" stroke-linejoin="round"/></svg></span>
+        <div>
+          <strong data-i18n="instructor.evaluations.passageMismatchTitle">Passage mismatch</strong>
+          <p><%= escapeHtml(matchNote) %></p>
+        </div>
+      </div>
+      <% } else { %>
+      <div class="lx-tiles">
+        <div class="lx-tile lx-tile--ok"><strong><%= analysis.getCorrectWords().size() %></strong><span data-i18n="instructor.evaluations.correctWords">Correct words</span></div>
+        <div class="lx-tile lx-tile--gold"><strong><%= analysis.getMissingWords().size() %></strong><span data-i18n="instructor.evaluations.missingWords">Missing words</span></div>
+        <div class="lx-tile lx-tile--rose"><strong><%= analysis.getReplacedWords().size() %></strong><span data-i18n="instructor.evaluations.incorrectWords">Incorrect words</span></div>
+        <div class="lx-tile lx-tile--blue"><strong><%= analysis.getExtraWords().size() %></strong><span data-i18n="instructor.evaluations.extraWords">Extra words</span></div>
+      </div>
+      <% } %>
+      <% } else if (analysis != null) {
+           boolean referenceUnavailable = analysisStatus == Status.REFERENCE_UNAVAILABLE;
+           String boxTone = analysisStatus == Status.FAILED || analysisStatus == Status.REJECTED ? "bad" : "wait";
+           String boxTitle = "Analysis could not be completed";
+           String boxKey = "statusFailed";
+           if (analysisStatus == Status.REJECTED) { boxTitle = "Not a Quran recitation"; boxKey = "statusRejected"; }
+           else if (analysisStatus == Status.CANNOT_EVALUATE) { boxTitle = "Cannot evaluate this audio"; boxKey = "statusCannot"; }
+           else if (referenceUnavailable) { boxTitle = "Trusted reference unavailable"; boxKey = "statusReference"; }
+           String cardReason = analysis.getReason();
+           if (cardReason == null || cardReason.trim().isEmpty()) cardReason = "No additional details were provided.";
+      %>
+      <div class="lx-status-box lx-status-box--<%= boxTone %>">
+        <h3 data-i18n="instructor.evaluations.<%= boxKey %>"><%= escapeHtml(boxTitle) %></h3>
+        <% if (referenceUnavailable) { %>
+        <p data-i18n="instructor.evaluations.statusReferenceReason">The trusted Qur'an reference could not be loaded. The comparison was withheld, and no Qur'an text was generated.</p>
+        <% } else { %>
+        <p><%= escapeHtml(cardReason) %></p>
+        <% } %>
+        <% if (!referenceUnavailable && analysis.getTranscript() != null && !analysis.getTranscript().isBlank()) { %>
+        <div class="lx-arabic" lang="ar"><%= escapeHtml(analysis.getTranscript()) %></div>
+        <% } %>
+        <% if (showRetryAnalysis) { %>
+        <button class="lx-btn lx-btn--ghost" type="button" data-ai-analyze form="<%= evalFormId %>">
+          <span class="lx-btn__spinner" aria-hidden="true"></span>
+          <svg class="lx-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6M20 4v5h-5M20 12a8 8 0 01-13.7 5.6M4 20v-5h5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="instructor.evaluations.retryAnalysis">Retry Analysis</span>
+        </button>
+        <% } %>
+      </div>
+      <% } else { %>
+      <div class="lx-status-box">
+        <p data-i18n="instructor.evaluations.noAnalysisYet">AI analysis has not been stored for this recitation yet.</p>
+      </div>
+      <% } %>
+
+      <% if (analysis != null) { %>
+      <details class="lx-details">
+        <summary data-i18n="instructor.evaluations.analysisDetails">Analysis details</summary>
+        <dl class="lx-kv">
+          <div><dt data-i18n="instructor.evaluations.summaryStt">Speech-to-Text Provider</dt><dd><%= sttDisplay(analysis) %></dd></div>
+          <div><dt data-i18n="instructor.evaluations.summaryReference">Reference Source</dt><dd><%= referenceSourceDisplay(analysis) %></dd></div>
+          <div><dt data-i18n="instructor.evaluations.summaryEvaluator">AI Evaluator</dt><dd><%= evaluatorDisplay(analysis) %></dd></div>
+          <div><dt data-i18n="instructor.evaluations.summaryTranscriptLen">Transcript Length</dt><dd><%= transcriptCharCount(analysis) %></dd></div>
+        </dl>
+      </details>
+      <% } %>
+    </section>
+
+    <section class="lx-card lx-findings lx-enter" aria-labelledby="lx-findings-title-<%= rid %>">
+      <div class="lx-card__head">
+        <span class="lx-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="4" width="16" height="16" rx="3"/></svg></span>
+        <div>
+          <h2 class="lx-card__title" id="lx-findings-title-<%= rid %>" data-i18n="instructor.evaluations.findingsTitle">Findings</h2>
+          <% if (evaluation != null) { %>
+          <p class="lx-card__sub" data-i18n="instructor.evaluations.findingsFrozen">The evaluation is saved, so these findings are final.</p>
+          <% } else { %>
+          <p class="lx-card__sub" data-i18n="instructor.evaluations.findingsSub">Accept, edit, or reject each AI finding. Only accepted, edited, and instructor-added findings reach the student.</p>
+          <% } %>
+        </div>
+      </div>
+
+      <% if (findingTotal > 0) { %>
+      <div class="lx-progress<%= pendingFindingCount == 0 ? " is-complete" : "" %>" data-lx-progress data-pct="<%= verifiedPct %>">
+        <div class="lx-progress__label">
+          <span class="lx-progress__title" data-i18n="instructor.evaluations.verificationProgress">Verification progress</span>
+          <% if (pendingFindingCount == 0) { %>
+          <span class="lx-progress__done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="instructor.evaluations.verifiedOfTotal" data-i18n-count="<%= verifiedCount %>" data-i18n-total="<%= findingTotal %>"><%= verifiedCount %> / <%= findingTotal %> verified</span></span>
+          <% } else { %>
+          <span class="lx-progress__count" data-i18n="instructor.evaluations.verifiedOfTotal" data-i18n-count="<%= verifiedCount %>" data-i18n-total="<%= findingTotal %>"><%= verifiedCount %> / <%= findingTotal %> verified</span>
+          <% } %>
+        </div>
+        <div class="lx-progress__track" role="progressbar" aria-valuemin="0" aria-valuemax="<%= findingTotal %>" aria-valuenow="<%= verifiedCount %>" aria-labelledby="lx-findings-title-<%= rid %>">
+          <span style="--lx-pct:<%= verifiedPct %>%"></span>
+        </div>
+      </div>
+      <% } %>
+
+      <% if (findingTotal == 0) { %>
+      <p class="lx-empty" data-i18n="instructor.evaluations.noFindingsStored">No findings were stored for this analysis.</p>
+      <% } else { %>
+      <ol class="lx-findings__list">
+        <% int findingIndex = 0;
+           for (RecitationFindingRecord finding : storedFindings) {
+             if (finding == null || finding.getFindingType() == null) continue;
+             findingIndex++;
+             FindingInstructorStatus ist = finding.getInstructorStatus();
+             boolean instructorOwned = finding.getAiStatus() == FindingAiStatus.NOT_APPLICABLE;
+             String cardState = ist == FindingInstructorStatus.ACCEPTED ? "accepted"
+                     : ist == FindingInstructorStatus.EDITED ? "edited"
+                     : ist == FindingInstructorStatus.REJECTED ? "rejected"
+                     : ist == FindingInstructorStatus.INSTRUCTOR_ADDED ? "added"
+                     : "pending";
+             String chipTone = "wait";
+             if ("accepted".equals(cardState) || "edited".equals(cardState) || "added".equals(cardState)) chipTone = "ok";
+             else if ("rejected".equals(cardState)) chipTone = "none";
+             String statusI18nKey = "needsReview";
+             String statusText = "Needs review";
+             if (ist == FindingInstructorStatus.ACCEPTED) { statusI18nKey = "verifiedByInstructor"; statusText = "Verified by Instructor"; }
+             else if (ist == FindingInstructorStatus.EDITED) { statusI18nKey = "instructorCorrection"; statusText = "Instructor correction"; }
+             else if (ist == FindingInstructorStatus.REJECTED) { statusI18nKey = "excludedFromFocus"; statusText = "Excluded from learning focus"; }
+             else if (ist == FindingInstructorStatus.INSTRUCTOR_ADDED) { statusI18nKey = "verifiedByInstructor"; statusText = "Verified by Instructor"; }
+             FindingType ftype = finding.getFindingType();
+             String typeI18nKey = "typeOther";
+             String typeClass = "other";
+             if (ftype == FindingType.MISSING_WORD) { typeI18nKey = "typeMissingWord"; typeClass = "missing"; }
+             else if (ftype == FindingType.INCORRECT_WORD) { typeI18nKey = "typeIncorrectWord"; typeClass = "incorrect"; }
+             else if (ftype == FindingType.EXTRA_WORD) { typeI18nKey = "typeExtraWord"; typeClass = "extra"; }
+             else if (ftype == FindingType.PASSAGE_MISMATCH) { typeI18nKey = "typePassageMismatch"; typeClass = "passage"; }
+             else if (ftype == FindingType.PRONUNCIATION_OBSERVATION) { typeI18nKey = "typePronunciation"; typeClass = "pronunciation"; }
+             String typeIconPath;
+             switch (typeClass) {
+               case "missing": typeIconPath = "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 8.5v7M8.5 12h7\" stroke-linecap=\"round\"/>"; break;
+               case "incorrect": typeIconPath = "<path d=\"M7 7.5h11l-3-3M17 16.5H6l3 3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>"; break;
+               case "extra": typeIconPath = "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M8.5 12h7\" stroke-linecap=\"round\"/>"; break;
+               case "passage": typeIconPath = "<path d=\"M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13\" stroke-linejoin=\"round\"/>"; break;
+               case "pronunciation": typeIconPath = "<path d=\"M3 12h2M7 8v8M11 5v14M15 8v8M19 10v4\" stroke-linecap=\"round\"/>"; break;
+               default: typeIconPath = "<path d=\"M5 5h14v10H9l-4 4z\" stroke-linejoin=\"round\"/>";
+             }
+             boolean decidable = evaluation == null;
+             boolean canAccept = decidable && ist == FindingInstructorStatus.PENDING && !instructorOwned;
+             boolean canEdit = decidable && (ist == FindingInstructorStatus.PENDING || ist == FindingInstructorStatus.ACCEPTED || ist == FindingInstructorStatus.EDITED);
+             boolean canReject = decidable && ist != FindingInstructorStatus.REJECTED;
+             String editId = "lx-edit-" + finding.getFindingId();
+             String aiExpected = finding.getExpectedText();
+             String aiHeard = finding.getHeardText();
+             boolean hasAiPair = !instructorOwned && ((aiExpected != null && !aiExpected.isBlank()) || (aiHeard != null && !aiHeard.isBlank()));
+             boolean hasInstructorVersion = finding.getInstructorExpectedText() != null || finding.getInstructorHeardText() != null
+                     || finding.getInstructorExplanation() != null || finding.getInstructorNote() != null;
+        %>
+        <li class="lx-finding is-<%= cardState %> lx-finding--<%= instructorOwned ? "instructor" : "ai" %>" data-rr-finding data-finding-id="<%= finding.getFindingId() %>" style="--lx-i:<%= findingIndex %>">
+          <div class="lx-finding__main">
+            <span class="lx-finding__icon lx-finding__icon--<%= typeClass %>" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><%= typeIconPath %></svg></span>
+            <div class="lx-finding__text">
+              <div class="lx-finding__top">
+                <span class="lx-finding__type" data-i18n="instructor.evaluations.<%= typeI18nKey %>"><%= escapeHtml(findingTypeLabel(ftype)) %></span>
+                <% if (instructorOwned) { %>
+                <span class="lx-source lx-source--you"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0" stroke-linecap="round"/></svg><span data-i18n="instructor.evaluations.sourceInstructor">Instructor</span></span>
+                <% } else { %>
+                <span class="lx-source lx-source--ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z" stroke-linejoin="round"/></svg><span data-i18n="instructor.evaluations.sourceAi">AI</span></span>
+                <% } %>
+                <span class="lx-pill lx-pill--sm lx-pill--<%= chipTone %> lx-finding__status"><%= toneIcon(chipTone) %><span data-i18n="instructor.evaluations.<%= statusI18nKey %>"><%= statusText %></span></span>
+              </div>
+              <% if (finding.getVerseKey() != null && !finding.getVerseKey().isBlank()) { %>
+              <p class="lx-finding__where"><%= ayahLabel(finding.getVerseKey()) %><% if (finding.getWordPosition() != null) { %> · <span data-i18n="instructor.evaluations.wordPosition">Word</span> <%= finding.getWordPosition() %><% } %></p>
+              <% } %>
+              <% if (!instructorOwned && finding.getExplanation() != null && !finding.getExplanation().isBlank()) { %>
+              <p class="lx-finding__explain"><%= escapeHtml(finding.getExplanation()) %></p>
+              <% } %>
+              <% if (hasAiPair) { %>
+              <dl class="lx-pair">
+                <div>
+                  <dt data-i18n="instructor.evaluations.expectedLabel">Expected</dt>
+                  <dd class="lx-arabic" lang="ar"><%= aiExpected == null || aiExpected.isBlank() ? "—" : escapeHtml(aiExpected) %></dd>
+                </div>
+                <div>
+                  <dt data-i18n="instructor.evaluations.heardLabel">Heard</dt>
+                  <dd class="lx-arabic" lang="ar"><%= aiHeard == null || aiHeard.isBlank() ? "—" : escapeHtml(aiHeard) %></dd>
+                </div>
+              </dl>
+              <% } %>
+              <% if (ftype == FindingType.PRONUNCIATION_OBSERVATION) { %>
+              <p class="lx-finding__explain" data-i18n="instructor.evaluations.pronunciationCaution">Unverified acoustic note. Listen to the recording before accepting it. This is not a tajwīd verdict.</p>
+              <% } %>
+              <% if (hasInstructorVersion) { %>
+              <div class="lx-own">
+                <b data-i18n="instructor.evaluations.instructorVersion">Your version</b>
+                <% if (finding.getInstructorExpectedText() != null) { %><span><span data-i18n="instructor.evaluations.expectedLabel">Expected</span>: <span class="lx-arabic" lang="ar"><%= escapeHtml(finding.getInstructorExpectedText()) %></span></span><% } %>
+                <% if (finding.getInstructorHeardText() != null) { %><span><span data-i18n="instructor.evaluations.heardLabel">Heard</span>: <span class="lx-arabic" lang="ar"><%= escapeHtml(finding.getInstructorHeardText()) %></span></span><% } %>
+                <% if (finding.getInstructorExplanation() != null) { %><span><%= escapeHtml(finding.getInstructorExplanation()) %></span><% } %>
+                <% if (finding.getInstructorNote() != null) { %><span class="lx-note"><%= escapeHtml(finding.getInstructorNote()) %></span><% } %>
+              </div>
+              <% } %>
+            </div>
+            <% if (canAccept || canEdit || canReject) { %>
+            <div class="lx-finding__actions">
+              <% if (canAccept) { %>
+              <form method="post" action="<%= request.getContextPath() %>/instructor/evaluations" data-rr-accept-form>
+                <input type="hidden" name="action" value="accept_finding"/>
+                <input type="hidden" name="findingId" value="<%= finding.getFindingId() %>"/>
+                <input type="hidden" name="recitationId" value="<%= rid %>"/>
+                <input type="hidden" name="sessionId" value="<%= escapeHtml(sessionIdValue) %>"/>
+                <button type="submit" class="lx-act lx-act--accept">
+                  <span class="lx-btn__spinner" aria-hidden="true"></span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span data-i18n="instructor.evaluations.accept">Accept</span>
+                </button>
+              </form>
+              <% } %>
+              <% if (canEdit) { %>
+              <button type="button" class="lx-act lx-act--edit" data-lx-edit-toggle aria-expanded="false" aria-controls="<%= editId %>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" stroke-linejoin="round"/></svg>
+                <span data-i18n="instructor.evaluations.edit">Edit</span>
+              </button>
+              <% } %>
+              <% if (canReject) { %>
+              <form method="post" action="<%= request.getContextPath() %>/instructor/evaluations" data-rr-reject-form>
+                <input type="hidden" name="action" value="reject_finding"/>
+                <input type="hidden" name="findingId" value="<%= finding.getFindingId() %>"/>
+                <input type="hidden" name="recitationId" value="<%= rid %>"/>
+                <input type="hidden" name="sessionId" value="<%= escapeHtml(sessionIdValue) %>"/>
+                <button type="submit" class="lx-act lx-act--reject">
+                  <span class="lx-btn__spinner" aria-hidden="true"></span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+                  <span data-i18n="instructor.evaluations.<%= instructorOwned ? "withdraw" : "reject" %>"><%= instructorOwned ? "Withdraw" : "Reject" %></span>
+                </button>
+              </form>
+              <% } %>
+            </div>
+            <% } %>
+          </div>
+          <% if (canEdit) { %>
+          <form method="post" action="<%= request.getContextPath() %>/instructor/evaluations" class="lx-edit" id="<%= editId %>" data-rr-edit-form hidden>
+            <input type="hidden" name="action" value="edit_finding"/>
+            <input type="hidden" name="findingId" value="<%= finding.getFindingId() %>"/>
+            <input type="hidden" name="recitationId" value="<%= rid %>"/>
+            <input type="hidden" name="sessionId" value="<%= escapeHtml(sessionIdValue) %>"/>
+            <div class="lx-edit__grid">
+              <div>
+                <label class="lx-label" for="<%= editId %>-exp" data-i18n="instructor.evaluations.correctedExpected">Corrected expected text</label>
+                <input class="lx-input lx-arabic" lang="ar" id="<%= editId %>-exp" name="instructorExpectedText" maxlength="255" value="<%= escapeHtml(finding.getInstructorExpectedText()) %>"/>
+              </div>
+              <div>
+                <label class="lx-label" for="<%= editId %>-heard" data-i18n="instructor.evaluations.correctedHeard">Corrected heard text</label>
+                <input class="lx-input lx-arabic" lang="ar" id="<%= editId %>-heard" name="instructorHeardText" maxlength="255" value="<%= escapeHtml(finding.getInstructorHeardText()) %>"/>
+              </div>
+            </div>
+            <div>
+              <label class="lx-label" for="<%= editId %>-why" data-i18n="instructor.evaluations.explanationForStudent">Explanation for the student</label>
+              <textarea class="lx-input" id="<%= editId %>-why" name="instructorExplanation" rows="2"><%= escapeHtml(finding.getInstructorExplanation()) %></textarea>
+            </div>
+            <div>
+              <label class="lx-label" for="<%= editId %>-note"><span data-i18n="instructor.evaluations.noteLabel">Note</span> <small data-i18n="instructor.evaluations.optional">(optional)</small></label>
+              <textarea class="lx-input" id="<%= editId %>-note" name="instructorNote" rows="2"><%= escapeHtml(finding.getInstructorNote()) %></textarea>
+            </div>
+            <div class="lx-edit__actions">
+              <button type="button" class="lx-btn lx-btn--ghost lx-btn--sm" data-lx-edit-cancel data-i18n="instructor.evaluations.cancel">Cancel</button>
+              <button type="submit" class="lx-btn lx-btn--primary lx-btn--sm"><span class="lx-btn__spinner" aria-hidden="true"></span><span data-i18n="instructor.evaluations.saveEdit">Save edit</span></button>
+            </div>
+          </form>
+          <% } %>
+        </li>
+        <% } %>
+      </ol>
+      <% } %>
+
+      <% if (analysis != null && evaluation == null) {
+           String addId = "lx-add-" + rid;
+      %>
+      <button type="button" class="lx-add" data-rr-add-toggle aria-expanded="false" aria-controls="<%= addId %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+        <span data-i18n="instructor.evaluations.addInstructorFinding">Add Instructor Finding</span>
+      </button>
+      <form method="post" action="<%= request.getContextPath() %>/instructor/evaluations" class="lx-addform" id="<%= addId %>" data-rr-add-form hidden>
+        <input type="hidden" name="action" value="add_finding"/>
+        <input type="hidden" name="recitationId" value="<%= rid %>"/>
+        <input type="hidden" name="sessionId" value="<%= escapeHtml(sessionIdValue) %>"/>
+        <div class="lx-addform__head">
+          <span class="lx-source lx-source--you"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0" stroke-linecap="round"/></svg><span data-i18n="instructor.evaluations.sourceInstructor">Instructor</span></span>
+          <p class="lx-note" data-i18n="instructor.evaluations.addFindingNote">Saved as instructor-added. It goes to the student and does not block publishing.</p>
+        </div>
+        <div class="lx-edit__grid lx-edit__grid--3">
+          <div>
+            <label class="lx-label" for="<%= addId %>-type" data-i18n="instructor.evaluations.findingType">Type</label>
+            <select class="lx-input" id="<%= addId %>-type" name="findingType">
+              <option value="MISSING_WORD" data-i18n="instructor.evaluations.typeMissingWord">Missing word</option>
+              <option value="INCORRECT_WORD" data-i18n="instructor.evaluations.typeIncorrectWord">Incorrect word</option>
+              <option value="EXTRA_WORD" data-i18n="instructor.evaluations.typeExtraWord">Extra word</option>
+              <option value="PRONUNCIATION_OBSERVATION" data-i18n="instructor.evaluations.typePronunciation">Pronunciation observation</option>
+              <option value="OTHER" data-i18n="instructor.evaluations.typeOther">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="lx-label" for="<%= addId %>-verse" data-i18n="instructor.evaluations.verseKeyLabel">Verse</label>
+            <input class="lx-input" id="<%= addId %>-verse" name="verseKey" maxlength="12" placeholder="1:5" dir="ltr"/>
+          </div>
+          <div>
+            <label class="lx-label" for="<%= addId %>-word" data-i18n="instructor.evaluations.wordPosition">Word</label>
+            <input class="lx-input" id="<%= addId %>-word" name="wordPosition" type="number" min="1"/>
+          </div>
+        </div>
+        <div class="lx-edit__grid">
+          <div>
+            <label class="lx-label" for="<%= addId %>-exp" data-i18n="instructor.evaluations.expectedLabel">Expected</label>
+            <input class="lx-input lx-arabic" lang="ar" id="<%= addId %>-exp" name="instructorExpectedText" maxlength="255"/>
+          </div>
+          <div>
+            <label class="lx-label" for="<%= addId %>-heard" data-i18n="instructor.evaluations.heardLabel">Heard</label>
+            <input class="lx-input lx-arabic" lang="ar" id="<%= addId %>-heard" name="instructorHeardText" maxlength="255"/>
+          </div>
+        </div>
+        <div>
+          <label class="lx-label" for="<%= addId %>-why" data-i18n="instructor.evaluations.whatYouObserved">What you observed</label>
+          <textarea class="lx-input" id="<%= addId %>-why" name="instructorExplanation" rows="2"></textarea>
+        </div>
+        <div class="lx-edit__actions">
+          <button type="button" class="lx-btn lx-btn--ghost lx-btn--sm" data-rr-add-toggle aria-controls="<%= addId %>" data-i18n="instructor.evaluations.cancel">Cancel</button>
+          <button type="submit" class="lx-btn lx-btn--primary lx-btn--sm"><span class="lx-btn__spinner" aria-hidden="true"></span><span data-i18n="instructor.evaluations.addFinding">Add finding</span></button>
+        </div>
+      </form>
+      <% } %>
+
+      <% if (studentFocusCount > 0) { %>
+      <details class="lx-preview">
+        <summary><span data-i18n="instructor.evaluations.studentFocusPreview">What the student will see</span> <span class="lx-pill lx-pill--sm lx-pill--ok"><%= studentFocusCount %></span></summary>
+        <ul>
+          <% for (RecitationFindingRecord focusRow : storedFindings) {
+               if (focusRow == null || !studentFacing(focusRow.getInstructorStatus())) continue;
+               String shownExpected = focusText(focusRow.getInstructorStatus(), focusRow.getExpectedText(), focusRow.getInstructorExpectedText());
+               String shownGuide = focusText(focusRow.getInstructorStatus(), focusRow.getExplanation(), focusRow.getInstructorExplanation());
+          %>
+          <li>
+            <strong><%= escapeHtml(findingTypeLabel(focusRow.getFindingType())) %><% if (focusRow.getVerseKey() != null) { %> · <%= ayahLabel(focusRow.getVerseKey()) %><% } %></strong>
+            <% if (shownExpected != null) { %><span class="lx-arabic" lang="ar"><%= escapeHtml(shownExpected) %></span><% } %>
+            <% if (shownGuide != null) { %><span class="lx-note"><%= escapeHtml(shownGuide) %></span><% } %>
+          </li>
+          <% } %>
+        </ul>
+      </details>
+      <% } %>
+    </section>
+  </div>
+
+  <% if (evaluation != null) {
+       String savedFeedback = evaluation.getFeedback() == null || evaluation.getFeedback().trim().isEmpty() ? "" : evaluation.getFeedback().trim();
+       boolean isPublished = evaluation.getPublishedAt() != null;
+  %>
+  <section class="lx-card lx-done-card lx-enter" data-lx-done aria-labelledby="lx-final-title-<%= rid %>">
+    <div class="lx-done__hero">
+      <svg class="lx-done__mark" viewBox="0 0 52 52" aria-hidden="true">
+        <circle class="lx-done__circle" cx="26" cy="26" r="23" fill="none" stroke-width="2.5"/>
+        <path class="lx-check" d="M15 27l7 7 15-16" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <% if (isPublished) { %>
+        <h2 class="lx-done__title" id="lx-final-title-<%= rid %>" data-i18n="instructor.evaluations.resultPublished">Result published</h2>
+        <p class="lx-card__sub" data-i18n="instructor.evaluations.studentCanSee">The student can now see the verified result.</p>
+        <% } else { %>
+        <h2 class="lx-done__title" id="lx-final-title-<%= rid %>" data-i18n="instructor.evaluations.statusSaved">Evaluation saved</h2>
+        <% } %>
+      </div>
+    </div>
+    <div class="lx-done">
+      <p class="lx-done__score"><%= evaluation.getScore() %> <small>/ 100</small></p>
+      <% if (savedFeedback.isEmpty()) { %>
+      <p class="lx-quote lx-quote--empty" data-i18n="instructor.evaluations.noFeedbackSaved">No written feedback was saved.</p>
+      <% } else { %>
+      <p class="lx-quote"><%= escapeHtml(savedFeedback) %></p>
+      <% } %>
+    </div>
+    <div class="lx-done__next">
+      <% if (nextHref != null) { %>
+      <div class="lx-done__upnext">
+        <small data-i18n="instructor.evaluations.nextLabel">Next</small>
+        <strong><%= escapeHtml(nextName) %> · <span data-i18n="instructor.evaluations.attemptLabel" data-i18n-n="<%= nextAttempt %>">Attempt <%= nextAttempt %></span></strong>
+      </div>
+      <% } %>
+      <div class="lx-actions">
+        <a class="lx-btn lx-btn--ghost" href="?session=<%= escapeHtml(sessionIdValue) %>">
+          <svg class="lx-i-dir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="instructor.evaluations.backToStudents">Back to students</span>
+        </a>
+        <% if (nextHref != null) { %>
+        <a class="lx-btn lx-btn--primary" href="<%= escapeHtml(nextHref) %>">
+          <span data-i18n="instructor.evaluations.openNextAttempt">Open next attempt</span>
+          <svg class="lx-i-dir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <% } %>
+      </div>
+    </div>
+  </section>
+  <% } else { %>
+  <form method="post" action="<%= request.getContextPath() %>/instructor/evaluations" class="lx-card lx-final lx-enter" id="<%= evalFormId %>" data-lx-eval-form data-focus-count="<%= studentFocusCount %>" aria-labelledby="lx-final-title-<%= rid %>">
+    <input type="hidden" name="recitationId" value="<%= rid %>"/>
+    <input type="hidden" name="sessionId" value="<%= escapeHtml(sessionIdValue) %>"/>
+    <input type="hidden" name="action" value="save" data-action-input/>
+    <div class="lx-final__head">
+      <p class="lx-final__eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.9-7 9.5-4.1-1.6-7-5.3-7-9.5V6z" stroke-linejoin="round"/></svg>
+        <span data-i18n="instructor.evaluations.decisionEyebrow">Instructor decision</span>
+      </p>
+      <h2 class="lx-card__title" id="lx-final-title-<%= rid %>" data-i18n="instructor.evaluations.finalEvaluation">Final instructor evaluation</h2>
+      <p class="lx-card__sub" data-i18n="instructor.evaluations.finalEvaluationSub">The score and feedback you publish are what the student sees. The suggested score is advisory.</p>
+    </div>
+    <div class="lx-final__grid">
+      <div class="lx-final__score">
+        <label class="lx-label" for="score-<%= rid %>" data-i18n="instructor.evaluations.finalScoreLabel">Final score</label>
+        <div class="lx-score-input">
+          <input class="lx-input" id="score-<%= rid %>" type="number" name="score" min="0" max="100" required inputmode="numeric" dir="ltr"/>
+          <span aria-hidden="true">/ 100</span>
+        </div>
+        <% if (aiSuggests) { %>
+        <p class="lx-final__hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z" stroke-linejoin="round"/></svg>
+          <span data-i18n="instructor.evaluations.aiSuggestion">AI suggestion</span>
+          <b dir="ltr"><%= analysis.getScore() %>/100</b>
+          <span class="lx-final__hint-tag" data-i18n="instructor.evaluations.advisoryPill">Advisory</span>
+        </p>
+        <% } %>
+      </div>
+      <div>
+        <label class="lx-label" for="feedback-<%= rid %>" data-i18n="instructor.evaluations.feedbackForStudent">Feedback for the student</label>
+        <textarea class="lx-input" id="feedback-<%= rid %>" name="feedback" rows="4" data-i18n="instructor.evaluations.feedbackPlaceholder" data-i18n-attr="placeholder" placeholder="What went well, and what to practise next."></textarea>
+      </div>
+    </div>
+    <div class="lx-final__foot">
+      <% if (publishBlockKey != null) { %>
+      <p class="lx-gate" id="<%= gateId %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 017 0v3" stroke-linecap="round"/></svg>
+        <span data-i18n="instructor.evaluations.<%= publishBlockKey %>" data-i18n-count="<%= pendingFindingCount %>"><%= escapeHtml(publishBlockText) %></span>
+      </p>
+      <% } else { %>
+      <p class="lx-gate lx-gate--ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.3l2.4 2.4 4.6-4.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <% if (findingTotal > 0) { %>
+        <span data-i18n="instructor.evaluations.readyToPublish">Findings are verified. You can save and publish the result.</span>
+        <% } else { %>
+        <span data-i18n="instructor.evaluations.publishReadyNoFindings">Add a score and feedback, then publish.</span>
+        <% } %>
+      </p>
+      <% } %>
+      <button type="submit" data-ai-save class="lx-btn lx-btn--primary lx-btn--lg lx-btn--publish"<%= publishBlockKey != null ? " disabled aria-describedby=\"" + gateId + "\"" : "" %>>
+        <span class="lx-btn__spinner" aria-hidden="true"></span>
+        <svg class="lx-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M4.5 12L20 4.5 16 20l-4.2-6.3L4.5 12z" stroke-linejoin="round"/><path d="M11.8 13.7L20 4.5" stroke-linecap="round"/></svg>
+        <span data-i18n="instructor.evaluations.saveAndPublish">Save &amp; Publish Result</span>
+      </button>
+    </div>
+  </form>
+  <% } %>
+</article>

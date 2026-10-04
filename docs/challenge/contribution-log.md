@@ -1,0 +1,35 @@
+# Contribution Log
+
+Only work actually performed during the challenge development period is recorded here as challenge contribution.
+
+Pre-challenge functionality stays in the baseline documents. Planned work stays in the development plan until it is done.
+
+## Challenge progression
+
+The public release records three days of challenge work. The table below is the evidence. It is not a second log.
+
+**Day 1 — Foundation.** The challenge environment was isolated. A session stores a structured Qur'an passage. Comparison uses a trusted reference, Arabic normalization, and deterministic finding types. Analysis and findings are stored. AI explains those findings. It does not invent the mushaf text. Missing input fails safely.
+
+**Day 2 — Verification and automation.** The instructor accepts, edits, rejects, or adds each finding. Unpublished findings do not reach the learner. A published review becomes Verified Learning Focus, and Practice Again starts the next attempt. Analysis runs in the background, with job recovery. Speech-to-text is ElevenLabs Scribe v2. The comparison text is Quranpedia Hafs.
+
+**Day 3 — Public release.** The learner and instructor experience, validation, and documentation under `docs/` were finished. Public screenshots use synthetic accounts. Private images, the packaged baseline export, and the competition presentation stay out of this repository.
+
+The rows below were written as the work landed. The Commit column was left empty at the time. This file is part of the public-release commit. The status text "not pushed" describes that earlier state.
+
+## Log
+
+| Date | Time | Task | Files changed | Description | Commit | Evidence | Status |
+|---|---|---|---|---|---|---|---|
+| 2026-10-02 | — | Phase 0 schema | `setup/etasmi_schema.sql`, `setup/railway_schema.sql`, `setup/module_ai_learning_loop_patch.sql`, `DBSeeder.java` | Added analysis, finding, publication, and attempt columns. No `learning_focus` table. | | Schema present in the challenge database | Implemented, not pushed |
+| 2026-10-02 | — | Phase 1 trusted reference | `RecitationReferenceService`, `QuranFoundationReferenceProvider`, session passage fields | A session stores surah and ayah range. The comparison text comes from Quran Foundation `text_uthmani`. | | Reference source recorded on analysis rows | Implemented, not pushed |
+| 2026-10-02 | — | Phase 2 comparison | `RecitationComparisonEngine`, `ArabicComparisonSelfCheck` | Findings are computed in Java from the trusted text. Orthographic variants produce zero findings. | | Self-check, 32 checks, 0 failures | Implemented, not pushed |
+| 2026-10-02 | — | Phase 3 persistence | `RecitationAnalysisDao`, `RecitationFindingDao`, instructor evaluations reload | Analysis and findings survive refresh. A new analysis does not erase the previous one. | | Instructor page reloads the latest stored analysis | Implemented, not pushed |
+| 2026-10-02 | — | Phase 4 verification gate | `FindingVerificationService`, `EvaluationService`, `evaluations.jsp` | Accept, edit, reject, and instructor-added findings. Publish is refused while any finding is pending. | | Pending publish on recitation 9 was refused | Implemented, not pushed |
+| 2026-10-02 | — | Phase 5 learning focus and Practice Again | `VerifiedLearningFocusService`, `recitation-result.jsp`, `RecitationService` | Published reviews show verified focus. Practice Again links a new recitation on the same enrollment. Attempt number is 1 plus the enrollment maximum. | | Recitations 9 and 10 parent 8, attempts 2 and 3. Student IDOR returns 404 | Implemented, not pushed |
+| 2026-10-02 | — | Phase 6 safe-failure states | `evaluations.jsp`, `validation.md` | Reference-unavailable and failed analysis have separate instructor cards. A missing reference creates no findings and no generated Qur'an text. Manual scoring still publishes. | | V-01 through V-06 Passed | Implemented, not pushed |
+| 2026-10-03 | 06:12 | Stale analysis job recovery | `RecitationAnalysisJobRecovery`, `RecitationAutoAnalysisService`, `RecitationDaoJdbc`, `RecitationAutoAnalysisExecutor` | Startup reconciliation retries MySQL, requeues stale retryable leases (not only first-run), abandons other stale leases. | | Recitation 16 recovered: analysis 27 OK, job COMPLETED | Implemented, not pushed |
+| 2026-10-03 | 06:13 | Full HTTP E2E of the learning loop | (runtime only) | Accept/Edit/Reject/Add, pending publish block, student leak/IDOR, Practice Again parent 18→19 attempt 7, auto ElevenLabs+QF analysis 28 | | `docs/challenge/validation.md` E2E-01–E2E-10 | Implemented, not pushed |
+| 2026-10-03 | 06:31 | Final edge-case live validation | `docs/challenge/validation.md` | Silence, STT-reachable short tone, and English non-Qur'an speech. No code change; outcomes matched the contract. | | Recitations 20–22; V-09, V-10, V-11 Passed | Validated, not pushed |
+| 2026-10-03 | 09:12 | Master E2E refinement | Instructor review JSPF/CSS, student result/history, `RecitationAiAnalysisService`, `EvaluationService`, `RecitationAnalysisJobRecovery`, `RecitationReferenceService`, `QuranPassageDisplay`, locales en/ar/ms | Honest comparison title, publish-ready copy, first-PENDING selection, 60s QF negative cache, stored-reference fallback, surah-name display, STT stamp on failed transcript, student publish notification, COMPLETED-without-analysis reclaim, phase-correct pending copy + bounded refresh, missing ar/ms keys | | Rebuild + E2E-10–16: self-check 32/0; rec 16 published + notification 59; rec 24 `stt_provider=elevenlabs`; IDOR 404; no Jasper | Implemented, not pushed |
+| 2026-10-03 | 09:22 | Quranpedia trusted reference | `QuranpediaReferenceProvider`, `RecitationReferenceService`, `LearningLoopPublicationPolicy`, instructor review label, `VerifiedLearningFocusService` | Learning Loop comparison text is Quranpedia Hafs `text`. Quran Foundation stays on the student library. OK publication requires `reference_source=QURANPEDIA`. | | Recitation 25 analysis 34; evaluation 17; Practice Again recitation 26 analysis 35; outage recitation 27 analysis 36 `REFERENCE_UNAVAILABLE` | Implemented, not pushed |
+| 2026-10-03 | 09:47 | Publish a REJECTED analysis | `LearningLoopPublicationPolicy` | A `REJECTED` analysis can be published when the session has a structured range and no finding is pending. It is not retried, and it does not require `reference_source=QURANPEDIA`. `FAILED` and `CANNOT_EVALUATE` stay unpublishable. | | Recitation 22 evaluation 18 score 41; retry refused; student result hid the transcript; recitation 20 still unpublished | Implemented, not pushed |

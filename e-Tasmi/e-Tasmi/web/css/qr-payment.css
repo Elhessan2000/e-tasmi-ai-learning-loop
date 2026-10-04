@@ -208,15 +208,20 @@ body.student-premium-page .qrpay-page {
 
 .qrpay-qr__frame {
   position: relative;
-  display: inline-grid;
+  display: grid;
   place-items: center;
   padding: 16px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-  width: 100%;
+  width: min(100%, 312px);
+  max-width: 312px;
+  aspect-ratio: 1;
+  overflow: hidden;
   box-sizing: border-box;
+  justify-self: center;
+  flex: 0 0 auto;
 }
 
 /* Soft green corner accents to read like a payment terminal frame */
@@ -235,11 +240,13 @@ body.student-premium-page .qrpay-page {
 
 .qrpay-qr__img {
   width: 100%;
-  max-width: 280px;
-  height: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   aspect-ratio: 1;
   display: block;
   object-fit: contain;
+  object-position: center;
   background: #ffffff;
 }
 
@@ -656,8 +663,9 @@ body.student-premium-page .qrpay-page {
 }
 
 @media (max-width: 560px) {
-  .qrpay-qr__frame { padding: 14px; border-radius: 16px; }
-  .qrpay-qr__img { max-width: 240px; }
+  body.student-premium-page .qrpay-page .qrpay-qr__frame,
+  .qrpay-qr__frame { width: min(100%, 240px); max-width: 240px; padding: 14px; border-radius: 16px; }
+  .qrpay-qr__img { max-width: 100%; max-height: 100%; }
   .qrpay-steps { gap: 4px 6px; }
   .qrpay-step { font-size: 0.68rem; }
 
@@ -910,4 +918,45 @@ html[data-theme="dark"] .qrpay-page .qrpay-poweredby {
 
 html[data-theme="dark"] .qrpay-page .qrpay-poweredby strong {
   color: #86efac;
+}
+
+/* Receipt preview must not stretch the payment card or the QR frame. */
+body.student-premium-page .qrpay-page .qrpay-card--pay,
+body.student-premium-page .qrpay-page .qrpay-upload-form,
+body.student-premium-page .qrpay-page .qrpay-receipt-preview {
+  min-width: 0;
+  max-width: 100%;
+}
+
+body.student-premium-page .qrpay-page .qrpay-qr {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+body.student-premium-page .qrpay-page .qrpay-qr__frame {
+  overflow: hidden;
+}
+
+body.student-premium-page .qrpay-page .qrpay-receipt-preview__thumb {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  flex: 0 0 60px;
+  overflow: hidden;
+}
+
+body.student-premium-page .qrpay-page .qrpay-receipt-preview__thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  object-position: center;
 }

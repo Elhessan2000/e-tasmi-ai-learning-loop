@@ -15,7 +15,8 @@
 --
 -- Usage (Docker Compose):
 --   Get-Content e-Tasmi/setup/reset_operational_data_for_testing.sql -Raw |
---     docker exec -i etasmi-db mysql -uetasmi -petasmi123 etasmi
+--     docker exec -i etasmi-db mysql -uetasmi -p etasmi
+-- The database password is the local Compose value in docker-compose.yml. It is not printed here.
 
 USE etasmi;
 

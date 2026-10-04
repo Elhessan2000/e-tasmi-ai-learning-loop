@@ -3,13 +3,14 @@
 -- Prerequisite: an admin user admin@etasmi.com must exist (DBSeeder).
 --
 -- From host (Docker):
---   docker compose exec -T db mysql -u etasmi -petasmi123 etasmi < e-Tasmi/setup/seed_qademo_student.sql
+--   docker compose exec -T db mysql -u etasmi -p etasmi < e-Tasmi/setup/seed_qademo_student.sql
+-- The database password is the local Compose value in docker-compose.yml. It is not printed here.
 -- Or: paste into phpMyAdmin / MySQL client.
 --
 -- Login after run:
 --   Email:    qademo.student@etasmi.local
---   Password: Admin123!
--- (Same password as admin@etasmi.com and the other demo users in sample_data.sql.)
+--   Password: the bootstrap admin password (DBSeeder, or ETASMI_BOOTSTRAP_ADMIN_PASSWORD).
+-- It is not printed in this file. Same hash as admin@etasmi.com and sample_data.sql.
 -- ---------------------------------------------------------------------------
 
 USE etasmi;

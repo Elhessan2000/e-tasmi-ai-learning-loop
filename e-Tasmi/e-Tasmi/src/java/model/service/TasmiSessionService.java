@@ -16,6 +16,9 @@ import model.entity.SessionRecordingStatus;
 import model.entity.StudentLevel;
 import model.entity.TasmiSession;
 import model.entity.TasmiSessionStatus;
+import model.service.quran.QuranPassageRange;
+import model.service.quran.RecitationReferenceService;
+import model.service.quran.TrustedReferenceResult;
 import util.Db;
 import util.ZoomApiClient;
 
@@ -82,13 +85,13 @@ public class TasmiSessionService {
 
     public List<TasmiSession> listStudentScheduledSessions() {
         try (Connection connection = Db.getConnection()) {
-            LocalDate today = LocalDate.now(util.DateTimeFormats.appZone());
+            Instant now = Instant.now();
             List<TasmiSession> visibleSessions = new ArrayList<>();
             for (TasmiSession session : tasmiSessionDao.listByStatus(connection, TasmiSessionStatus.SCHEDULED)) {
                 if (session == null || !isVisibleToStudents(session) || !isActiveApprovedInstructor(connection, session)) {
                     continue;
                 }
-                if (session.getSessionDate() != null && session.getSessionDate().isBefore(today)) {
+                if (!isUpcoming(session, now)) {
                     continue;
                 }
                 visibleSessions.add(session);
@@ -112,9 +115,13 @@ public class TasmiSessionService {
             combined.addAll(tasmiSessionDao.listByStatus(connection, TasmiSessionStatus.ONGOING));
             combined.addAll(tasmiSessionDao.listByStatus(connection, TasmiSessionStatus.SCHEDULED));
 
+            Instant now = Instant.now();
             Map<Long, TasmiSession> uniqueById = new LinkedHashMap<>();
             for (TasmiSession session : combined) {
                 if (session == null || !isVisibleToStudents(session) || !isActiveApprovedInstructor(connection, session)) {
+                    continue;
+                }
+                if (session.getStatus() == TasmiSessionStatus.SCHEDULED && !isUpcoming(session, now)) {
                     continue;
                 }
                 uniqueById.put(session.getSessionId(), session);
@@ -142,6 +149,9 @@ public class TasmiSessionService {
                                                   LocalTime time,
                                                   Integer durationMinutes,
                                                   String quranPortion,
+                                                  Integer surahNumber,
+                                                  Integer ayahStart,
+                                                  Integer ayahEnd,
                                                   BigDecimal fee,
                                                   int capacity) {
         if (level == null) {
@@ -150,6 +160,10 @@ public class TasmiSessionService {
         ValidationResult validation = validateSessionInput(title, date, time, durationMinutes, fee, capacity);
         if (!validation.valid) {
             return TasmiSessionCreateResult.failure(validation.message);
+        }
+        String passageError = QuranPassageRange.validate(surahNumber, ayahStart, ayahEnd);
+        if (passageError != null) {
+            return TasmiSessionCreateResult.failure(passageError);
         }
 
         try (Connection connection = Db.getConnection()) {
@@ -197,7 +211,7 @@ public class TasmiSessionService {
             session.setSessionDate(date);
             session.setSessionTime(time);
             session.setDurationMinutes(duration);
-            session.setQuranPortion(normalizeText(quranPortion));
+            applyStructuredPassage(session, quranPortion, surahNumber, ayahStart, ayahEnd);
             session.setMode(SessionMode.ONLINE);
             session.setFee(fee == null ? BigDecimal.ZERO : fee);
             session.setCapacity(capacity);
@@ -211,6 +225,7 @@ public class TasmiSessionService {
             session.setStatus(TasmiSessionStatus.SCHEDULED);
 
             long sessionId = tasmiSessionDao.insert(connection, session);
+            prefetchTrustedReference(surahNumber, ayahStart, ayahEnd);
             return TasmiSessionCreateResult.success(sessionId);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Failed to create tasmi session", ex);
@@ -227,6 +242,9 @@ public class TasmiSessionService {
                                        LocalTime time,
                                        Integer durationMinutes,
                                        String quranPortion,
+                                       Integer surahNumber,
+                                       Integer ayahStart,
+                                       Integer ayahEnd,
                                        BigDecimal fee,
                                        int capacity) {
         if (sessionId <= 0) {
@@ -238,6 +256,10 @@ public class TasmiSessionService {
         ValidationResult validation = validateSessionInput(title, date, time, durationMinutes, fee, capacity);
         if (!validation.valid) {
             return ServiceResult.fail(validation.message);
+        }
+        String passageError = QuranPassageRange.validate(surahNumber, ayahStart, ayahEnd);
+        if (passageError != null) {
+            return ServiceResult.fail(passageError);
         }
 
         try (Connection connection = Db.getConnection()) {
@@ -286,7 +308,7 @@ public class TasmiSessionService {
             session.setSessionDate(date);
             session.setSessionTime(time);
             session.setDurationMinutes(duration);
-            session.setQuranPortion(normalizeText(quranPortion));
+            applyStructuredPassage(session, quranPortion, surahNumber, ayahStart, ayahEnd);
             session.setMode(SessionMode.ONLINE);
             session.setFee(fee == null ? BigDecimal.ZERO : fee);
             session.setCapacity(capacity);
@@ -303,6 +325,7 @@ public class TasmiSessionService {
             }
 
             notifyEnrolledStudents(connection, sessionId, "A Tasmi session you are enrolled in has been updated. Please check the latest session details.");
+            prefetchTrustedReference(surahNumber, ayahStart, ayahEnd);
             return ServiceResult.ok();
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Failed to update tasmi session", ex);
@@ -350,6 +373,18 @@ public class TasmiSessionService {
             }
 
             TasmiSession existing = existingOpt.get();
+            if (existing.getStatus() != TasmiSessionStatus.SCHEDULED || isStarted(existing)) {
+                connection.rollback();
+                return ServiceResult.fail("Only a scheduled session that has not been started can be deleted.");
+            }
+            if (enrollmentDao.countOccupyingBySessionId(connection, sessionId) > 0) {
+                connection.rollback();
+                return ServiceResult.fail("This session cannot be deleted because students are enrolled in it.");
+            }
+            if (!releaseInactiveEnrollments(connection, sessionId)) {
+                connection.rollback();
+                return ServiceResult.fail("This session cannot be deleted because it is linked to enrollments or related records.");
+            }
             if (existing.getZoomMeetingId() != null && ZoomApiClient.isConfigured()) {
                 try {
                     new ZoomApiClient().deleteMeeting(existing.getZoomMeetingId());
@@ -370,6 +405,49 @@ public class TasmiSessionService {
             LOGGER.log(Level.SEVERE, "Failed to delete tasmi session", ex);
             return ServiceResult.fail(dbErrorToUserMessage(ex));
         }
+    }
+
+    /**
+     * Wall-clock start of a session in the application timezone.
+     * Session date and time are stored as local wall-clock values, not instants.
+     */
+    public static Instant scheduledStart(TasmiSession session) {
+        if (session == null || session.getSessionDate() == null || session.getSessionTime() == null) {
+            return null;
+        }
+        return java.time.LocalDateTime.of(session.getSessionDate(), session.getSessionTime())
+                .atZone(util.DateTimeFormats.appZone())
+                .toInstant();
+    }
+
+    /** The instructor has opened the live session. Completed sessions stay in that lifecycle. */
+    public static boolean isStarted(TasmiSession session) {
+        if (session == null || session.getStatus() == null) {
+            return false;
+        }
+        return session.getStatus() == TasmiSessionStatus.ONGOING
+                || session.getLiveStartedAt() != null;
+    }
+
+    /**
+     * Scheduled, not started, and the scheduled start is still strictly in the future.
+     * A session at exactly its start instant is no longer upcoming.
+     */
+    public static boolean isUpcoming(TasmiSession session, Instant now) {
+        if (session == null || now == null || session.getStatus() != TasmiSessionStatus.SCHEDULED || isStarted(session)) {
+            return false;
+        }
+        Instant start = scheduledStart(session);
+        return start != null && start.isAfter(now);
+    }
+
+    /** Scheduled, not started, and the scheduled start is now or in the past. The row is kept. */
+    public static boolean isMissed(TasmiSession session, Instant now) {
+        if (session == null || now == null || session.getStatus() != TasmiSessionStatus.SCHEDULED || isStarted(session)) {
+            return false;
+        }
+        Instant start = scheduledStart(session);
+        return start != null && !start.isAfter(now);
     }
 
     public ServiceResult startSession(long instructorUserId, long sessionId) {
@@ -642,6 +720,42 @@ public class TasmiSessionService {
                 && isValidMeetingLink(session.getMeetingLink());
     }
 
+    /**
+     * Rows that are not current students can still block the session foreign key.
+     * Remove cancelled or rejected enrollments, and pending or approved enrollments
+     * whose student account was removed, only when they have no recitation.
+     */
+    private boolean releaseInactiveEnrollments(Connection connection, long sessionId) throws SQLException {
+        String blocked = "SELECT COUNT(*) FROM enrollment e "
+                + "WHERE e.session_id = ? AND e.enrollment_status IN ('REJECTED','CANCELLED') "
+                + "AND EXISTS (SELECT 1 FROM recitation r WHERE r.enrollment_id = e.enrollment_id)";
+        try (PreparedStatement ps = connection.prepareStatement(blocked)) {
+            ps.setLong(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return false;
+                }
+            }
+        }
+        String sql = "DELETE FROM enrollment WHERE session_id = ? AND enrollment_status IN ('REJECTED','CANCELLED')";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, sessionId);
+            ps.executeUpdate();
+        }
+        String stale = "DELETE e FROM enrollment e "
+                + "JOIN student st ON st.student_id = e.student_id "
+                + "LEFT JOIN `user` u ON u.user_id = st.user_id "
+                + "WHERE e.session_id = ? "
+                + "AND e.enrollment_status IN ('PENDING','APPROVED') "
+                + "AND (u.user_id IS NULL OR u.status = 'DELETED') "
+                + "AND NOT EXISTS (SELECT 1 FROM recitation r WHERE r.enrollment_id = e.enrollment_id)";
+        try (PreparedStatement ps = connection.prepareStatement(stale)) {
+            ps.setLong(1, sessionId);
+            ps.executeUpdate();
+        }
+        return true;
+    }
+
     private boolean isVisibleToStudents(TasmiSession session) {
         if (session == null || session.getMode() != SessionMode.ONLINE) {
             return false;
@@ -822,6 +936,45 @@ public class TasmiSessionService {
             }
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Failed to notify enrolled students for session " + sessionId, ex);
+        }
+    }
+
+    private void applyStructuredPassage(TasmiSession session,
+                                        String quranPortion,
+                                        Integer surahNumber,
+                                        Integer ayahStart,
+                                        Integer ayahEnd) {
+        session.setSurahNumber(surahNumber);
+        session.setAyahStart(ayahStart);
+        session.setAyahEnd(ayahEnd);
+        String portion = normalizeText(quranPortion);
+        if ((portion == null || portion.isBlank()) && surahNumber != null && ayahStart != null && ayahEnd != null) {
+            portion = surahNumber + ":" + ayahStart + "–" + ayahEnd;
+        }
+        session.setQuranPortion(portion);
+    }
+
+    /**
+     * Warms the trusted-reference cache. Failures are logged and never fail the save.
+     * Does not log Arabic text.
+     */
+    private void prefetchTrustedReference(Integer surahNumber, Integer ayahStart, Integer ayahEnd) {
+        if (surahNumber == null || ayahStart == null || ayahEnd == null) {
+            return;
+        }
+        try {
+            TrustedReferenceResult result = RecitationReferenceService.getInstance()
+                    .fetch(surahNumber, ayahStart, ayahEnd);
+            if (result.isOk()) {
+                LOGGER.info("Trusted reference prefetch: reference_source="
+                        + result.getReference().getSource()
+                        + " verse_keys=" + result.getReference().getVerseKeys()
+                        + " length=" + result.getReference().getReferenceText().length());
+            } else {
+                LOGGER.warning("REFERENCE_UNAVAILABLE: " + result.getReason());
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "REFERENCE_UNAVAILABLE: prefetch failed", ex);
         }
     }
 

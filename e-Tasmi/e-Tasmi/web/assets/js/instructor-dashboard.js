@@ -231,14 +231,19 @@
       var startMs = s.startEpochMs;
       var endMs = s.endEpochMs;
 
-      // Auto-roll: if a SCHEDULED session has visibly slipped past its end-time
-      // (instructor never started it), or an ONGOING session has been over for
-      // more than ~30 min, ask the server for the next one immediately. This
-      // covers the gap between heartbeat polls so the dashboard never lingers.
-      if (endMs > 0) {
-        var pastBy = nowMs - endMs;
-        var rollAfter = (s.status === 'ONGOING') ? (30 * 60 * 1000) : 60 * 1000;
-        if (pastBy > rollAfter && !this._rollPending) {
+      // Auto-roll: a scheduled session leaves the countdown at its start time
+      // when the instructor has not started it. A live session rolls only after
+      // it has overrun its planned end. The server chooses the next session.
+      var rollAfter = -1;
+      var pastBy = 0;
+      if (s.status === 'ONGOING' && endMs > 0) {
+        pastBy = nowMs - endMs;
+        rollAfter = 30 * 60 * 1000;
+      } else if (s.status !== 'ONGOING' && startMs > 0) {
+        pastBy = nowMs - startMs;
+        rollAfter = 0;
+      }
+      if (rollAfter >= 0 && pastBy >= rollAfter && !this._rollPending) {
           this._rollPending = true;
           var self = this;
           if (Heartbeat && typeof Heartbeat.tick === 'function') {
@@ -246,7 +251,6 @@
           }
           // Allow another roll attempt after 20s if heartbeat hasn't replaced us yet.
           setTimeout(function () { self._rollPending = false; }, 20000);
-        }
       }
 
       // State machine

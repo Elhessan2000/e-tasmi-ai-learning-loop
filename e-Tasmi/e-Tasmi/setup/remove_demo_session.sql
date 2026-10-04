@@ -2,7 +2,8 @@
 -- Safe to re-run: targets only sessions titled exactly "Demo Tasmi Session".
 --
 -- Docker:
---   Get-Content e-Tasmi\setup\remove_demo_session.sql | docker exec -i etasmi-db mysql -uetasmi -petasmi123 etasmi
+--   Get-Content e-Tasmi\setup\remove_demo_session.sql | docker exec -i etasmi-db mysql -uetasmi -p etasmi
+-- The database password is the local Compose value in docker-compose.yml. It is not printed here.
 
 USE etasmi;
 

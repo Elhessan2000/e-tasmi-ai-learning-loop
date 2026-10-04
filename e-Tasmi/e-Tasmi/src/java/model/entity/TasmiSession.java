@@ -19,6 +19,10 @@ public class TasmiSession {
     private SessionMode mode;
     private Integer durationMinutes;
     private String quranPortion;
+    /** Structured passage; null on sessions created before Phase 1. */
+    private Integer surahNumber;
+    private Integer ayahStart;
+    private Integer ayahEnd;
     private BigDecimal fee;
     private int capacity;
     private TasmiSessionStatus status;
@@ -138,6 +142,30 @@ public class TasmiSession {
 
     public void setQuranPortion(String quranPortion) {
         this.quranPortion = quranPortion;
+    }
+
+    public Integer getSurahNumber() {
+        return surahNumber;
+    }
+
+    public void setSurahNumber(Integer surahNumber) {
+        this.surahNumber = surahNumber;
+    }
+
+    public Integer getAyahStart() {
+        return ayahStart;
+    }
+
+    public void setAyahStart(Integer ayahStart) {
+        this.ayahStart = ayahStart;
+    }
+
+    public Integer getAyahEnd() {
+        return ayahEnd;
+    }
+
+    public void setAyahEnd(Integer ayahEnd) {
+        this.ayahEnd = ayahEnd;
     }
 
     public BigDecimal getFee() {

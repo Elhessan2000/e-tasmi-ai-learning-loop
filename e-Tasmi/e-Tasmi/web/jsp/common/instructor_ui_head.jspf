@@ -32,7 +32,7 @@
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-sidebar-collapsed.css?v=20260614-lime5">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-page-headers.css?v=20260625-student-theme">
 <%-- Clean minimal shell — MUST load last so it wins the cascade --%>
-<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-figma-shell.css?v=20260625-rtl-logical">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-figma-shell.css?v=20261003-footer-shell2">
 <%-- Green sidebar override — loads after figma-shell to apply dark-emerald theme --%>
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/instructor-sidebar-green.css?v=20260625-rtl-border">
 <script defer src="<%= request.getContextPath() %>/assets/js/instructor-workspace.js?v=20260610-instructor-shell4"></script>

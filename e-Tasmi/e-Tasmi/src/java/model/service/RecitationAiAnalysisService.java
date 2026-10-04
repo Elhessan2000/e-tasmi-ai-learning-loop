@@ -1,5 +1,17 @@
 package model.service;
 
+import model.entity.RecitationAnalysis;
+import model.entity.RecitationFindingRecord;
+import model.service.analysis.ComparisonOutcome;
+import model.service.analysis.FindingAiStatus;
+import model.service.analysis.FindingType;
+import model.service.analysis.RecitationComparisonEngine;
+import model.service.analysis.RecitationFinding;
+import model.service.quran.TrustedReference;
+import model.service.stt.SpeechToTextProvider;
+import model.service.stt.SpeechToTextProviders;
+import model.service.stt.SpeechTranscript;
+
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -21,15 +33,22 @@ import java.util.logging.Logger;
  * AI-assisted Quran recitation evaluation.
  *
  * Pipeline:
- *   Step 1: transcribeAudio()    -> OpenAI speech-to-text (json format)
+ *   Step 1: selected SpeechToTextProvider (OpenAI by default, ElevenLabs when STT_PROVIDER=elevenlabs)
  *   Step 2: aiEvaluateRecitation -> Single GPT call that (a) classifies Quran vs non-Quran
  *                                   while knowing the expected passage, (b) produces the full
  *                                   instructor-facing evaluation report (correct / missing /
  *                                   incorrect / extra words, pronunciation notes, score,
  *                                   summary, feedback, matched-passage note).
  *
+ * Structured mode (a trusted reference is supplied): the word-level findings are computed
+ * deterministically in Java by {@code RecitationComparisonEngine} against the trusted Uthmani
+ * text, each carrying a verse key and word position, and the model is reduced to explaining
+ * them. No Qur'an text originates from the model in this mode, and the diff needs no API key.
+ * Without a trusted reference the legacy label-based behaviour below is used unchanged.
+ *
  * Fallbacks:
  *   - Empty transcript                          -> CANNOT_EVALUATE
+ *   - Structured passage without trusted text   -> REFERENCE_UNAVAILABLE (findings withheld)
  *   - LLM says NOT Quran with confidence >=0.85 -> REJECTED
  *   - LLM call fails                            -> local word-diff fallback (still useful)
  *
@@ -73,18 +92,47 @@ public class RecitationAiAnalysisService {
             .build();
 
     public enum Status {
-        OK,              // Evaluation succeeded (may include "different passage" note).
-        REJECTED,        // High-confidence non-Quran content (song, noise, random speech, etc.).
-        CANNOT_EVALUATE, // Empty transcript / upstream failure.
-        FAILED           // Misconfiguration or bad input.
+        OK,                     // Evaluation succeeded (may include "different passage" note).
+        REJECTED,               // High-confidence non-Quran content (song, noise, random speech, etc.).
+        CANNOT_EVALUATE,        // Empty transcript / upstream failure.
+        REFERENCE_UNAVAILABLE,  // Session has a structured passage but its trusted text could not be retrieved.
+        FAILED                  // Misconfiguration or bad input.
     }
 
     // =============================================================================================
     // Public entry point
     // =============================================================================================
 
+    /**
+     * Legacy entry point: no structured passage on the session, so the free-text
+     * {@code quran_portion} label is the only expected text available.
+     */
     public AnalysisResult analyze(String expectedText, byte[] mediaBytes, String mediaFileName) {
-        String normalizedExpected = trimToNull(expectedText);
+        return analyze(null, expectedText, mediaBytes, mediaFileName);
+    }
+
+    /**
+     * The session carries a structured passage but its trusted text could not be retrieved.
+     * No comparison is attempted and no Qur'an text is produced; the instructor can still
+     * evaluate manually.
+     */
+    public AnalysisResult referenceUnavailable(String reason) {
+        return AnalysisResult.referenceUnavailable(reason);
+    }
+
+    /**
+     * @param reference     trusted passage. When present it is the only source of Qur'an text and
+     *                      the word-level findings are computed deterministically from it in Java;
+     *                      the model is reduced to explaining them. When {@code null} the legacy
+     *                      label-based behaviour is used unchanged.
+     * @param expectedLabel free-text {@code quran_portion} label, used only when
+     *                      {@code reference} is {@code null}
+     */
+    public AnalysisResult analyze(TrustedReference reference, String expectedLabel,
+                                  byte[] mediaBytes, String mediaFileName) {
+        String normalizedExpected = reference != null
+                ? trimToNull(reference.getReferenceText())
+                : trimToNull(expectedLabel);
         if (normalizedExpected == null) {
             return AnalysisResult.failed("Expected Quran text is required for AI analysis.");
         }
@@ -99,32 +147,37 @@ public class RecitationAiAnalysisService {
             return AnalysisResult.failed("Recitation file is too large for transcription. Keep it under 25MB.");
         }
 
-        String apiKey = trimToNull(System.getenv("OPENAI_API_KEY"));
-        if (apiKey == null) {
-            return AnalysisResult.failed(
-                    "OPENAI_API_KEY is not configured. Add it in your environment to enable AI analysis.");
+        SpeechToTextProvider stt = SpeechToTextProviders.select();
+        if (!stt.configured()) {
+            return AnalysisResult.failed(stt.unavailableReason());
         }
+        String apiKey = trimToNull(System.getenv("OPENAI_API_KEY"));
 
-        // -------- Step 1: Transcription --------
-        TranscriptionResult tr;
+        // -------- Step 1: Transcription (selected provider; no silent vendor swap) --------
+        SpeechTranscript tr;
         try {
-            tr = transcribeAudio(mediaBytes, mediaFileName, apiKey);
+            tr = stt.transcribe(mediaBytes, mediaFileName);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Transcription step failed", ex);
             return AnalysisResult.cannotEvaluate("Cannot transcribe audio (upstream error).");
         }
-        if (tr == null || !tr.ok) {
-            String reason = (tr == null || tr.reason == null) ? "Cannot transcribe audio." : tr.reason;
-            return AnalysisResult.cannotEvaluate(reason);
+        if (tr == null || !tr.isOk()) {
+            String reason = (tr == null || tr.getFailureReason() == null)
+                    ? "Cannot transcribe audio." : tr.getFailureReason();
+            return stamp(AnalysisResult.cannotEvaluate(reason), stt, true, false);
         }
-        if (trimToNull(tr.transcript) == null) {
-            return AnalysisResult.cannotEvaluate("No speech was detected in the audio.");
+        if (trimToNull(tr.getText()) == null) {
+            return stamp(AnalysisResult.cannotEvaluate("No speech was detected in the audio."), stt, true, false);
+        }
+
+        if (reference != null) {
+            return analyzeAgainstTrustedReference(reference, tr.getText(), apiKey, stt);
         }
 
         // -------- Step 2: AI-assisted evaluation (classification + report in one pass) --------
         AiReport report;
         try {
-            report = aiEvaluateRecitation(normalizedExpected, tr.transcript, apiKey);
+            report = aiEvaluateRecitation(normalizedExpected, tr.getText(), apiKey);
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "AI evaluator failed; falling back to local diff.", ex);
             report = null;
@@ -132,7 +185,7 @@ public class RecitationAiAnalysisService {
 
         if (report == null) {
             // AI is unreachable / invalid response: still deliver a useful report using the local diff.
-            return buildFallbackResult(normalizedExpected, tr.transcript);
+            return stamp(buildFallbackResult(normalizedExpected, tr.getText()), stt, true, false);
         }
 
         // REJECTION gate — depends ONLY on the "is it Quran audio at all?" signal.
@@ -146,13 +199,13 @@ public class RecitationAiAnalysisService {
             String reason = (trimToNull(report.reasonIfNotQuran) != null)
                     ? report.reasonIfNotQuran
                     : "This audio does not appear to be a Quran recitation.";
-            return AnalysisResult.rejected(reason)
-                    .withTranscript(tr.transcript, normalizedExpected);
+            return stamp(AnalysisResult.rejected(reason)
+                    .withTranscript(tr.getText(), normalizedExpected), stt, true, true);
         }
 
         // Defensive: if the AI returned nonsense (empty on every list and score<=0), fall back.
         if (isEffectivelyEmpty(report)) {
-            return buildFallbackResult(normalizedExpected, tr.transcript);
+            return stamp(buildFallbackResult(normalizedExpected, tr.getText()), stt, true, false);
         }
 
         // Accuracy% for the existing UI derives from the AI's own word lists.
@@ -178,8 +231,8 @@ public class RecitationAiAnalysisService {
             }
         }
 
-        return AnalysisResult.ok(
-                tr.transcript,
+        return stamp(AnalysisResult.ok(
+                tr.getText(),
                 normalizedExpected,
                 accuracyPercent,
                 nonNull(report.correctWords),
@@ -196,7 +249,393 @@ public class RecitationAiAnalysisService {
                 report.mixedPassages,
                 nonNull(report.detectedPassages),
                 nullOr(report.referenceText)
-        );
+        ), stt, true, true);
+    }
+
+    // =============================================================================================
+    // Structured mode — deterministic findings from the trusted reference
+    //
+    // The Java diff is the ONLY source of word-level findings. The model never sees a request to
+    // produce a diff and its output is never used as Qur'an text, so a model error cannot invent
+    // or alter the reference. If the model call fails the findings are still returned.
+    // =============================================================================================
+
+    private AnalysisResult analyzeAgainstTrustedReference(TrustedReference reference,
+                                                         String transcript,
+                                                         String apiKey,
+                                                         SpeechToTextProvider stt) {
+        ComparisonOutcome comparison = RecitationComparisonEngine.compare(reference, transcript);
+        if (!comparison.isAvailable()) {
+            return stamp(AnalysisResult.referenceUnavailable(
+                    "The trusted Qur'an reference contained no comparable text, so the comparison was withheld."),
+                    stt, true, false);
+        }
+
+        ExplanationReport report;
+        try {
+            report = aiExplainFindings(reference, transcript, comparison, apiKey);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Explanation step failed; returning deterministic findings only.", ex);
+            report = null;
+        }
+
+        // Rejection depends ONLY on "is this Quran audio at all?", never on passage mismatch.
+        if (report != null
+                && !report.isQuran
+                && report.isQuranConfidence >= NON_QURAN_REJECTION_CONFIDENCE
+                && size(report.detectedPassages) == 0) {
+            String reason = trimToNull(report.reasonIfNotQuran) != null
+                    ? report.reasonIfNotQuran
+                    : "This audio does not appear to be a Quran recitation.";
+            return stamp(AnalysisResult.rejected(reason).withTranscript(transcript, reference.getReferenceText()),
+                    stt, true, true);
+        }
+
+        boolean matchesPassage = report == null || report.matchesExpectedPassage;
+        ComparisonOutcome finalComparison;
+        String passageNote;
+
+        if (matchesPassage) {
+            finalComparison = attachExplanations(comparison, report);
+            passageNote = report != null && trimToNull(report.matchedPassageNote) != null
+                    ? report.matchedPassageNote
+                    : "Recitation compared against the trusted reference.";
+        } else {
+            // Word-level diffing against the wrong passage is noise, so it is withheld.
+            String mismatchNote = (trimToNull(report.matchedPassageNote) != null
+                    ? report.matchedPassageNote + " "
+                    : "This recitation does not match the assigned passage. ")
+                    + "Word-level findings were withheld because comparing against the wrong passage "
+                    + "produces false mistakes. Listen to the recording and evaluate manually, or correct "
+                    + "the session passage and analyze again.";
+            finalComparison = comparison.asPassageMismatch(mismatchNote);
+            passageNote = mismatchNote;
+        }
+
+        finalComparison = finalComparison.withAdditionalFindings(pronunciationFindings(report));
+
+        double accuracy = comparison.getAccuracyPercent();
+        int score = report == null ? (int) Math.round(accuracy) : clampScore(report.score);
+
+        String summary = report == null
+                ? String.format(Locale.US,
+                        "Deterministic comparison against the trusted reference. Accuracy %.1f%%. "
+                                + "AI explanations were unavailable.", accuracy)
+                : nullOr(report.summary);
+        if (!matchesPassage && trimToNull(summary) != null
+                && !summary.toLowerCase(Locale.ROOT).startsWith("passage mismatch")) {
+            summary = "Passage mismatch — " + summary;
+        } else if (!matchesPassage && trimToNull(summary) == null) {
+            summary = "Passage mismatch — this submission does not match the expected passage.";
+        }
+
+        String feedback = report == null
+                ? buildDeterministicFeedback(finalComparison, score)
+                : nullOr(report.feedback);
+
+        List<RecitationFinding> findings = finalComparison.getFindings();
+
+        // Verse keys, counts and types only. Qur'an text is never logged.
+        LOGGER.info("Deterministic comparison: reference_source=" + reference.getSource()
+                + " verse_keys=" + reference.getVerseKeys()
+                + " " + comparison.countsLabel()
+                + " reported_findings=" + findings.size()
+                + " explained=" + (report == null ? "no" : "yes")
+                + " matches_passage=" + matchesPassage);
+
+        return stamp(AnalysisResult.ok(
+                transcript,
+                reference.getReferenceText(),
+                accuracy,
+                finalComparison.getCorrectWords(),
+                wordsOf(findings, FindingType.MISSING_WORD),
+                wordsOf(findings, FindingType.EXTRA_WORD),
+                wordsOf(findings, FindingType.INCORRECT_WORD),
+                feedback,
+                score,
+                summary,
+                passageNote,
+                report == null ? List.of() : nonNull(report.pronunciationNotes),
+                report == null ? 0.0 : report.isQuranConfidence,
+                matchesPassage,
+                report != null && report.mixedPassages,
+                report == null ? List.of() : nonNull(report.detectedPassages),
+                reference.getReferenceText()
+        ).withStructuredFindings(findings, reference.getSource(), reference.getVerseKeys()),
+                stt, true, report != null);
+    }
+
+    /** Applies the model's per-index explanations, falling back to a template for any it omitted. */
+    private ComparisonOutcome attachExplanations(ComparisonOutcome comparison, ExplanationReport report) {
+        List<RecitationFinding> source = comparison.getFindings();
+        List<RecitationFinding> explained = new ArrayList<>(source.size());
+        for (int index = 0; index < source.size(); index++) {
+            RecitationFinding finding = source.get(index);
+            String explanation = report == null ? null : trimToNull(report.explanations.get(index));
+            if (explanation == null) {
+                explanation = defaultExplanation(finding);
+            }
+            explained.add(finding.withExplanation(explanation));
+        }
+        return comparison.withFindings(explained);
+    }
+
+    private String defaultExplanation(RecitationFinding finding) {
+        switch (finding.getType()) {
+            case MISSING_WORD:
+                return "This word of the assigned passage was not heard in the recitation.";
+            case INCORRECT_WORD:
+                return "A different word was heard where the assigned passage has this word.";
+            case EXTRA_WORD:
+                return "A word that is not part of the assigned passage was heard here.";
+            case PASSAGE_MISMATCH:
+                return "The recitation does not correspond to the assigned passage.";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Acoustic observations are advisory only: a transcript cannot prove a tajwid rule, so each
+     * one is recorded as an unverified observation for the instructor to confirm by listening.
+     */
+    private List<RecitationFinding> pronunciationFindings(ExplanationReport report) {
+        if (report == null || size(report.pronunciationNotes) == 0) {
+            return List.of();
+        }
+        List<RecitationFinding> advisory = new ArrayList<>();
+        for (String note : report.pronunciationNotes) {
+            String text = trimToNull(note);
+            if (text != null) {
+                advisory.add(RecitationFinding.pronunciationObservation(text));
+            }
+        }
+        return advisory;
+    }
+
+    private List<String> wordsOf(List<RecitationFinding> findings, FindingType type) {
+        List<String> words = new ArrayList<>();
+        for (RecitationFinding finding : findings) {
+            if (finding.getType() != type) {
+                continue;
+            }
+            if (type == FindingType.INCORRECT_WORD) {
+                words.add(finding.getExpectedText() + " -> " + finding.getHeardText());
+            } else if (type == FindingType.MISSING_WORD) {
+                words.add(finding.getExpectedText());
+            } else {
+                words.add(finding.getHeardText());
+            }
+        }
+        return words;
+    }
+
+    private String buildDeterministicFeedback(ComparisonOutcome comparison, int score) {
+        StringBuilder sb = new StringBuilder();
+        if (score >= 90) sb.append("Excellent recitation overall.");
+        else if (score >= 75) sb.append("Good recitation with a few noticeable issues.");
+        else if (score >= 50) sb.append("Partial match — several words differ and need practice.");
+        else sb.append("The recitation has many mismatches and needs significant practice.");
+        if (comparison.getMissingCount() > 0) {
+            sb.append(" Words not heard: ").append(comparison.getMissingCount()).append('.');
+        }
+        if (comparison.getIncorrectCount() > 0) {
+            sb.append(" Words heard differently: ").append(comparison.getIncorrectCount()).append('.');
+        }
+        if (comparison.getExtraCount() > 0) {
+            sb.append(" Extra words heard: ").append(comparison.getExtraCount()).append('.');
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Asks the model to explain findings that were already computed in Java. The model is not
+     * asked for a word diff and is not permitted to emit Qur'an text.
+     */
+    private ExplanationReport aiExplainFindings(TrustedReference reference,
+                                                String transcript,
+                                                ComparisonOutcome comparison,
+                                                String apiKey) throws Exception {
+        if (trimToNull(apiKey) == null) {
+            throw new IllegalStateException("OPENAI_API_KEY is not configured.");
+        }
+        String model = resolveEvaluatorModel();
+
+        String systemPrompt =
+                "You are an expert Quran (Qur'an) recitation evaluator for a Tasmi (Quran memorization) platform. " +
+                "You help an instructor grade a student's recitation.\n\n" +
+                "THE WORD-LEVEL COMPARISON IS ALREADY DONE. It was computed deterministically in software " +
+                "against a trusted, source-attributed Uthmani reference. You MUST NOT produce a word diff, and " +
+                "you MUST NOT add, remove, re-order, or re-judge any finding. Your only tasks are: explain each " +
+                "supplied finding, classify the audio, judge passage match, and write the summary, feedback and " +
+                "score.\n\n" +
+                "CRITICAL DISTINCTION — two independent signals:\n" +
+                "  (A) is_quran: Does the audio transcript consist of recitation from the Qur'an corpus (any surah, " +
+                "any ayah, any order, even mixed across surahs, even with errors)?\n" +
+                "  (B) matches_expected_passage: Does the recited content correspond to the specific passage the " +
+                "instructor asked the student to recite?\n" +
+                "These are INDEPENDENT. A student who recites Surah Al-Ikhlas when asked for Surah Al-Baqarah is " +
+                "still reciting Quran -> is_quran=true, matches_expected_passage=false.\n\n" +
+                "ZERO-GUESSING CONTRACT (highest priority — overrides everything below):\n" +
+                "  - Judge ONLY what is explicitly present in the supplied reference text, transcript and findings.\n" +
+                "  - Never describe a mistake that is not one of the supplied findings.\n" +
+                "  - If a rule cannot be verified with 100% certainty, mark it unverified rather than guessing.\n\n" +
+                "HARD RULES:\n" +
+                "1. Set is_quran=true whenever the recitation is from the Qur'an, EVEN IF:\n" +
+                "   - it is from a different surah than expected;\n" +
+                "   - it mixes ayāt from multiple surahs;\n" +
+                "   - the student made many mistakes;\n" +
+                "   - only partial verses are recited.\n" +
+                "2. Set is_quran=false ONLY when the content is CLEARLY NOT Qur'an: modern song lyrics or nasheeds, " +
+                "poetry, news, casual conversation, noise, silence, gibberish, or a du'a / adhan / hadith recited " +
+                "as such (not as Qur'an). Use high confidence (>=0.85) ONLY when you are certain.\n" +
+                "3. NEVER put reasoning like 'not from the expected surah' in reason_if_not_quran. That is a passage " +
+                "mismatch, not a non-Quran audio. In that case is_quran must remain true.\n" +
+                "4. The transcript comes from automatic speech recognition and MAY contain small ASR errors " +
+                "(missing diacritics, hamza variants, segmentation, occasional wrong letter). Orthographic " +
+                "differences have already been normalised away before the findings were computed.\n" +
+                "5. NEVER recite Quran from memory. The reference text supplied below is the single authoritative " +
+                "source of truth. Do NOT paraphrase, re-spell, re-diacritise, or 'correct' it, and do NOT output " +
+                "Qur'an text in any field of your response.\n" +
+                "6. explanations: return exactly one entry per supplied finding index. Each explanation is ONE " +
+                "short sentence for the instructor explaining what that finding means pedagogically. Do not " +
+                "restate the Arabic words and do not dispute the finding.\n" +
+                "7. detected_passages: 0-5 short human-readable labels for the passages detected in the transcript " +
+                "(e.g. 'Surah Al-Ikhlas 112:1-4', 'Surah Al-Kawthar 108:1-3'). Empty if unclear.\n" +
+                "8. mixed_passages=true only if detected_passages has 2+ distinct surahs.\n" +
+                "9. pronunciation_notes / tajwīd: a PLAIN TEXT TRANSCRIPT CANNOT prove acoustic rules " +
+                "(madd length, ghunna nasalisation, qalqala bounce, makhārij quality) — that information is " +
+                "lost in transcription. Therefore you MUST NOT assert any tajwīd verdict from the transcript " +
+                "alone. Only add a note when the transcript shows an unambiguous letter/word substitution; " +
+                "phrase every acoustic observation as unverified, e.g. \"unverified: possible madd issue at … " +
+                "— requires acoustic review\". When in doubt, leave pronunciation_notes empty.\n" +
+                "10. score 0-100 reflects accuracy and completeness against the reference, informed by the " +
+                "supplied counts. When matches_expected_passage=false, still score what the student recited.\n" +
+                "11. summary: 1 concise sentence for the instructor. If passage mismatch, say so up front.\n" +
+                "12. feedback: 2-4 actionable sentences for the student.\n" +
+                "13. Respond with STRICT JSON ONLY. No prose, no markdown, no code fences.";
+
+        StringBuilder findingLines = new StringBuilder();
+        List<RecitationFinding> findings = comparison.getFindings();
+        for (int index = 0; index < findings.size(); index++) {
+            RecitationFinding finding = findings.get(index);
+            findingLines.append(index).append(". type=").append(finding.getType().name())
+                    .append(" location=").append(finding.locationLabel());
+            if (finding.getExpectedText() != null) {
+                findingLines.append(" expected=\"").append(finding.getExpectedText()).append('"');
+            }
+            if (finding.getHeardText() != null) {
+                findingLines.append(" heard=\"").append(finding.getHeardText()).append('"');
+            }
+            findingLines.append('\n');
+        }
+        if (findings.isEmpty()) {
+            findingLines.append("(none — the recitation matched the reference word for word)\n");
+        }
+
+        String userPrompt =
+                "Trusted reference passage (" + reference.getSource() + ", verses "
+                        + reference.getVerseKeys() + ") — authoritative, do not reproduce:\n\"\"\"\n"
+                        + reference.getReferenceText() + "\n\"\"\"\n\n" +
+                "Student transcript (from ASR — may contain small errors):\n\"\"\"\n" + transcript + "\n\"\"\"\n\n" +
+                "Deterministic comparison counts: " + comparison.countsLabel() + "\n\n" +
+                "Findings already computed in software (explain these, do not change them):\n"
+                        + findingLines + "\n" +
+                "Return JSON with EXACTLY this schema:\n" +
+                "{\n" +
+                "  \"is_quran\": boolean,\n" +
+                "  \"is_quran_confidence\": number 0..1,\n" +
+                "  \"reason_if_not_quran\": string (empty if is_quran=true; NEVER mention passage/surah mismatch here),\n" +
+                "  \"matches_expected_passage\": boolean,\n" +
+                "  \"detected_passages\": string[],\n" +
+                "  \"mixed_passages\": boolean,\n" +
+                "  \"matched_passage_note\": string,\n" +
+                "  \"explanations\": [{ \"index\": integer, \"explanation\": string }],\n" +
+                "  \"pronunciation_notes\": string[],\n" +
+                "  \"score\": integer 0..100,\n" +
+                "  \"summary\": string,\n" +
+                "  \"feedback\": string\n" +
+                "}";
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("model", model);
+        body.put("temperature", 0);
+        body.put("top_p", 1);
+        body.put("seed", EVALUATOR_SEED);
+        body.put("response_format", Collections.singletonMap("type", "json_object"));
+        body.put("messages", Arrays.asList(
+                mapOf("role", "system", "content", systemPrompt),
+                mapOf("role", "user", "content", userPrompt)
+        ));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(CHAT_ENDPOINT))
+                .timeout(REQUEST_TIMEOUT)
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(MiniJson.stringify(body), StandardCharsets.UTF_8))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request,
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            LOGGER.log(Level.WARNING, "Explainer API returned status {0}", response.statusCode());
+            return null;
+        }
+
+        Object parsed = MiniJson.parse(response.body());
+        if (!(parsed instanceof Map)) return null;
+        @SuppressWarnings("unchecked")
+        Map<String, Object> root = (Map<String, Object>) parsed;
+        LOGGER.log(Level.INFO, "Explainer system_fingerprint={0}", asString(root.get("system_fingerprint")));
+
+        String content = extractAssistantContent(root);
+        if (content == null) return null;
+
+        Object payload;
+        try {
+            payload = MiniJson.parse(content);
+        } catch (Exception ex) {
+            LOGGER.warning("Explainer returned malformed JSON.");
+            return null;
+        }
+        if (!(payload instanceof Map)) return null;
+        @SuppressWarnings("unchecked")
+        Map<String, Object> p = (Map<String, Object>) payload;
+
+        ExplanationReport r = new ExplanationReport();
+        r.isQuran = asBool(p.get("is_quran"), true);
+        r.isQuranConfidence = Math.max(0.0, Math.min(1.0, asDouble(p.get("is_quran_confidence"), 0.0)));
+        r.reasonIfNotQuran = asString(p.get("reason_if_not_quran"));
+        r.matchesExpectedPassage = asBool(p.get("matches_expected_passage"), true);
+        r.mixedPassages = asBool(p.get("mixed_passages"), false);
+        r.detectedPassages = asStringList(p.get("detected_passages"));
+        r.matchedPassageNote = asString(p.get("matched_passage_note"));
+        r.pronunciationNotes = asStringList(p.get("pronunciation_notes"));
+        r.score = (int) Math.round(asDouble(p.get("score"), 0.0));
+        r.summary = asString(p.get("summary"));
+        r.feedback = asString(p.get("feedback"));
+        r.explanations = parseExplanations(p.get("explanations"));
+        return r;
+    }
+
+    private static Map<Integer, String> parseExplanations(Object value) {
+        Map<Integer, String> byIndex = new LinkedHashMap<>();
+        if (!(value instanceof List)) {
+            return byIndex;
+        }
+        for (Object entry : (List<?>) value) {
+            if (!(entry instanceof Map)) {
+                continue;
+            }
+            Map<?, ?> row = (Map<?, ?>) entry;
+            int index = (int) Math.round(asDouble(row.get("index"), -1));
+            String explanation = trimToNull(asString(row.get("explanation")));
+            if (index >= 0 && explanation != null) {
+                byIndex.put(index, explanation);
+            }
+        }
+        return byIndex;
     }
 
     private String buildPassageNote(AiReport r) {
@@ -224,12 +663,35 @@ public class RecitationAiAnalysisService {
     // Step 1 - Transcription
     // =============================================================================================
 
+    private static String resolveTranscriptionModel() {
+        String model = trimToNull(System.getenv("OPENAI_RECITATION_MODEL"));
+        return model == null ? DEFAULT_TRANSCRIPTION_MODEL : model;
+    }
+
+    private static String resolveEvaluatorModel() {
+        String model = trimToNull(System.getenv("OPENAI_EVALUATOR_MODEL"));
+        if (model == null) {
+            // Back-compat: honor the old env variable name if set.
+            model = trimToNull(System.getenv("OPENAI_CLASSIFIER_MODEL"));
+        }
+        return model == null ? DEFAULT_EVALUATOR_MODEL : model;
+    }
+
+    /** Records which calls actually succeeded. A failed call leaves its model null. */
+    private static AnalysisResult stamp(AnalysisResult result, SpeechToTextProvider stt,
+                                        boolean transcribed, boolean analyzed) {
+        if (result == null) {
+            return null;
+        }
+        return result.withProvenance(
+                transcribed && stt != null ? stt.id() : null,
+                transcribed && stt != null ? stt.model() : null,
+                analyzed ? resolveEvaluatorModel() : null);
+    }
+
     private TranscriptionResult transcribeAudio(byte[] mediaBytes, String mediaFileName, String apiKey)
             throws Exception {
-        String model = trimToNull(System.getenv("OPENAI_RECITATION_MODEL"));
-        if (model == null) {
-            model = DEFAULT_TRANSCRIPTION_MODEL;
-        }
+        String model = resolveTranscriptionModel();
         String safeFileName = trimToNull(mediaFileName);
         if (safeFileName == null) {
             safeFileName = "recitation.webm";
@@ -310,14 +772,10 @@ public class RecitationAiAnalysisService {
     // =============================================================================================
 
     private AiReport aiEvaluateRecitation(String expectedText, String transcript, String apiKey) throws Exception {
-        String model = trimToNull(System.getenv("OPENAI_EVALUATOR_MODEL"));
-        if (model == null) {
-            // Back-compat: honor the old env variable name if set.
-            model = trimToNull(System.getenv("OPENAI_CLASSIFIER_MODEL"));
+        if (trimToNull(apiKey) == null) {
+            throw new IllegalStateException("OPENAI_API_KEY is not configured.");
         }
-        if (model == null) {
-            model = DEFAULT_EVALUATOR_MODEL;
-        }
+        String model = resolveEvaluatorModel();
 
         String systemPrompt =
                 "You are an expert Quran (Qur'an) recitation evaluator for a Tasmi (Quran memorization) platform. " +
@@ -778,6 +1236,25 @@ public class RecitationAiAnalysisService {
         String feedback;
     }
 
+    /**
+     * Structured-mode model output. Deliberately has no word-list or reference-text fields:
+     * in structured mode the model cannot contribute Qur'an text or alter the diff.
+     */
+    private static final class ExplanationReport {
+        boolean isQuran;
+        double isQuranConfidence;
+        String reasonIfNotQuran;
+        boolean matchesExpectedPassage;
+        boolean mixedPassages;
+        List<String> detectedPassages;
+        String matchedPassageNote;
+        Map<Integer, String> explanations = new LinkedHashMap<>();
+        List<String> pronunciationNotes;
+        int score;
+        String summary;
+        String feedback;
+    }
+
     private static final class Comparison {
         final List<String> correctWords;
         final List<String> missingWords;
@@ -815,6 +1292,12 @@ public class RecitationAiAnalysisService {
         private final boolean mixedPassages;
         private final List<String> detectedPassages;
         private final String referenceText;
+        private final List<RecitationFinding> findings;
+        private final String referenceSource;
+        private final String referenceVerseKeys;
+        private final String sttProvider;
+        private final String sttModel;
+        private final String analysisModel;
 
         private AnalysisResult(Status status, String reason, String transcript, String expectedText,
                                double accuracyPercent, int score,
@@ -823,7 +1306,10 @@ public class RecitationAiAnalysisService {
                                String feedback, String summary, String matchedPassageNote,
                                List<String> pronunciationNotes, double isQuranConfidence,
                                boolean matchesExpectedPassage, boolean mixedPassages,
-                               List<String> detectedPassages, String referenceText) {
+                               List<String> detectedPassages, String referenceText,
+                               List<RecitationFinding> findings,
+                               String referenceSource, String referenceVerseKeys,
+                               String sttProvider, String sttModel, String analysisModel) {
             this.status = status;
             this.reason = reason;
             this.transcript = transcript;
@@ -843,6 +1329,12 @@ public class RecitationAiAnalysisService {
             this.mixedPassages = mixedPassages;
             this.detectedPassages = detectedPassages == null ? List.of() : List.copyOf(detectedPassages);
             this.referenceText = referenceText;
+            this.findings = findings == null ? List.of() : List.copyOf(findings);
+            this.referenceSource = referenceSource;
+            this.referenceVerseKeys = referenceVerseKeys;
+            this.sttProvider = sttProvider;
+            this.sttModel = sttModel;
+            this.analysisModel = analysisModel;
         }
 
         static AnalysisResult ok(String transcript, String expectedText, double accuracyPercent,
@@ -856,23 +1348,32 @@ public class RecitationAiAnalysisService {
             return new AnalysisResult(Status.OK, null, transcript, expectedText, accuracyPercent, score,
                     correctWords, missingWords, extraWords, replacedWords,
                     feedback, summary, matchedPassageNote, pronunciationNotes, isQuranConfidence,
-                    matchesExpectedPassage, mixedPassages, detectedPassages, referenceText);
+                    matchesExpectedPassage, mixedPassages, detectedPassages, referenceText,
+                    List.of(), null, null, null, null, null);
         }
 
         static AnalysisResult rejected(String reason) {
-            return new AnalysisResult(Status.REJECTED, reason, null, null, 0, 0,
-                    List.of(), List.of(), List.of(), List.of(), null, null, null, List.of(), 0.0,
-                    true, false, List.of(), null);
+            return statusOnly(Status.REJECTED, reason);
         }
         static AnalysisResult cannotEvaluate(String reason) {
-            return new AnalysisResult(Status.CANNOT_EVALUATE, reason, null, null, 0, 0,
-                    List.of(), List.of(), List.of(), List.of(), null, null, null, List.of(), 0.0,
-                    true, false, List.of(), null);
+            return statusOnly(Status.CANNOT_EVALUATE, reason);
         }
         static AnalysisResult failed(String reason) {
-            return new AnalysisResult(Status.FAILED, reason, null, null, 0, 0,
+            return statusOnly(Status.FAILED, reason);
+        }
+        /** Trusted reference missing: no findings, no score, and no Qur'an text of any kind. */
+        static AnalysisResult referenceUnavailable(String reason) {
+            String message = (reason == null || reason.isBlank())
+                    ? "The trusted Qur'an reference is unavailable, so the AI comparison was withheld. "
+                            + "No Qur'an text was generated by AI."
+                    : reason;
+            return statusOnly(Status.REFERENCE_UNAVAILABLE, message);
+        }
+
+        private static AnalysisResult statusOnly(Status status, String reason) {
+            return new AnalysisResult(status, reason, null, null, 0, 0,
                     List.of(), List.of(), List.of(), List.of(), null, null, null, List.of(), 0.0,
-                    true, false, List.of(), null);
+                    true, false, List.of(), null, List.of(), null, null, null, null, null);
         }
 
         /** Attach transcript/expected context so the UI can display them on failure cards too. */
@@ -882,7 +1383,37 @@ public class RecitationAiAnalysisService {
                     this.correctWords, this.missingWords, this.extraWords, this.replacedWords,
                     this.feedback, this.summary, this.matchedPassageNote, this.pronunciationNotes,
                     this.isQuranConfidence, this.matchesExpectedPassage, this.mixedPassages,
-                    this.detectedPassages, this.referenceText);
+                    this.detectedPassages, this.referenceText,
+                    this.findings, this.referenceSource, this.referenceVerseKeys,
+                    this.sttProvider, this.sttModel, this.analysisModel);
+        }
+
+        /** Attaches the deterministic findings and the attribution of the text they came from. */
+        AnalysisResult withStructuredFindings(List<RecitationFinding> findings,
+                                              String referenceSource, String referenceVerseKeys) {
+            return new AnalysisResult(this.status, this.reason, this.transcript, this.expectedText,
+                    this.accuracyPercent, this.score,
+                    this.correctWords, this.missingWords, this.extraWords, this.replacedWords,
+                    this.feedback, this.summary, this.matchedPassageNote, this.pronunciationNotes,
+                    this.isQuranConfidence, this.matchesExpectedPassage, this.mixedPassages,
+                    this.detectedPassages, this.referenceText,
+                    findings, referenceSource, referenceVerseKeys,
+                    this.sttProvider, this.sttModel, this.analysisModel);
+        }
+
+        /**
+         * Records the provider and models that actually produced this result.
+         * {@code analysisModel} is null when the explanation or evaluation call did not succeed.
+         */
+        AnalysisResult withProvenance(String sttProvider, String sttModel, String analysisModel) {
+            return new AnalysisResult(this.status, this.reason, this.transcript, this.expectedText,
+                    this.accuracyPercent, this.score,
+                    this.correctWords, this.missingWords, this.extraWords, this.replacedWords,
+                    this.feedback, this.summary, this.matchedPassageNote, this.pronunciationNotes,
+                    this.isQuranConfidence, this.matchesExpectedPassage, this.mixedPassages,
+                    this.detectedPassages, this.referenceText,
+                    this.findings, this.referenceSource, this.referenceVerseKeys,
+                    sttProvider, sttModel, analysisModel);
         }
 
         // --- New structured API ---
@@ -898,6 +1429,162 @@ public class RecitationAiAnalysisService {
         public boolean isMixedPassages() { return mixedPassages; }
         public List<String> getDetectedPassages() { return detectedPassages; }
         public String getReferenceText() { return referenceText; }
+
+        /**
+         * Deterministic findings, each addressable by verse key and word position. Empty in legacy
+         * mode and whenever the trusted reference was unavailable. Every entry is
+         * {@code PROPOSED} / {@code PENDING} until an instructor decides on it.
+         */
+        public List<RecitationFinding> getFindings() { return findings; }
+        /** Attribution of the compared text, e.g. {@code QURAN_FOUNDATION}. */
+        public String getReferenceSource() { return referenceSource; }
+        public String getReferenceVerseKeys() { return referenceVerseKeys; }
+        public boolean hasStructuredFindings() { return referenceSource != null; }
+        public String getSttProvider() { return sttProvider; }
+        public String getSttModel() { return sttModel; }
+        public String getAnalysisModel() { return analysisModel; }
+
+        /**
+         * Rebuilds a report from a persisted analysis so a refresh shows the same card.
+         * Correct words are count-only: the table stores how many matched, not their text.
+         * Word-level chips are rebuilt from the stored findings.
+         */
+        static AnalysisResult restored(RecitationAnalysis stored) {
+            Status status = Status.FAILED;
+            if (stored.getStatus() != null) {
+                try {
+                    status = Status.valueOf(stored.getStatus());
+                } catch (IllegalArgumentException ignored) {
+                    status = Status.FAILED;
+                }
+            }
+            List<RecitationFinding> findings = new ArrayList<>();
+            if (stored.getFindings() != null) {
+                for (RecitationFindingRecord record : stored.getFindings()) {
+                    RecitationFinding finding = toEngineFinding(record);
+                    if (finding != null) {
+                        findings.add(finding);
+                    }
+                }
+            }
+            int correctCount = stored.getCorrectWordCount() == null ? 0 : Math.max(0, stored.getCorrectWordCount());
+            List<String> correctWords = new ArrayList<>(correctCount);
+            for (int i = 0; i < correctCount; i++) {
+                correctWords.add("");
+            }
+            List<String> detected = splitStoredPassages(stored.getDetectedPassages());
+            List<String> pronunciation = new ArrayList<>();
+            for (RecitationFinding finding : findings) {
+                if (finding.getType() == FindingType.PRONUNCIATION_OBSERVATION
+                        && finding.getExplanation() != null) {
+                    pronunciation.add(finding.getExplanation());
+                }
+            }
+            boolean matches = stored.getMatchesExpectedPassage() == null || stored.getMatchesExpectedPassage();
+            String reason = status == Status.OK ? null : stored.getStatusReason();
+            return new AnalysisResult(
+                    status,
+                    reason,
+                    stored.getTranscript(),
+                    stored.getReferenceText(),
+                    stored.getAccuracyPercent() == null ? 0.0 : stored.getAccuracyPercent(),
+                    stored.getAiSuggestedScore() == null ? 0 : stored.getAiSuggestedScore(),
+                    correctWords,
+                    wordsOf(findings, FindingType.MISSING_WORD),
+                    wordsOf(findings, FindingType.EXTRA_WORD),
+                    wordsOf(findings, FindingType.INCORRECT_WORD),
+                    stored.getAiFeedback(),
+                    stored.getAiSummary(),
+                    stored.getMatchedPassageNote(),
+                    pronunciation,
+                    stored.getIsQuranConfidence() == null ? 0.0 : stored.getIsQuranConfidence(),
+                    matches,
+                    Boolean.TRUE.equals(stored.getMixedPassages()),
+                    detected,
+                    stored.getReferenceText(),
+                    findings,
+                    stored.getReferenceSource(),
+                    stored.getReferenceVerseKeys(),
+                    stored.getSttProvider(),
+                    stored.getSttModel(),
+                    stored.getAnalysisModel());
+        }
+
+        private static RecitationFinding toEngineFinding(RecitationFindingRecord record) {
+            if (record == null || record.getFindingType() == null) {
+                return null;
+            }
+            // Instructor-authored rows have no AI proposal. Rebuilding them as engine findings
+            // would put null labels into the report chips and crash List.copyOf.
+            if (record.getAiStatus() == FindingAiStatus.NOT_APPLICABLE) {
+                return null;
+            }
+            RecitationFinding finding;
+            int position = record.getWordPosition() == null ? 0 : record.getWordPosition();
+            switch (record.getFindingType()) {
+                case MISSING_WORD:
+                    finding = RecitationFinding.missingWord(record.getVerseKey(), position, record.getExpectedText());
+                    break;
+                case INCORRECT_WORD:
+                    finding = RecitationFinding.incorrectWord(record.getVerseKey(), position,
+                            record.getExpectedText(), record.getHeardText());
+                    break;
+                case EXTRA_WORD:
+                    finding = RecitationFinding.extraWord(record.getVerseKey(), record.getWordPosition(),
+                            record.getHeardText());
+                    break;
+                case PASSAGE_MISMATCH:
+                    finding = RecitationFinding.passageMismatch(record.getExplanation());
+                    break;
+                case PRONUNCIATION_OBSERVATION:
+                    finding = RecitationFinding.pronunciationObservation(record.getExplanation());
+                    break;
+                default:
+                    return null;
+            }
+            return record.getExplanation() == null ? finding : finding.withExplanation(record.getExplanation());
+        }
+
+        private static List<String> splitStoredPassages(String stored) {
+            if (stored == null || stored.isBlank()) {
+                return List.of();
+            }
+            List<String> passages = new ArrayList<>();
+            for (String part : stored.split(",\\s*")) {
+                if (!part.isBlank()) {
+                    passages.add(part);
+                }
+            }
+            return passages;
+        }
+
+        private static List<String> wordsOf(List<RecitationFinding> findings, FindingType type) {
+            List<String> words = new ArrayList<>();
+            for (RecitationFinding finding : findings) {
+                if (finding.getType() != type) {
+                    continue;
+                }
+                if (type == FindingType.INCORRECT_WORD) {
+                    String expected = finding.getExpectedText();
+                    String heard = finding.getHeardText();
+                    if (expected == null && heard == null) {
+                        continue;
+                    }
+                    words.add((expected == null ? "" : expected) + " -> " + (heard == null ? "" : heard));
+                } else if (type == FindingType.MISSING_WORD) {
+                    if (finding.getExpectedText() == null) {
+                        continue;
+                    }
+                    words.add(finding.getExpectedText());
+                } else {
+                    if (finding.getHeardText() == null) {
+                        continue;
+                    }
+                    words.add(finding.getHeardText());
+                }
+            }
+            return words;
+        }
 
         public Map<String, Object> toMap() {
             Map<String, Object> m = new LinkedHashMap<>();
@@ -921,6 +1608,9 @@ public class RecitationAiAnalysisService {
                     m.put("score", score);
                     m.put("accuracy_percent", accuracyPercent);
                     m.put("is_quran_confidence", isQuranConfidence);
+                    m.put("reference_source", referenceSource);
+                    m.put("reference_verse_keys", referenceVerseKeys);
+                    m.put("findings", findingsAsMaps());
                     break;
                 case REJECTED:
                     m.put("status", "rejected");
@@ -930,6 +1620,10 @@ public class RecitationAiAnalysisService {
                     m.put("status", "cannot_evaluate");
                     m.put("reason", reason);
                     break;
+                case REFERENCE_UNAVAILABLE:
+                    m.put("status", "reference_unavailable");
+                    m.put("reason", reason);
+                    break;
                 case FAILED:
                 default:
                     m.put("status", "failed");
@@ -937,6 +1631,23 @@ public class RecitationAiAnalysisService {
                     break;
             }
             return m;
+        }
+
+        private List<Map<String, Object>> findingsAsMaps() {
+            List<Map<String, Object>> list = new ArrayList<>(findings.size());
+            for (RecitationFinding finding : findings) {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("type", finding.getType().name());
+                m.put("verse_key", finding.getVerseKey());
+                m.put("word_position", finding.getWordPosition());
+                m.put("expected_text", finding.getExpectedText());
+                m.put("heard_text", finding.getHeardText());
+                m.put("explanation", finding.getExplanation());
+                m.put("ai_status", finding.getAiStatus().name());
+                m.put("instructor_status", finding.getInstructorStatus().name());
+                list.add(m);
+            }
+            return list;
         }
 
         // --- Legacy getters (kept for the existing JSP) ---

@@ -879,7 +879,7 @@ body.instructor-package-page .instructor-shell-topbar__brand-label {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--et-text);
+  color: var(--et-text) !important;
   white-space: nowrap;
 }
 
@@ -1172,4 +1172,135 @@ body.instructor-package-page .instructor-shell-profilemenu__item--danger:hover s
   right: auto;
   inset-inline-start: -4px;
   inset-inline-end: auto;
+}
+
+/* ── Dark theme: the shell tokens follow the shared --theme-* palette ───── */
+html[data-theme="dark"] {
+  background-color: var(--theme-bg, #0b1220);
+}
+
+html[data-theme="dark"] body.instructor-package-page {
+  --et-canvas:   var(--theme-bg, #0b1220);
+  --et-surface:  var(--theme-surface, #111b32);
+  --et-text:     var(--theme-text, #e6eaf3);
+  --et-muted:    #9aabbd;
+  --et-hover-bg: rgba(255, 255, 255, 0.06);
+  --et-border:   var(--theme-border, #1f2c48);
+  --et-shadow:   0 4px 12px -4px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] body.instructor-package-page .instructor-shell-topbar,
+html[data-theme="dark"] body.instructor-package-page.instructor-module-page .instructor-shell-topbar,
+html[data-theme="dark"] body.instructor-dashboard-page.instructor-package-page .instructor-shell-topbar {
+  background: rgba(11, 18, 32, 0.82) !important;
+  border-bottom: 1px solid var(--theme-border, #1f2c48) !important;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 8px 24px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Shared instructor shell: footer closes short pages and follows long ones. */
+html:has(body.instructor-package-page) {
+  overflow-x: hidden;
+}
+
+body.instructor-package-page.instructor-module-page,
+body.instructor-dashboard-page.instructor-package-page {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body.instructor-package-page.instructor-module-page .app-shell,
+body.instructor-dashboard-page.instructor-package-page .app-shell {
+  height: auto !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+body.instructor-package-page.instructor-module-page .app-main,
+body.instructor-dashboard-page.instructor-package-page .app-main {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+  width: auto !important;
+  max-width: calc(100vw - var(--et-sidebar-w)) !important;
+  box-sizing: border-box !important;
+}
+
+body.instructor-package-page .container.sd-container.instructor-workspace-shell,
+body.instructor-package-page .instructor-shell-layout,
+body.instructor-package-page .instructor-shell-content {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 0 auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.instructor-package-page .instructor-shell-content {
+  padding-bottom: 0 !important;
+}
+
+body.instructor-package-page .instructor-shell-content > .footer {
+  position: static !important;
+  top: auto !important;
+  bottom: auto !important;
+  margin-top: auto !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body.instructor-package-page,
+html[data-theme="dark"] body.instructor-package-page .app-shell,
+html[data-theme="dark"] body.instructor-package-page .app-main,
+html[data-theme="dark"] body.instructor-package-page .instructor-shell-content,
+html[data-theme="dark"] body.instructor-package-page .instructor-shell-content > .footer {
+  background: var(--theme-bg, #0b1220) !important;
+}
+
+html[data-theme="dark"] body.instructor-package-page .instructor-shell-content > .footer {
+  color: var(--theme-text-muted, #9aabbd) !important;
+  border-top: 1px solid var(--theme-border, #1f2c48) !important;
+}
+
+/* Drawer widths: the desktop sidebar offset must not keep squeezing the column. */
+@media (max-width: 1100px) {
+  body.instructor-package-page .app-main,
+  body.instructor-package-page.instructor-module-page .app-main,
+  body.instructor-dashboard-page.instructor-package-page .app-main {
+    margin-left: unset !important;
+    margin-right: unset !important;
+    margin-inline-start: 0 !important;
+    margin-inline-end: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1101px) {
+  body.instructor-package-page.instructor-nav-collapsed .app-main {
+    max-width: calc(100vw - var(--et-rail-w)) !important;
+  }
+}
+
+body.instructor-package-page.instructor-module-page .container.sd-container.instructor-workspace-shell,
+body.instructor-package-page.instructor-module-page .instructor-shell-layout,
+body.instructor-package-page.instructor-module-page .instructor-shell-content,
+body.instructor-dashboard-page.instructor-package-page .container.sd-container.instructor-workspace-shell,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-layout,
+body.instructor-dashboard-page.instructor-package-page .instructor-shell-content {
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }

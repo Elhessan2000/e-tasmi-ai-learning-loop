@@ -11,6 +11,11 @@ public interface UserDao {
     Optional<User> findById(Connection connection, long userId) throws SQLException;
 
     /**
+     * Loads a user even after an admin soft-delete. Login and normal lookups stay on {@link #findById}.
+     */
+    Optional<User> findAnyById(Connection connection, long userId) throws SQLException;
+
+    /**
      * Inserts a new user and returns the generated userId.
      */
     long insert(Connection connection, User user) throws SQLException;

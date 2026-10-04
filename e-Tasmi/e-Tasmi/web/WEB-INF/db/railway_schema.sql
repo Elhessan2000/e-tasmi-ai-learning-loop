@@ -21,6 +21,8 @@ SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS audit_log;
 DROP TABLE IF EXISTS evaluation;
+DROP TABLE IF EXISTS recitation_finding;
+DROP TABLE IF EXISTS recitation_analysis;
 DROP TABLE IF EXISTS recitation;
 DROP TABLE IF EXISTS attendance;
 DROP TABLE IF EXISTS session_material;
@@ -137,6 +139,9 @@ CREATE TABLE tasmi_session (
   session_time TIME NOT NULL,
   duration_minutes INT UNSIGNED NOT NULL DEFAULT 60,
   quran_portion VARCHAR(150) DEFAULT NULL,
+  surah_number TINYINT UNSIGNED DEFAULT NULL,
+  ayah_start SMALLINT UNSIGNED DEFAULT NULL,
+  ayah_end SMALLINT UNSIGNED DEFAULT NULL,
   mode ENUM('ONLINE','PHYSICAL') NOT NULL,
   fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   capacity INT UNSIGNED NOT NULL DEFAULT 1,
@@ -161,7 +166,13 @@ CREATE TABLE tasmi_session (
   CONSTRAINT fk_tasmi_session_instructor
     FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id)
     ON UPDATE CASCADE
-    ON DELETE RESTRICT
+    ON DELETE RESTRICT,
+  CONSTRAINT chk_tasmi_session_surah
+    CHECK (surah_number IS NULL OR (surah_number >= 1 AND surah_number <= 114)),
+  CONSTRAINT chk_tasmi_session_ayah_start
+    CHECK (ayah_start IS NULL OR ayah_start >= 1),
+  CONSTRAINT chk_tasmi_session_ayah_range
+    CHECK (ayah_start IS NULL OR ayah_end IS NULL OR ayah_start <= ayah_end)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE enrollment (
@@ -293,12 +304,21 @@ CREATE TABLE recitation (
   enrollment_id BIGINT UNSIGNED NOT NULL,
   audio_file_path VARCHAR(255) NOT NULL,
   submission_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  parent_recitation_id BIGINT UNSIGNED DEFAULT NULL,
+  attempt_number INT UNSIGNED NOT NULL DEFAULT 1,
+  analysis_job_state ENUM('NONE','IN_PROGRESS','COMPLETED') NOT NULL DEFAULT 'NONE',
+  analysis_job_started_at TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (recitation_id),
   KEY idx_recitation_enrollment (enrollment_id),
+  KEY idx_recitation_parent (parent_recitation_id),
   CONSTRAINT fk_recitation_enrollment
     FOREIGN KEY (enrollment_id) REFERENCES enrollment (enrollment_id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_recitation_parent
+    FOREIGN KEY (parent_recitation_id) REFERENCES recitation (recitation_id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
@@ -390,15 +410,105 @@ CREATE TABLE session_material (
     ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- AI Learning Loop: persisted recitation analysis and structured findings.
+-- One `recitation_analysis` row per analysis run (history is kept, rows are
+-- never overwritten). Findings belong to the run that produced them.
+-- ---------------------------------------------------------------------
+CREATE TABLE recitation_analysis (
+  analysis_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  recitation_id BIGINT UNSIGNED NOT NULL,
+  status ENUM('OK','REJECTED','CANNOT_EVALUATE','REFERENCE_UNAVAILABLE','FAILED') NOT NULL,
+  status_reason VARCHAR(500) DEFAULT NULL,
+  stt_provider VARCHAR(60) DEFAULT NULL,
+  stt_model VARCHAR(60) DEFAULT NULL,
+  analysis_model VARCHAR(60) DEFAULT NULL,
+  transcript TEXT DEFAULT NULL,
+  reference_source VARCHAR(60) DEFAULT NULL,
+  reference_verse_keys VARCHAR(255) DEFAULT NULL,
+  reference_text TEXT DEFAULT NULL,
+  matches_expected_passage TINYINT(1) DEFAULT NULL,
+  accuracy_percent DECIMAL(5,2) DEFAULT NULL,
+  ai_suggested_score INT DEFAULT NULL,
+  ai_summary TEXT DEFAULT NULL,
+  ai_feedback TEXT DEFAULT NULL,
+  matched_passage_note TEXT DEFAULT NULL,
+  correct_word_count SMALLINT UNSIGNED DEFAULT NULL,
+  is_quran_confidence DECIMAL(4,3) DEFAULT NULL,
+  mixed_passages TINYINT(1) DEFAULT NULL,
+  detected_passages VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (analysis_id),
+  KEY idx_recitation_analysis_recitation (recitation_id, created_at),
+  CONSTRAINT fk_recitation_analysis_recitation
+    FOREIGN KEY (recitation_id) REFERENCES recitation (recitation_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT chk_recitation_analysis_score
+    CHECK (ai_suggested_score IS NULL OR (ai_suggested_score >= 0 AND ai_suggested_score <= 100)),
+  CONSTRAINT chk_recitation_analysis_accuracy
+    CHECK (accuracy_percent IS NULL OR (accuracy_percent >= 0 AND accuracy_percent <= 100)),
+  CONSTRAINT chk_recitation_analysis_quran_confidence
+    CHECK (is_quran_confidence IS NULL OR (is_quran_confidence >= 0 AND is_quran_confidence <= 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- AI findings are advisory until an instructor decides. `instructor_status`
+-- is the verification gate: only ACCEPTED / EDITED / INSTRUCTOR_ADDED rows may
+-- ever reach a student. The AI columns are never overwritten by an edit; the
+-- instructor's version lives in the `instructor_*` columns beside them.
+CREATE TABLE recitation_finding (
+  finding_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  analysis_id BIGINT UNSIGNED NOT NULL,
+  recitation_id BIGINT UNSIGNED NOT NULL,
+  finding_type ENUM('MISSING_WORD','INCORRECT_WORD','EXTRA_WORD','PASSAGE_MISMATCH','PRONUNCIATION_OBSERVATION','OTHER') NOT NULL,
+  verse_key VARCHAR(12) DEFAULT NULL,
+  word_position SMALLINT UNSIGNED DEFAULT NULL,
+  expected_text VARCHAR(255) DEFAULT NULL,
+  heard_text VARCHAR(255) DEFAULT NULL,
+  explanation TEXT DEFAULT NULL,
+  ai_status ENUM('PROPOSED','NOT_APPLICABLE') NOT NULL DEFAULT 'PROPOSED',
+  ai_confidence DECIMAL(4,3) DEFAULT NULL,
+  instructor_status ENUM('PENDING','ACCEPTED','EDITED','REJECTED','INSTRUCTOR_ADDED') NOT NULL DEFAULT 'PENDING',
+  instructor_expected_text VARCHAR(255) DEFAULT NULL,
+  instructor_heard_text VARCHAR(255) DEFAULT NULL,
+  instructor_explanation TEXT DEFAULT NULL,
+  instructor_note TEXT DEFAULT NULL,
+  decided_by_instructor_id BIGINT UNSIGNED DEFAULT NULL,
+  decided_at TIMESTAMP NULL DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (finding_id),
+  KEY idx_finding_analysis (analysis_id),
+  KEY idx_finding_recitation_status (recitation_id, instructor_status),
+  KEY idx_finding_instructor (decided_by_instructor_id),
+  CONSTRAINT fk_finding_analysis
+    FOREIGN KEY (analysis_id) REFERENCES recitation_analysis (analysis_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_finding_recitation
+    FOREIGN KEY (recitation_id) REFERENCES recitation (recitation_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_finding_instructor
+    FOREIGN KEY (decided_by_instructor_id) REFERENCES instructor (instructor_id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
+  CONSTRAINT chk_finding_confidence
+    CHECK (ai_confidence IS NULL OR (ai_confidence >= 0 AND ai_confidence <= 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE evaluation (
   evaluation_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   recitation_id BIGINT UNSIGNED NOT NULL,
   instructor_id BIGINT UNSIGNED NOT NULL,
   score INT NOT NULL,
   feedback TEXT DEFAULT NULL,
+  analysis_id BIGINT UNSIGNED DEFAULT NULL,
+  published_at TIMESTAMP NULL DEFAULT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (evaluation_id),
   UNIQUE KEY uq_evaluation_recitation (recitation_id),
   KEY idx_evaluation_instructor (instructor_id),
+  KEY idx_evaluation_analysis (analysis_id),
   CONSTRAINT fk_evaluation_recitation
     FOREIGN KEY (recitation_id) REFERENCES recitation (recitation_id)
     ON UPDATE CASCADE
@@ -407,6 +517,10 @@ CREATE TABLE evaluation (
     FOREIGN KEY (instructor_id) REFERENCES instructor (instructor_id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
+  CONSTRAINT fk_evaluation_analysis
+    FOREIGN KEY (analysis_id) REFERENCES recitation_analysis (analysis_id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
   CONSTRAINT chk_evaluation_score CHECK (score >= 0 AND score <= 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

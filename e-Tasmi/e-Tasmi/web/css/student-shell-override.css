@@ -327,6 +327,22 @@ body.student-package-page .student-shell-topbar__brand-sub {
     display: none !important;
   }
 }
+@media (max-width: 480px) {
+  body.student-package-page .student-shell-topbar__inner {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+  body.student-package-page .student-shell-topbar__brandbar {
+    flex: 0 0 auto !important;
+    padding-inline: 0 !important;
+    gap: 8px !important;
+  }
+  body.student-package-page .student-shell-topbar__actions {
+    padding: 0 !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+}
 
 /* spacer */
 body.student-package-page .student-shell-topbar__spacer {
@@ -835,8 +851,15 @@ body.student-package-page .student-shell-sidebar__mobile-bar {
     transform: translateX(-100%) !important;
     transition: transform .25s cubic-bezier(.32,.72,.2,1) !important;
   }
+  [dir="rtl"] body.student-package-page .student-shell-sidebar {
+    left: auto !important;
+    right: 0 !important;
+    transform: translateX(100%) !important;
+  }
   body.student-package-page .student-shell-sidebar.is-open,
-  body.student-nav-open .student-shell-sidebar {
+  body.student-nav-open .student-shell-sidebar,
+  [dir="rtl"] body.student-package-page .student-shell-sidebar.is-open,
+  [dir="rtl"] body.student-nav-open .student-shell-sidebar {
     transform: translateX(0) !important;
   }
   /* Scrim */
@@ -994,3 +1017,69 @@ html[data-theme="dark"] .etasmi-bc__link        { color: #94a3b8; }
 html[data-theme="dark"] .etasmi-bc__link:hover   { color: #e2e8f0; background: rgba(255,255,255,.05); }
 html[data-theme="dark"] .etasmi-bc__sep          { color: #475569; }
 html[data-theme="dark"] .etasmi-bc__current      { color: #e2e8f0; }
+
+/* Shared student shell: the content column fills the viewport so the one
+   footer closes short pages and follows long pages. No fixed/absolute footer. */
+body.student-package-page.student-module-page .app-shell,
+body.student-dashboard-page.student-package-page .app-shell {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+}
+
+body.student-package-page.student-module-page .app-main,
+body.student-dashboard-page.student-package-page .app-main,
+body.student-package-page.student-module-page .container.sd-container.student-workspace-shell,
+body.student-dashboard-page.student-package-page .container.sd-container.student-workspace-shell {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+body.student-package-page.student-module-page .student-shell-layout,
+body.student-dashboard-page.student-package-page .student-shell-layout {
+  flex: 1 1 auto !important;
+  align-items: stretch !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  min-height: 0 !important;
+}
+
+body.student-package-page.student-module-page .student-shell-content,
+body.student-dashboard-page.student-package-page .student-shell-content {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100% !important;
+  min-width: 0 !important;
+}
+
+body.student-package-page.student-module-page .student-shell-content > .student-workspace-view,
+body.student-dashboard-page.student-package-page .student-shell-content > .student-workspace-view {
+  flex: 1 0 auto !important;
+}
+
+body.student-package-page.student-module-page .student-shell-content > .footer,
+body.student-dashboard-page.student-package-page .student-shell-content > .footer {
+  position: static !important;
+  margin-top: auto !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+}
+
+@media (min-width: 1101px) {
+  body.student-package-page.student-module-page .student-shell-content,
+  body.student-dashboard-page.student-package-page .student-shell-content {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  body.student-package-page.student-module-page .student-shell-content,
+  body.student-dashboard-page.student-package-page .student-shell-content {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}

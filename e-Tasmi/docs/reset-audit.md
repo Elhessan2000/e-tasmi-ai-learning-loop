@@ -1,3 +1,5 @@
+> **Historical note.** Current setup is Docker Compose, described in [../README.md](../README.md). This file records an older reset away from XAMPP. Do not follow it as the installation guide.
+
 # e-Tasmi Reset Notes
 
 ## What this reset does
@@ -73,8 +75,7 @@ The local MySQL container now contains demo records for:
 - one evaluation
 - one progress row
 
-Demo accounts use the same password as the seeded admin account:
-- `Admin123!`
+Demo accounts reuse the bootstrap admin password hash created by `DBSeeder`. The password is not printed in this note. Set `ETASMI_BOOTSTRAP_ADMIN_PASSWORD` in the ignored `.env` file to choose it locally.
 
 Demo emails:
 - `student.demo@etasmi.local`
@@ -87,10 +88,7 @@ This challenge copy is isolated from the original e-Tasmi installation.
 - phpMyAdmin: `http://localhost:8083/`
 - MySQL host port: `3317`
 
-phpMyAdmin login:
-- Host: `db`
-- Username: `etasmi`
-- Password: `etasmi123`
+phpMyAdmin uses the Compose database service. The local username and password live in `docker-compose.yml` and are not reprinted here.
 
 ## Recommended next rebuild order
 1. Repair instructor session actions and student enrollment flows end to end in the browser.

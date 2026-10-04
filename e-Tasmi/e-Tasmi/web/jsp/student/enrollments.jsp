@@ -5,7 +5,9 @@
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.time.Instant" %>
 <%@ page import="java.time.LocalDate" %>
+<%@ page import="model.service.TasmiSessionService" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="model.entity.TasmiSession" %>
 <%@ page import="model.entity.TasmiSessionStatus" %>
@@ -78,10 +80,11 @@
             if (s == null) {
                 continue;
             }
-            if (s.getStatus() == TasmiSessionStatus.COMPLETED) {
-                completedCards.add(card);
-            } else {
+            Instant now = Instant.now();
+            if (s.getStatus() == TasmiSessionStatus.ONGOING || TasmiSessionService.isUpcoming(s, now)) {
                 upcomingCards.add(card);
+            } else if (s.getStatus() == TasmiSessionStatus.COMPLETED || TasmiSessionService.isMissed(s, now)) {
+                completedCards.add(card);
             }
         }
     }

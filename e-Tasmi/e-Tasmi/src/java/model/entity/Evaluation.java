@@ -6,6 +6,8 @@ public class Evaluation {
     private long instructorId;
     private int score;
     private String feedback;
+    private Long analysisId;
+    private java.time.Instant publishedAt;
 
     public long getEvaluationId() {
         return evaluationId;
@@ -45,5 +47,21 @@ public class Evaluation {
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
+    }
+
+    public Long getAnalysisId() {
+        return analysisId;
+    }
+
+    public void setAnalysisId(Long analysisId) {
+        this.analysisId = analysisId;
+    }
+
+    public java.time.Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(java.time.Instant publishedAt) {
+        this.publishedAt = publishedAt;
     }
 }

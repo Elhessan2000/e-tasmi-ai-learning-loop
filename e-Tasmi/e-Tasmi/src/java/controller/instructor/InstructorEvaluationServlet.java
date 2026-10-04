@@ -17,12 +17,22 @@ import model.entity.EnrollmentStatus;
 import model.entity.Evaluation;
 import model.entity.Instructor;
 import model.entity.Recitation;
+import model.entity.RecitationAnalysis;
+import model.entity.RecitationFindingRecord;
 import model.entity.Student;
 import model.entity.TasmiSession;
 import model.entity.User;
+import model.entity.UserStatus;
 import model.service.EvaluationResult;
 import model.service.EvaluationService;
+import model.service.FindingVerificationService;
 import model.service.RecitationAiAnalysisService;
+import model.service.RecitationAnalysisService;
+import model.service.RecitationAutoAnalysisService;
+import model.service.analysis.FindingType;
+import model.service.quran.RecitationReferenceService;
+import model.service.quran.TrustedReference;
+import model.service.quran.TrustedReferenceResult;
 import util.Db;
 import util.LocalFileUtil;
 
@@ -59,11 +69,6 @@ import java.util.logging.Logger;
 public class InstructorEvaluationServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(InstructorEvaluationServlet.class.getName());
 
-    /** HTTP session attribute key for the latest AI analysis result per recitation (shown after Analyze). */
-    public static String aiAnalysisSessionKey(long recitationId) {
-        return "etasmi.aiAnalysis." + recitationId;
-    }
-
     private final EvaluationService evaluationService = new EvaluationService();
     private final EvaluationDao evaluationDao = new EvaluationDaoJdbc();
     private final EnrollmentDao enrollmentDao = new EnrollmentDaoJdbc();
@@ -71,7 +76,9 @@ public class InstructorEvaluationServlet extends HttpServlet {
     private final StudentDao studentDao = new StudentDaoJdbc();
     private final TasmiSessionDao tasmiSessionDao = new TasmiSessionDaoJdbc();
     private final UserDao userDao = new UserDaoJdbc();
-    private final RecitationAiAnalysisService recitationAiAnalysisService = new RecitationAiAnalysisService();
+    private final RecitationAnalysisService recitationAnalysisService = new RecitationAnalysisService();
+    private final FindingVerificationService findingVerificationService = new FindingVerificationService();
+    private final RecitationAutoAnalysisService autoAnalysisService = new RecitationAutoAnalysisService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -83,6 +90,8 @@ public class InstructorEvaluationServlet extends HttpServlet {
         // and is independent of the active/reviewed split.
         List<Map<String, Object>> rows = loadRecitationRows(userId);
         request.setAttribute("recitationRows", rows);
+        attachPersistedAnalyses(request, userId, rows);
+        queueLegacyAnalysisIfNeeded(userId, rows, request.getParameter("recitation"));
 
         // Load every session this instructor owns (including ones with zero
         // submissions) and bucket them into Active / Reviewed.
@@ -116,6 +125,15 @@ public class InstructorEvaluationServlet extends HttpServlet {
         } else if ("0".equals(reviewedFlash)) {
             request.setAttribute("success", "Session reopened for review.");
         }
+        String verified = request.getParameter("verified");
+        if ("1".equals(verified)) {
+            request.setAttribute("success", "Finding decision saved. It stays reversible until you save the evaluation.");
+        } else         if ("added".equals(verified)) {
+            request.setAttribute("success", "Your finding was added. It is already verified and does not block publication.");
+        }
+        if ("1".equals(request.getParameter("analysis_retry"))) {
+            request.setAttribute("success", "Analysis retry started. Refresh this page in a moment to see the updated report.");
+        }
 
         request.getRequestDispatcher("/jsp/instructor/evaluations.jsp").forward(request, response);
     }
@@ -140,8 +158,16 @@ public class InstructorEvaluationServlet extends HttpServlet {
         } catch (Exception ignored) {
         }
 
-        if ("analyze".equalsIgnoreCase(action)) {
-            handleAnalyze(request, response, userId, recitationId);
+        if ("accept_finding".equalsIgnoreCase(action)
+                || "edit_finding".equalsIgnoreCase(action)
+                || "reject_finding".equalsIgnoreCase(action)
+                || "add_finding".equalsIgnoreCase(action)) {
+            handleFindingAction(request, response, userId, recitationId, action);
+            return;
+        }
+
+        if ("analyze".equalsIgnoreCase(action) || "retry_analysis".equalsIgnoreCase(action)) {
+            handleRetryAnalysis(request, response, userId, recitationId);
             return;
         }
 
@@ -153,13 +179,18 @@ public class InstructorEvaluationServlet extends HttpServlet {
 
         String feedback = request.getParameter("feedback");
 
-        HttpSession httpSession = request.getSession(false);
         EvaluationResult result = evaluationService.evaluate(userId, recitationId, score, feedback);
         if (result.isSuccess()) {
-            if (httpSession != null) {
-                httpSession.removeAttribute(aiAnalysisSessionKey(recitationId));
+            StringBuilder target = new StringBuilder(request.getContextPath())
+                    .append("/instructor/evaluations?saved=1");
+            String sessionId = trimToNull(request.getParameter("sessionId"));
+            if (sessionId != null && sessionId.matches("\\d+")) {
+                target.append("&session=").append(sessionId);
             }
-            response.sendRedirect(request.getContextPath() + "/instructor/evaluations?saved=1");
+            if (recitationId > 0) {
+                target.append("&recitation=").append(recitationId);
+            }
+            response.sendRedirect(target.toString());
             return;
         }
 
@@ -225,88 +256,258 @@ public class InstructorEvaluationServlet extends HttpServlet {
         request.setAttribute("activeSessionGroups", activeGroups);
         request.setAttribute("reviewedSessionGroups", reviewedGroups);
         request.setAttribute("sessionGroups", allGroups);
+        attachPersistedAnalyses(request, userId, rows);
         request.getRequestDispatcher("/jsp/instructor/evaluations.jsp").forward(request, response);
     }
 
-    private void handleAnalyze(HttpServletRequest request, HttpServletResponse response, long userId, long recitationId) throws ServletException, IOException {
+    private void handleRetryAnalysis(HttpServletRequest request, HttpServletResponse response, long userId, long recitationId)
+            throws ServletException, IOException {
         if (recitationId <= 0) {
-            request.setAttribute("error", "Invalid recitation selected for AI analysis.");
+            request.setAttribute("error", "Invalid recitation selected for analysis retry.");
             forwardWithFreshGroups(request, response, userId);
             return;
         }
+        String error = autoAnalysisService.scheduleInstructorRetry(userId, recitationId);
+        if (error != null) {
+            request.setAttribute("error", error);
+            forwardWithFreshGroups(request, response, userId);
+            return;
+        }
+        StringBuilder target = new StringBuilder(request.getContextPath())
+                .append("/instructor/evaluations?analysis_retry=1");
+        String sessionId = trimToNull(request.getParameter("sessionId"));
+        if (sessionId != null && sessionId.matches("\\d+")) {
+            target.append("&session=").append(sessionId);
+        }
+        target.append("&recitation=").append(recitationId);
+        response.sendRedirect(target.toString());
+    }
 
-        List<Map<String, Object>> rows = loadRecitationRows(userId);
-        Recitation target = null;
-        String expectedText = null;
+    private void queueLegacyAnalysisIfNeeded(long instructorUserId, List<Map<String, Object>> rows, String recitationParam) {
+        long recitationId = 0;
+        try {
+            recitationId = Long.parseLong(recitationParam == null ? "" : recitationParam.trim());
+        } catch (Exception ignored) {
+        }
+        if (recitationId <= 0 || rows == null) {
+            return;
+        }
         for (Map<String, Object> row : rows) {
             Recitation recitation = row == null ? null : (Recitation) row.get("recitation");
             if (recitation != null && recitation.getRecitationId() == recitationId) {
-                target = recitation;
-                Object portion = row.get("quranPortion");
-                expectedText = portion == null ? null : trimToNull(String.valueOf(portion));
-                break;
+                if (row.get("evaluation") != null) {
+                    return;
+                }
+                autoAnalysisService.ensureQueuedIfMissing(recitationId);
+                return;
             }
         }
+    }
 
-        if (target == null) {
-            request.setAttribute("error", "You cannot analyze this recitation.");
-            forwardWithFreshGroups(request, response, userId);
-            return;
+    /** Loads the newest saved report for each recitation already scoped to this instructor. */
+    private void attachPersistedAnalyses(HttpServletRequest request, long userId, List<Map<String, Object>> rows) {
+        List<Long> ids = recitationIds(rows);
+        Map<Long, RecitationAiAnalysisService.AnalysisResult> reports =
+                recitationAnalysisService.loadLatestReports(userId, ids);
+        request.setAttribute("analysisByRecitationId", reports);
+        request.setAttribute("expectedTextByRecitationId", expectedTexts(rows, reports));
+
+        Map<Long, List<RecitationFindingRecord>> findingsByRecitationId = new HashMap<>();
+        for (Map.Entry<Long, RecitationAnalysis> entry
+                : recitationAnalysisService.loadLatestForRecitations(userId, ids).entrySet()) {
+            RecitationAnalysis stored = entry.getValue();
+            findingsByRecitationId.put(entry.getKey(),
+                    stored == null || stored.getFindings() == null ? List.of() : stored.getFindings());
         }
+        request.setAttribute("findingsByRecitationId", findingsByRecitationId);
+        attachDisplayVerses(request, rows);
+    }
 
-        if (expectedText == null) {
-            request.setAttribute("error", "This session has no expected Quran portion defined. Update the session before running AI analysis.");
-            forwardWithFreshGroups(request, response, userId);
-            return;
+    /**
+     * Display-only ayah bodies. Used when the stored verse-key range already matches the
+     * session. A failed fetch leaves the concatenated reference text in place.
+     * Only the evaluation that is open renders verses, so only that one is fetched.
+     */
+    private void attachDisplayVerses(HttpServletRequest request, List<Map<String, Object>> rows) {
+        @SuppressWarnings("unchecked")
+        Map<Long, RecitationAiAnalysisService.AnalysisResult> reports =
+                (Map<Long, RecitationAiAnalysisService.AnalysisResult>) request.getAttribute("analysisByRecitationId");
+        Map<Long, List<TrustedReference.Verse>> display = new HashMap<>();
+        String openRecitation = trimToNull(request.getParameter("recitation"));
+        if (openRecitation == null) {
+            openRecitation = trimToNull(request.getParameter("recitationId"));
         }
-
-        byte[] mediaBytes = readRecitationMedia(target.getAudioFilePath());
-        if (mediaBytes == null || mediaBytes.length == 0) {
-            request.setAttribute("error", "Recitation media is unavailable for AI analysis. Use a valid upload URL or local /uploads file.");
-            forwardWithFreshGroups(request, response, userId);
-            return;
+        if (reports != null && rows != null && openRecitation != null) {
+            for (Map<String, Object> row : rows) {
+                if (row == null) {
+                    continue;
+                }
+                Recitation recitation = (Recitation) row.get("recitation");
+                if (recitation == null || !openRecitation.equals(String.valueOf(recitation.getRecitationId()))) {
+                    continue;
+                }
+                RecitationAiAnalysisService.AnalysisResult analysis = reports.get(recitation.getRecitationId());
+                if (analysis == null || analysis.getStatus() != RecitationAiAnalysisService.Status.OK) {
+                    continue;
+                }
+                Integer surah = asInteger(row.get("surahNumber"));
+                Integer ayahStart = asInteger(row.get("ayahStart"));
+                Integer ayahEnd = asInteger(row.get("ayahEnd"));
+                if (surah == null || ayahStart == null || ayahEnd == null || ayahStart < 1 || ayahEnd < ayahStart) {
+                    continue;
+                }
+                String expectedKeys = surah + ":" + ayahStart + "-" + surah + ":" + ayahEnd;
+                if (!TrustedReference.SOURCE_QURANPEDIA.equals(analysis.getReferenceSource())
+                        || !expectedKeys.equals(analysis.getReferenceVerseKeys())) {
+                    continue;
+                }
+                try {
+                    TrustedReferenceResult referenceResult = RecitationReferenceService.getInstance()
+                            .fetch(surah, ayahStart, ayahEnd);
+                    if (referenceResult != null && referenceResult.isOk()
+                            && referenceResult.getReference() != null
+                            && expectedKeys.equals(referenceResult.getReference().getVerseKeys())) {
+                        display.put(recitation.getRecitationId(), referenceResult.getReference().getVerses());
+                    }
+                } catch (RuntimeException ex) {
+                    LOGGER.log(Level.WARNING, "Display verses unavailable for recitation {0}: {1}",
+                            new Object[]{recitation.getRecitationId(), ex.getClass().getSimpleName()});
+                }
+            }
         }
+        request.setAttribute("displayVersesByRecitationId", display);
+    }
 
-        String fileName = extractFileName(target.getAudioFilePath(), target.getRecitationId());
-        RecitationAiAnalysisService.AnalysisResult analysisResult =
-                recitationAiAnalysisService.analyze(expectedText, mediaBytes, fileName);
-
-        HttpSession analyzeSession = request.getSession(true);
-        analyzeSession.setAttribute(aiAnalysisSessionKey(recitationId), analysisResult);
-
-        RecitationAiAnalysisService.Status status = analysisResult.getStatus();
-        if (status == RecitationAiAnalysisService.Status.OK) {
-            request.setAttribute("success", "AI analysis generated. Review the report before confirming your final score.");
-        } else if (status == RecitationAiAnalysisService.Status.CANNOT_EVALUATE
-                || status == RecitationAiAnalysisService.Status.FAILED) {
-            // REJECTED already renders a dedicated status card in the JSP, so skip the top banner there.
-            request.setAttribute("error", analysisResult.getError());
+    private static Integer asInteger(Object value) {
+        if (value instanceof Integer) {
+            return (Integer) value;
         }
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        return null;
+    }
 
-        Map<Long, RecitationAiAnalysisService.AnalysisResult> analysisByRecitationId = new HashMap<>();
-        analysisByRecitationId.put(recitationId, analysisResult);
-        request.setAttribute("analysisByRecitationId", analysisByRecitationId);
-
-        Map<Long, String> expectedTextByRecitationId = new HashMap<>();
-        expectedTextByRecitationId.put(recitationId, expectedText);
-        request.setAttribute("expectedTextByRecitationId", expectedTextByRecitationId);
-
-        // Reuse the helper but with the same recitationRows we already loaded.
-        List<Map<String, Object>> allGroups = buildSessionGroupsForAllSessions(userId, rows);
-        List<Map<String, Object>> activeGroups = new ArrayList<>();
-        List<Map<String, Object>> reviewedGroups = new ArrayList<>();
-        for (Map<String, Object> group : allGroups) {
-            if (group.get("evaluationReviewedAt") != null) {
-                reviewedGroups.add(group);
+    /**
+     * Accept / Edit / Reject / Add. Each action is its own POST so the browser cannot
+     * publish by omitting a pending finding. Ownership, latest-analysis and freeze
+     * checks live in {@link FindingVerificationService}.
+     */
+    private void handleFindingAction(HttpServletRequest request, HttpServletResponse response,
+                                     long userId, long recitationId, String action)
+            throws ServletException, IOException {
+        EvaluationResult result;
+        boolean added = "add_finding".equalsIgnoreCase(action);
+        if (added) {
+            result = findingVerificationService.addInstructorFinding(
+                    userId,
+                    recitationId,
+                    parseFindingType(request.getParameter("findingType")),
+                    request.getParameter("verseKey"),
+                    parseOptionalInt(request.getParameter("wordPosition")),
+                    request.getParameter("instructorExpectedText"),
+                    request.getParameter("instructorHeardText"),
+                    request.getParameter("instructorExplanation"),
+                    request.getParameter("instructorNote"));
+        } else {
+            long findingId = 0;
+            try {
+                findingId = Long.parseLong(request.getParameter("findingId"));
+            } catch (Exception ignored) {
+            }
+            if ("accept_finding".equalsIgnoreCase(action)) {
+                result = findingVerificationService.accept(userId, findingId);
+            } else if ("edit_finding".equalsIgnoreCase(action)) {
+                result = findingVerificationService.edit(userId, findingId,
+                        request.getParameter("instructorExpectedText"),
+                        request.getParameter("instructorHeardText"),
+                        request.getParameter("instructorExplanation"),
+                        request.getParameter("instructorNote"));
             } else {
-                activeGroups.add(group);
+                result = findingVerificationService.reject(userId, findingId,
+                        request.getParameter("instructorNote"));
             }
         }
-        request.setAttribute("recitationRows", rows);
-        request.setAttribute("activeSessionGroups", activeGroups);
-        request.setAttribute("reviewedSessionGroups", reviewedGroups);
-        request.setAttribute("sessionGroups", allGroups);
-        request.getRequestDispatcher("/jsp/instructor/evaluations.jsp").forward(request, response);
+
+        if (result.isSuccess()) {
+            String redirect = request.getContextPath() + "/instructor/evaluations?verified="
+                    + (added ? "added" : "1");
+            String sessionId = trimToNull(request.getParameter("sessionId"));
+            if (sessionId != null) {
+                redirect += "&session=" + sessionId;
+            }
+            if (recitationId > 0) {
+                redirect += "&recitation=" + recitationId;
+            }
+            response.sendRedirect(redirect);
+            return;
+        }
+
+        request.setAttribute("error", result.getError());
+        forwardWithFreshGroups(request, response, userId);
+    }
+
+    private FindingType parseFindingType(String raw) {
+        String value = trimToNull(raw);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return FindingType.valueOf(value);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private Integer parseOptionalInt(String raw) {
+        String value = trimToNull(raw);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(value);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private List<Long> recitationIds(List<Map<String, Object>> rows) {
+        List<Long> ids = new ArrayList<>();
+        if (rows == null) {
+            return ids;
+        }
+        for (Map<String, Object> row : rows) {
+            Recitation recitation = row == null ? null : (Recitation) row.get("recitation");
+            if (recitation != null) {
+                ids.add(recitation.getRecitationId());
+            }
+        }
+        return ids;
+    }
+
+    private Map<Long, String> expectedTexts(List<Map<String, Object>> rows,
+                                            Map<Long, RecitationAiAnalysisService.AnalysisResult> reports) {
+        Map<Long, String> expected = new HashMap<>();
+        if (rows == null || reports == null) {
+            return expected;
+        }
+        for (Map<String, Object> row : rows) {
+            Recitation recitation = row == null ? null : (Recitation) row.get("recitation");
+            if (recitation == null) {
+                continue;
+            }
+            RecitationAiAnalysisService.AnalysisResult analysis = reports.get(recitation.getRecitationId());
+            if (analysis == null) {
+                continue;
+            }
+            String text = trimToNull(analysis.getExpectedText());
+            if (text == null) {
+                Object portion = row.get("quranPortion");
+                text = portion == null ? null : trimToNull(String.valueOf(portion));
+            }
+            expected.put(recitation.getRecitationId(), text);
+        }
+        return expected;
     }
 
     private List<Map<String, Object>> loadRecitationRows(long instructorUserId) {
@@ -330,19 +531,29 @@ public class InstructorEvaluationServlet extends HttpServlet {
                 Enrollment enrollment = loadEnrollment(connection, enrollmentCache, recitation.getEnrollmentId());
                 Student student = enrollment == null ? null : loadStudent(connection, studentCache, enrollment.getStudentId());
                 User user = student == null ? null : loadUser(connection, userCache, student.getUserId());
+                boolean accountRemoved = false;
+                if (user == null && student != null) {
+                    user = userDao.findAnyById(connection, student.getUserId()).orElse(null);
+                    accountRemoved = user == null || user.getStatus() == UserStatus.DELETED;
+                }
                 TasmiSession tasmiSession = enrollment == null ? null : loadSession(connection, sessionCache, enrollment.getSessionId());
                 Evaluation evaluation = evaluationDao.findByRecitationId(connection, recitation.getRecitationId()).orElse(null);
 
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("recitation", recitation);
                 row.put("evaluation", evaluation);
+                row.put("accountRemoved", Boolean.valueOf(accountRemoved));
                 row.put("studentName", displayStudentName(user));
                 row.put("studentIdentifier", displayStudentIdentifier(student, enrollment));
                 row.put("studentPhotoUrl", user == null ? null : trimToNull(user.getProfileImageUrl()));
                 row.put("studentInitials", initials(displayStudentName(user)));
                 row.put("studentId", student == null ? null : Long.valueOf(student.getStudentId()));
                 row.put("sessionTitle", tasmiSession == null ? null : trimToNull(tasmiSession.getTitle()));
-                row.put("quranPortion", tasmiSession == null ? null : trimToNull(tasmiSession.getQuranPortion()));
+                row.put("quranPortion", tasmiSession == null ? null : trimToNull(
+                        model.service.quran.QuranPassageDisplay.format(tasmiSession)));
+                row.put("surahNumber", tasmiSession == null ? null : tasmiSession.getSurahNumber());
+                row.put("ayahStart", tasmiSession == null ? null : tasmiSession.getAyahStart());
+                row.put("ayahEnd", tasmiSession == null ? null : tasmiSession.getAyahEnd());
                 row.put("sessionId", tasmiSession == null ? null : Long.valueOf(tasmiSession.getSessionId()));
                 row.put("sessionDate", tasmiSession == null || tasmiSession.getSessionDate() == null
                         ? null
@@ -448,7 +659,8 @@ public class InstructorEvaluationServlet extends HttpServlet {
                         : String.valueOf(tasmiSession.getSessionTime()));
                 group.put("sessionStatus", tasmiSession.getStatus() == null ? null
                         : tasmiSession.getStatus().name());
-                group.put("quranPortion", trimToNull(tasmiSession.getQuranPortion()));
+                group.put("quranPortion", trimToNull(
+                        model.service.quran.QuranPassageDisplay.format(tasmiSession)));
                 group.put("evaluationReviewedAt", tasmiSession.getEvaluationReviewedAt());
 
                 List<Map<String, Object>> submittedRows = rowsBySession.getOrDefault(
@@ -471,11 +683,17 @@ public class InstructorEvaluationServlet extends HttpServlet {
                     for (Enrollment enrollment : enrollments) {
                         if (enrollment == null) continue;
                         if (enrollment.getEnrollmentStatus() != EnrollmentStatus.APPROVED) continue;
-                        totalApproved++;
-                        if (submittedIds.contains(enrollment.getStudentId())) continue;
+                        if (submittedIds.contains(enrollment.getStudentId())) {
+                            totalApproved++;
+                            continue;
+                        }
 
                         Student student = loadStudent(connection, studentCache, enrollment.getStudentId());
                         User user = student == null ? null : loadUser(connection, userCache, student.getUserId());
+                        if (student != null && user == null) {
+                            continue;
+                        }
+                        totalApproved++;
 
                         Map<String, Object> p = new LinkedHashMap<>();
                         String pendingName = displayStudentName(user);

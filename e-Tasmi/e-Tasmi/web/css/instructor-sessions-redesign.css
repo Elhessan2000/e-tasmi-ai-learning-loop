@@ -384,6 +384,21 @@ html[data-theme="dark"] .isess-summary-row:hover { background: rgba(255,255,255,
 }
 .isess-field input:focus, .isess-field select:focus, .isess-field textarea:focus { outline: none; border-color: var(--isess-lime); background: var(--isess-surface); box-shadow: 0 0 0 3px var(--isess-lime-soft); }
 .isess-field textarea { min-height: 80px; resize: vertical; }
+.isess-field--range input {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+.isess-field--range input:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
+}
+.isess-range-hint {
+  grid-column: 1 / -1;
+  margin: -4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #92400e;
+}
 .isess-banner-zone {
   position: relative; border: 1.5px dashed var(--isess-border);
   border-radius: 12px; padding: 24px; text-align: center;

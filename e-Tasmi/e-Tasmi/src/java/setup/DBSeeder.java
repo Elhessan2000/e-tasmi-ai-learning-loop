@@ -30,6 +30,7 @@ public class DBSeeder implements ServletContextListener {
                 ensureStudentLevelColumn(conn);
                 ensureEmailVerificationTable(conn);
                 ensureInstructorModuleSchema(conn);
+                ensureAiLearningLoopSchema(conn);
                 repairAllAdminUsers(conn);
                 Optional<User> adminOpt = userDao.findByEmail(conn, "admin@etasmi.com");
                 if (adminOpt.isEmpty()) {
@@ -228,6 +229,177 @@ public class DBSeeder implements ServletContextListener {
                     "CONSTRAINT fk_material_instructor FOREIGN KEY (uploaded_by_instructor_id) REFERENCES instructor (instructor_id) ON UPDATE CASCADE ON DELETE RESTRICT" +
                     ")");
         }
+    }
+
+    /**
+     * AI Learning Loop foundation: structured Qur'an passage on the session,
+     * persisted analysis runs, persisted structured findings with per-finding
+     * instructor verification columns, evaluation publication state, and
+     * recitation attempt lineage.
+     *
+     * <p>Mirrors {@code setup/module_ai_learning_loop_patch.sql}. Each foreign
+     * key is added in the same ALTER as the column it belongs to, so the
+     * existing single column-existence guard covers the constraint too.</p>
+     *
+     * <p>Analysis rows and findings are written by {@code RecitationAnalysisService}.
+     * Instructor verification and publication stay unimplemented.</p>
+     */
+    private void ensureAiLearningLoopSchema(Connection connection) throws Exception {
+        if (!tableExists(connection, "recitation") || !tableExists(connection, "instructor")) {
+            return;
+        }
+
+        // 1) Analysis runs. History is kept: a re-analysis inserts a new row.
+        try (Statement st = connection.createStatement()) {
+            st.execute("CREATE TABLE IF NOT EXISTS recitation_analysis ("
+                    + "analysis_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+                    + "recitation_id BIGINT UNSIGNED NOT NULL,"
+                    + "status ENUM('OK','REJECTED','CANNOT_EVALUATE','REFERENCE_UNAVAILABLE','FAILED') NOT NULL,"
+                    + "status_reason VARCHAR(500) DEFAULT NULL,"
+                    + "stt_provider VARCHAR(60) DEFAULT NULL,"
+                    + "stt_model VARCHAR(60) DEFAULT NULL,"
+                    + "analysis_model VARCHAR(60) DEFAULT NULL,"
+                    + "transcript TEXT DEFAULT NULL,"
+                    + "reference_source VARCHAR(60) DEFAULT NULL,"
+                    + "reference_verse_keys VARCHAR(255) DEFAULT NULL,"
+                    + "reference_text TEXT DEFAULT NULL,"
+                    + "matches_expected_passage TINYINT(1) DEFAULT NULL,"
+                    + "accuracy_percent DECIMAL(5,2) DEFAULT NULL,"
+                    + "ai_suggested_score INT DEFAULT NULL,"
+                    + "ai_summary TEXT DEFAULT NULL,"
+                    + "ai_feedback TEXT DEFAULT NULL,"
+                    + "matched_passage_note TEXT DEFAULT NULL,"
+                    + "correct_word_count SMALLINT UNSIGNED DEFAULT NULL,"
+                    + "is_quran_confidence DECIMAL(4,3) DEFAULT NULL,"
+                    + "mixed_passages TINYINT(1) DEFAULT NULL,"
+                    + "detected_passages VARCHAR(255) DEFAULT NULL,"
+                    + "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                    + "PRIMARY KEY (analysis_id),"
+                    + "KEY idx_recitation_analysis_recitation (recitation_id, created_at),"
+                    + "CONSTRAINT fk_recitation_analysis_recitation FOREIGN KEY (recitation_id) "
+                    + "REFERENCES recitation (recitation_id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                    + "CONSTRAINT chk_recitation_analysis_score "
+                    + "CHECK (ai_suggested_score IS NULL OR (ai_suggested_score >= 0 AND ai_suggested_score <= 100)),"
+                    + "CONSTRAINT chk_recitation_analysis_accuracy "
+                    + "CHECK (accuracy_percent IS NULL OR (accuracy_percent >= 0 AND accuracy_percent <= 100)),"
+                    + "CONSTRAINT chk_recitation_analysis_quran_confidence "
+                    + "CHECK (is_quran_confidence IS NULL OR (is_quran_confidence >= 0 AND is_quran_confidence <= 1))"
+                    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            // 2) Structured findings. AI columns are immutable; an instructor
+            // edit is stored in the instructor_* columns beside them.
+            st.execute("CREATE TABLE IF NOT EXISTS recitation_finding ("
+                    + "finding_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,"
+                    + "analysis_id BIGINT UNSIGNED NOT NULL,"
+                    + "recitation_id BIGINT UNSIGNED NOT NULL,"
+                    + "finding_type ENUM('MISSING_WORD','INCORRECT_WORD','EXTRA_WORD','PASSAGE_MISMATCH',"
+                    + "'PRONUNCIATION_OBSERVATION','OTHER') NOT NULL,"
+                    + "verse_key VARCHAR(12) DEFAULT NULL,"
+                    + "word_position SMALLINT UNSIGNED DEFAULT NULL,"
+                    + "expected_text VARCHAR(255) DEFAULT NULL,"
+                    + "heard_text VARCHAR(255) DEFAULT NULL,"
+                    + "explanation TEXT DEFAULT NULL,"
+                    + "ai_status ENUM('PROPOSED','NOT_APPLICABLE') NOT NULL DEFAULT 'PROPOSED',"
+                    + "ai_confidence DECIMAL(4,3) DEFAULT NULL,"
+                    + "instructor_status ENUM('PENDING','ACCEPTED','EDITED','REJECTED','INSTRUCTOR_ADDED') "
+                    + "NOT NULL DEFAULT 'PENDING',"
+                    + "instructor_expected_text VARCHAR(255) DEFAULT NULL,"
+                    + "instructor_heard_text VARCHAR(255) DEFAULT NULL,"
+                    + "instructor_explanation TEXT DEFAULT NULL,"
+                    + "instructor_note TEXT DEFAULT NULL,"
+                    + "decided_by_instructor_id BIGINT UNSIGNED DEFAULT NULL,"
+                    + "decided_at TIMESTAMP NULL DEFAULT NULL,"
+                    + "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+                    + "PRIMARY KEY (finding_id),"
+                    + "KEY idx_finding_analysis (analysis_id),"
+                    + "KEY idx_finding_recitation_status (recitation_id, instructor_status),"
+                    + "KEY idx_finding_instructor (decided_by_instructor_id),"
+                    + "CONSTRAINT fk_finding_analysis FOREIGN KEY (analysis_id) "
+                    + "REFERENCES recitation_analysis (analysis_id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                    + "CONSTRAINT fk_finding_recitation FOREIGN KEY (recitation_id) "
+                    + "REFERENCES recitation (recitation_id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                    + "CONSTRAINT fk_finding_instructor FOREIGN KEY (decided_by_instructor_id) "
+                    + "REFERENCES instructor (instructor_id) ON UPDATE CASCADE ON DELETE SET NULL,"
+                    + "CONSTRAINT chk_finding_confidence "
+                    + "CHECK (ai_confidence IS NULL OR (ai_confidence >= 0 AND ai_confidence <= 1))"
+                    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        }
+
+        // Phase 3 reload columns. CREATE TABLE IF NOT EXISTS does not alter a table
+        // that already exists, so databases created in Phase 0 pick these up here.
+        ensureColumn(connection, "recitation_analysis", "ai_feedback",
+                "ALTER TABLE recitation_analysis ADD COLUMN ai_feedback TEXT DEFAULT NULL AFTER ai_summary");
+        ensureColumn(connection, "recitation_analysis", "matched_passage_note",
+                "ALTER TABLE recitation_analysis ADD COLUMN matched_passage_note TEXT DEFAULT NULL AFTER ai_feedback");
+        ensureColumn(connection, "recitation_analysis", "correct_word_count",
+                "ALTER TABLE recitation_analysis ADD COLUMN correct_word_count SMALLINT UNSIGNED DEFAULT NULL"
+                        + " AFTER matched_passage_note");
+        ensureColumn(connection, "recitation_analysis", "is_quran_confidence",
+                "ALTER TABLE recitation_analysis ADD COLUMN is_quran_confidence DECIMAL(4,3) DEFAULT NULL"
+                        + " AFTER correct_word_count,"
+                        + " ADD CONSTRAINT chk_recitation_analysis_quran_confidence"
+                        + " CHECK (is_quran_confidence IS NULL OR (is_quran_confidence >= 0 AND is_quran_confidence <= 1))");
+        ensureColumn(connection, "recitation_analysis", "mixed_passages",
+                "ALTER TABLE recitation_analysis ADD COLUMN mixed_passages TINYINT(1) DEFAULT NULL"
+                        + " AFTER is_quran_confidence");
+        ensureColumn(connection, "recitation_analysis", "detected_passages",
+                "ALTER TABLE recitation_analysis ADD COLUMN detected_passages VARCHAR(255) DEFAULT NULL"
+                        + " AFTER mixed_passages");
+
+        // 3) Structured passage on the session. `quran_portion` stays as-is and
+        // remains the display label; these columns are the machine-readable form.
+        ensureColumn(connection, "tasmi_session", "surah_number",
+                "ALTER TABLE tasmi_session ADD COLUMN surah_number TINYINT UNSIGNED DEFAULT NULL AFTER quran_portion,"
+                        + " ADD CONSTRAINT chk_tasmi_session_surah"
+                        + " CHECK (surah_number IS NULL OR (surah_number >= 1 AND surah_number <= 114))");
+        ensureColumn(connection, "tasmi_session", "ayah_start",
+                "ALTER TABLE tasmi_session ADD COLUMN ayah_start SMALLINT UNSIGNED DEFAULT NULL AFTER surah_number,"
+                        + " ADD CONSTRAINT chk_tasmi_session_ayah_start"
+                        + " CHECK (ayah_start IS NULL OR ayah_start >= 1)");
+        ensureColumn(connection, "tasmi_session", "ayah_end",
+                "ALTER TABLE tasmi_session ADD COLUMN ayah_end SMALLINT UNSIGNED DEFAULT NULL AFTER ayah_start,"
+                        + " ADD CONSTRAINT chk_tasmi_session_ayah_range"
+                        + " CHECK (ayah_start IS NULL OR ayah_end IS NULL OR ayah_start <= ayah_end)");
+
+        // 4) Attempt lineage for the practice loop.
+        ensureColumn(connection, "recitation", "parent_recitation_id",
+                "ALTER TABLE recitation ADD COLUMN parent_recitation_id BIGINT UNSIGNED DEFAULT NULL"
+                        + " AFTER submission_date,"
+                        + " ADD CONSTRAINT fk_recitation_parent FOREIGN KEY (parent_recitation_id)"
+                        + " REFERENCES recitation (recitation_id) ON UPDATE CASCADE ON DELETE SET NULL");
+        ensureColumn(connection, "recitation", "attempt_number",
+                "ALTER TABLE recitation ADD COLUMN attempt_number INT UNSIGNED NOT NULL DEFAULT 1"
+                        + " AFTER parent_recitation_id");
+        ensureIndex(connection, "recitation", "idx_recitation_parent",
+                "ALTER TABLE recitation ADD INDEX idx_recitation_parent (parent_recitation_id)");
+        ensureColumn(connection, "recitation", "analysis_job_state",
+                "ALTER TABLE recitation ADD COLUMN analysis_job_state"
+                        + " ENUM('NONE','IN_PROGRESS','COMPLETED') NOT NULL DEFAULT 'NONE'"
+                        + " AFTER attempt_number");
+        ensureColumn(connection, "recitation", "analysis_job_started_at",
+                "ALTER TABLE recitation ADD COLUMN analysis_job_started_at TIMESTAMP NULL DEFAULT NULL"
+                        + " AFTER analysis_job_state");
+        try (Statement st = connection.createStatement()) {
+            st.executeUpdate("UPDATE recitation r SET analysis_job_state = 'COMPLETED'"
+                    + " WHERE r.analysis_job_state = 'NONE'"
+                    + " AND EXISTS (SELECT 1 FROM recitation_analysis a WHERE a.recitation_id = r.recitation_id)");
+        } catch (Exception ignored) {
+            // Column may not exist yet on a very old schema; ensureColumn above is authoritative.
+        }
+
+        // 5) Evaluation publication state. `created_at` is deliberately left
+        // NULL for rows that already exist so no historical evaluation is given
+        // an invented timestamp; new rows are stamped by EvaluationDaoJdbc.
+        ensureColumn(connection, "evaluation", "analysis_id",
+                "ALTER TABLE evaluation ADD COLUMN analysis_id BIGINT UNSIGNED DEFAULT NULL AFTER feedback,"
+                        + " ADD CONSTRAINT fk_evaluation_analysis FOREIGN KEY (analysis_id)"
+                        + " REFERENCES recitation_analysis (analysis_id) ON UPDATE CASCADE ON DELETE SET NULL");
+        ensureColumn(connection, "evaluation", "published_at",
+                "ALTER TABLE evaluation ADD COLUMN published_at TIMESTAMP NULL DEFAULT NULL AFTER analysis_id");
+        ensureColumn(connection, "evaluation", "created_at",
+                "ALTER TABLE evaluation ADD COLUMN created_at TIMESTAMP NULL DEFAULT NULL AFTER published_at");
+        ensureIndex(connection, "evaluation", "idx_evaluation_analysis",
+                "ALTER TABLE evaluation ADD INDEX idx_evaluation_analysis (analysis_id)");
     }
 
     /**

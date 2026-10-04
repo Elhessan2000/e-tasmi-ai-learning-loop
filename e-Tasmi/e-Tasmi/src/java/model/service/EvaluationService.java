@@ -3,24 +3,31 @@ package model.service;
 import model.dao.EvaluationDao;
 import model.dao.InstructorDao;
 import model.dao.EnrollmentDao;
+import model.dao.NotificationDao;
 import model.dao.ProgressDao;
+import model.dao.RecitationAnalysisDao;
+import model.dao.RecitationFindingDao;
 import model.dao.RecitationDao;
 import model.dao.StudentDao;
 import model.dao.TasmiSessionDao;
-import model.dao.UserDao;
 import model.dao.impl.EvaluationDaoJdbc;
 import model.dao.impl.InstructorDaoJdbc;
 import model.dao.impl.EnrollmentDaoJdbc;
+import model.dao.impl.NotificationDaoJdbc;
 import model.dao.impl.ProgressDaoJdbc;
+import model.dao.impl.RecitationAnalysisDaoJdbc;
+import model.dao.impl.RecitationFindingDaoJdbc;
 import model.dao.impl.RecitationDaoJdbc;
 import model.dao.impl.StudentDaoJdbc;
 import model.dao.impl.TasmiSessionDaoJdbc;
-import model.dao.impl.UserDaoJdbc;
 import model.entity.Evaluation;
 import model.entity.Instructor;
 import model.entity.InstructorVerificationStatus;
+import model.entity.Notification;
 import model.entity.Recitation;
+import model.entity.RecitationAnalysis;
 import model.entity.Enrollment;
+import model.entity.Student;
 import model.entity.TasmiSession;
 import util.Db;
 
@@ -41,6 +48,11 @@ public class EvaluationService {
     private final EnrollmentDao enrollmentDao;
     private final ProgressDao progressDao;
     private final TasmiSessionDao tasmiSessionDao;
+    private final RecitationAnalysisDao recitationAnalysisDao;
+    private final RecitationFindingDao recitationFindingDao;
+    private final StudentDao studentDao;
+    private final NotificationDao notificationDao;
+    private final AuditLogService auditLogService;
 
     public EvaluationService() {
         this.instructorDao = new InstructorDaoJdbc();
@@ -49,6 +61,11 @@ public class EvaluationService {
         this.enrollmentDao = new EnrollmentDaoJdbc();
         this.progressDao = new ProgressDaoJdbc();
         this.tasmiSessionDao = new TasmiSessionDaoJdbc();
+        this.recitationAnalysisDao = new RecitationAnalysisDaoJdbc();
+        this.recitationFindingDao = new RecitationFindingDaoJdbc();
+        this.studentDao = new StudentDaoJdbc();
+        this.notificationDao = new NotificationDaoJdbc();
+        this.auditLogService = new AuditLogService();
     }
 
     public List<Recitation> listRecitationsForInstructor(long instructorUserId) {
@@ -100,20 +117,59 @@ public class EvaluationService {
                 return EvaluationResult.failure("This recitation has already been evaluated.");
             }
 
+            Optional<Recitation> recitationOpt = recitationDao.findById(connection, recitationId);
+            if (recitationOpt.isEmpty()) {
+                connection.rollback();
+                return EvaluationResult.failure("You cannot evaluate this recitation.");
+            }
+            Optional<Enrollment> enrollmentOpt = enrollmentDao.findById(connection, recitationOpt.get().getEnrollmentId());
+            TasmiSession session = null;
+            if (enrollmentOpt.isPresent()) {
+                session = tasmiSessionDao.findById(connection, enrollmentOpt.get().getSessionId()).orElse(null);
+            }
+
+            Optional<RecitationAnalysis> latestAnalysis =
+                    recitationAnalysisDao.findLatestByRecitationId(connection, recitationId);
+            int pending = 0;
+            if (latestAnalysis.isPresent()) {
+                pending = recitationFindingDao.countPendingByAnalysisId(
+                        connection, latestAnalysis.get().getAnalysisId());
+            }
+            String refusal = LearningLoopPublicationPolicy.refusalReason(
+                    latestAnalysis.orElse(null), session, pending);
+            if (refusal != null) {
+                connection.rollback();
+                return EvaluationResult.failure(refusal);
+            }
+
+            RecitationAnalysis analysis = latestAnalysis.get();
+            if (analysis.getRecitationId() != recitationId) {
+                connection.rollback();
+                return EvaluationResult.failure("The latest analysis does not match this recitation.");
+            }
+
             Evaluation e = new Evaluation();
             e.setRecitationId(recitationId);
             e.setInstructorId(instructor.getInstructorId());
             e.setScore(score);
             e.setFeedback(feedback);
+            e.setAnalysisId(analysis.getAnalysisId());
 
             evaluationDao.insert(connection, e);
 
-            Optional<Recitation> recitationOpt = recitationDao.findById(connection, recitationId);
-            if (recitationOpt.isPresent()) {
-                Optional<Enrollment> enrollmentOpt = enrollmentDao.findById(connection, recitationOpt.get().getEnrollmentId());
-                if (enrollmentOpt.isPresent()) {
-                    long studentId = enrollmentOpt.get().getStudentId();
-                    progressDao.upsert(connection, studentId, progressDao.computeCompletionRate(connection, studentId));
+            auditLogService.log(connection, instructorUserId, "INSTRUCTOR",
+                    "EVALUATION_PUBLISHED", "evaluation", String.valueOf(recitationId),
+                    "recitation_id=" + recitationId
+                            + " analysis_id=" + analysis.getAnalysisId()
+                            + " score=" + score);
+
+            if (enrollmentOpt.isPresent()) {
+                long studentId = enrollmentOpt.get().getStudentId();
+                progressDao.upsert(connection, studentId, progressDao.computeCompletionRate(connection, studentId));
+                try {
+                    notifyStudentPublished(connection, studentId, session);
+                } catch (SQLException notifyEx) {
+                    LOGGER.log(Level.WARNING, "Evaluation published, but student notification failed", notifyEx);
                 }
             }
 
@@ -194,5 +250,26 @@ public class EvaluationService {
             LOGGER.log(Level.SEVERE, "Failed to update session review state", ex);
             return EvaluationResult.failure("Server error while updating the session review status.");
         }
+    }
+
+    private void notifyStudentPublished(Connection connection, long studentId, TasmiSession session)
+            throws SQLException {
+        Optional<Student> studentOpt = studentDao.findById(connection, studentId);
+        if (studentOpt.isEmpty() || studentOpt.get().getUserId() <= 0) {
+            return;
+        }
+        Notification notification = new Notification();
+        notification.setUserId(studentOpt.get().getUserId());
+        notification.setMessage("Your recitation for " + sessionLabel(session)
+                + " has been reviewed and published.");
+        notification.setCreatedAt(Instant.now());
+        notificationDao.insert(connection, notification);
+    }
+
+    private static String sessionLabel(TasmiSession session) {
+        if (session == null || session.getTitle() == null || session.getTitle().trim().isEmpty()) {
+            return "Session #" + (session == null ? "-" : session.getSessionId());
+        }
+        return session.getTitle().trim();
     }
 }
