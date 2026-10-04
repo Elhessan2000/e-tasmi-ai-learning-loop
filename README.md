@@ -72,7 +72,7 @@ This project closes that gap.
 | Automatic analysis | A new attempt is analysed without a manual click |
 | Trusted Qur'an reference | Comparison text comes from Quranpedia Hafs (`GET /mushafs/1/{surah}`) |
 | Deterministic comparison | Word differences are computed in Java, not invented by a model |
-| AI explanation | OpenAI GPT-4o explains stored findings. It does not supply the mushaf text |
+| AI explanation | OpenAI gpt-6.1-sol explains stored findings. It does not supply the mushaf text |
 | Instructor verification | Accept, edit, reject, or add each finding |
 | Publication boundary | Pending findings cannot be published |
 | Verified Learning Focus | The learner sees only accepted, edited, or instructor-added findings |
@@ -98,7 +98,7 @@ Trusted passage retrieved from Quranpedia
 Arabic normalization + word-by-word comparison
       │
       ▼
-Structured findings + optional GPT-4o explanation
+Structured findings + optional gpt-6.1-sol explanation
       │
       ▼
 Instructor reviews  →  publishes
@@ -136,7 +136,7 @@ flowchart LR
     Instructor --> JSP
     SVC --> EL[ElevenLabs Scribe v2]
     SVC --> QP[Quranpedia]
-    SVC --> OA[OpenAI GPT-4o]
+    SVC --> OA[OpenAI gpt-6.1-sol]
     SVC --> CD[Cloudinary]
     LIB[Qur'an Library] --> QF[Quran Foundation]
     JSP --> LIB
@@ -148,7 +148,7 @@ flowchart LR
 | Database | MySQL 8.4 |
 | Speech-to-text | ElevenLabs Scribe v2 (`STT_PROVIDER=elevenlabs`) |
 | Trusted reference | Quranpedia Hafs mushaf id 1 — no API key |
-| Explanation | OpenAI GPT-4o |
+| Explanation | OpenAI gpt-6.1-sol |
 | Library content | Quran Foundation Content API |
 | Media | Cloudinary, or local disk when Cloudinary is unset |
 | Packaging | Docker Compose |

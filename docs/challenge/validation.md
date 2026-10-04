@@ -42,6 +42,6 @@ V-01 through V-05 and V-07 through V-08 were re-run as E2E-10 on 3 Oct 2026 afte
 
 Analysis 29 (`CANNOT_EVALUATE`) still stores `stt_provider=NULL` because it was created before the failed-transcript stamp fix. The same silence path now stamps provenance: analysis 33 on recitation 24 has `stt_provider=elevenlabs`.
 
-Active STT in this Docker environment is **ElevenLabs Scribe v2**. OpenAI `gpt-4o` is the explanation/evaluator model. From E2E-17 the Learning Loop comparison source is Quranpedia Hafs (`GET /mushafs/1/{surah}`, field `text`). Quran Foundation remains the student Qur'an library only. Older analyses may still store `reference_source=QURAN_FOUNDATION`.
+Active STT in this Docker environment is **ElevenLabs Scribe v2**. OpenAI `gpt-6.1-sol` (reasoning effort high) is the explanation model. Rows above that name `gpt-4o` record the model used on those dates. From E2E-17 the Learning Loop comparison source is Quranpedia Hafs (`GET /mushafs/1/{surah}`, field `text`). Quran Foundation remains the student Qur'an library only. Older analyses may still store `reference_source=QURAN_FOUNDATION`.
 
 E2E-19 changes the `REJECTED` publication rule that V-10, V-11, and the first E2E-16 pass recorded. Those rows stay as the historical result: at that time a save was refused. A `REJECTED` analysis is still not retried. The instructor can now publish a score and feedback when the session has a structured range and no finding is pending. `FAILED` and `CANNOT_EVALUATE` still cannot be published.

@@ -88,7 +88,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       # Empty means the app default: gpt-4o-transcribe. Do not default to whisper-1 here.
       OPENAI_RECITATION_MODEL: ${OPENAI_RECITATION_MODEL:-}
-      # Empty means the app default: gpt-4o. OPENAI_CLASSIFIER_MODEL is a legacy alias only.
+      # Empty means the app default: gpt-6.1-sol. OPENAI_CLASSIFIER_MODEL is a legacy alias only.
       OPENAI_EVALUATOR_MODEL: ${OPENAI_EVALUATOR_MODEL:-}
       OPENAI_CLASSIFIER_MODEL: ${OPENAI_CLASSIFIER_MODEL:-}
       # Empty means OpenAI speech-to-text. Set elevenlabs to use Scribe. No silent fallback.

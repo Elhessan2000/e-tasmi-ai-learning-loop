@@ -62,11 +62,14 @@ public class RecitationAiAnalysisService {
     private static final Logger LOGGER = Logger.getLogger(RecitationAiAnalysisService.class.getName());
 
     // --- Model / endpoint configuration ------------------------------------------------------
-    // gpt-4o-transcribe is materially better than whisper-1 on classical/Quranic Arabic and uses
-    // the same transcription endpoint. gpt-4o (full) reasons far more reliably than gpt-4o-mini for
-    // the alignment + judgement step. Both are overridable via env vars (see resolve* methods).
+    // gpt-4o-transcribe is the unused OpenAI transcription default. The learning loop transcribes
+    // with ElevenLabs. The explanation of already-computed findings uses gpt-6.1-sol
+    // (reasoning_effort=high), overridable via OPENAI_EVALUATOR_MODEL.
+    // The no-reference legacy evaluator stays on gpt-4o and is not the learning-loop path.
     private static final String DEFAULT_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
-    private static final String DEFAULT_EVALUATOR_MODEL = "gpt-4o";
+    private static final String DEFAULT_EVALUATOR_MODEL = "gpt-6.1-sol";
+    private static final String LEGACY_EVALUATOR_MODEL = "gpt-4o";
+    private static final String EVALUATOR_REASONING_EFFORT = "high";
     private static final String TRANSCRIPTION_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
     private static final String CHAT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
@@ -200,7 +203,7 @@ public class RecitationAiAnalysisService {
                     ? report.reasonIfNotQuran
                     : "This audio does not appear to be a Quran recitation.";
             return stamp(AnalysisResult.rejected(reason)
-                    .withTranscript(tr.getText(), normalizedExpected), stt, true, true);
+                    .withTranscript(tr.getText(), normalizedExpected), stt, true, true, LEGACY_EVALUATOR_MODEL);
         }
 
         // Defensive: if the AI returned nonsense (empty on every list and score<=0), fall back.
@@ -249,7 +252,7 @@ public class RecitationAiAnalysisService {
                 report.mixedPassages,
                 nonNull(report.detectedPassages),
                 nullOr(report.referenceText)
-        ), stt, true, true);
+        ), stt, true, true, LEGACY_EVALUATOR_MODEL);
     }
 
     // =============================================================================================
@@ -341,6 +344,9 @@ public class RecitationAiAnalysisService {
                 + " " + comparison.countsLabel()
                 + " reported_findings=" + findings.size()
                 + " explained=" + (report == null ? "no" : "yes")
+                + " explainer_provider=" + (report == null ? "none" : "OpenAI")
+                + " explainer_model=" + (report == null ? "none" : resolveEvaluatorModel())
+                + " reasoning_effort=" + (report == null ? "none" : EVALUATOR_REASONING_EFFORT)
                 + " matches_passage=" + matchesPassage);
 
         return stamp(AnalysisResult.ok(
@@ -559,14 +565,17 @@ public class RecitationAiAnalysisService {
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", model);
-        body.put("temperature", 0);
-        body.put("top_p", 1);
+        // gpt-6.1-sol rejects temperature and top_p when reasoning_effort is set.
+        body.put("reasoning_effort", EVALUATOR_REASONING_EFFORT);
         body.put("seed", EVALUATOR_SEED);
         body.put("response_format", Collections.singletonMap("type", "json_object"));
         body.put("messages", Arrays.asList(
                 mapOf("role", "system", "content", systemPrompt),
                 mapOf("role", "user", "content", userPrompt)
         ));
+
+        LOGGER.log(Level.INFO, "Explainer provider=OpenAI model={0} reasoning_effort={1}",
+                new Object[]{model, EVALUATOR_REASONING_EFFORT});
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(CHAT_ENDPOINT))
@@ -680,13 +689,18 @@ public class RecitationAiAnalysisService {
     /** Records which calls actually succeeded. A failed call leaves its model null. */
     private static AnalysisResult stamp(AnalysisResult result, SpeechToTextProvider stt,
                                         boolean transcribed, boolean analyzed) {
+        return stamp(result, stt, transcribed, analyzed, analyzed ? resolveEvaluatorModel() : null);
+    }
+
+    private static AnalysisResult stamp(AnalysisResult result, SpeechToTextProvider stt,
+                                        boolean transcribed, boolean analyzed, String evaluatorModel) {
         if (result == null) {
             return null;
         }
         return result.withProvenance(
                 transcribed && stt != null ? stt.id() : null,
                 transcribed && stt != null ? stt.model() : null,
-                analyzed ? resolveEvaluatorModel() : null);
+                analyzed ? evaluatorModel : null);
     }
 
     private TranscriptionResult transcribeAudio(byte[] mediaBytes, String mediaFileName, String apiKey)
@@ -775,7 +789,7 @@ public class RecitationAiAnalysisService {
         if (trimToNull(apiKey) == null) {
             throw new IllegalStateException("OPENAI_API_KEY is not configured.");
         }
-        String model = resolveEvaluatorModel();
+        String model = LEGACY_EVALUATOR_MODEL;
 
         String systemPrompt =
                 "You are an expert Quran (Qur'an) recitation evaluator for a Tasmi (Quran memorization) platform. " +

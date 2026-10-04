@@ -33,7 +33,7 @@ The browser talks to existing servlets. Servlets call services. Services use JDB
 
 ## AI approach
 
-Speech-to-text is ElevenLabs Scribe v2 when `STT_PROVIDER=elevenlabs`. The model is not asked to invent the mushaf text. Word differences are computed in Java from the Quranpedia Hafs reference. OpenAI GPT-4o explains stored findings only. A missing reference returns `REFERENCE_UNAVAILABLE` and stores no findings.
+Speech-to-text is ElevenLabs Scribe v2 when `STT_PROVIDER=elevenlabs`. The model is not asked to invent the mushaf text. Word differences are computed in Java from the Quranpedia Hafs reference. OpenAI gpt-6.1-sol explains stored findings only. A missing reference returns `REFERENCE_UNAVAILABLE` and stores no findings.
 
 ## Instructor verification
 

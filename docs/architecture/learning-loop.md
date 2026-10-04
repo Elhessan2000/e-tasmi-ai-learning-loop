@@ -13,7 +13,7 @@ flowchart TD
     pipeline --> ref[Quranpedia Hafs text]
     stt --> compare[Deterministic comparison]
     ref --> compare
-    compare --> explain[OpenAI GPT-4o explanation]
+    compare --> explain[OpenAI gpt-6.1-sol explanation]
     explain --> instructor[Instructor verification]
     instructor --> publish[Publication]
     publish --> focus[Verified Learning Focus]
@@ -38,7 +38,7 @@ There is no path from an unverified finding to the learner.
 |---|---|---|
 | ElevenLabs | Speech-to-text (`scribe_v2`, `language_code=ar`) | `ELEVENLABS_API_KEY` |
 | Quranpedia | Trusted comparison text, mushaf 1 (Hafs) | None. Public HTTPS API |
-| OpenAI | Explains stored findings | `OPENAI_API_KEY` |
+| OpenAI | Explains stored findings (`gpt-6.1-sol`, reasoning effort high) | `OPENAI_API_KEY` |
 | Cloudinary | Recitation media | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
 | Quran Foundation | Qur'an Library only | `QF_CLIENT_ID`, `QF_CLIENT_SECRET` |
 | Zoom | Optional live sessions | Optional |

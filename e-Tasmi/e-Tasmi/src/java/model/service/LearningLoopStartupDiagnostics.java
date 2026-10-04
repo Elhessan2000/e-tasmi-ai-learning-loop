@@ -47,6 +47,7 @@ public class LearningLoopStartupDiagnostics implements ServletContextListener {
         return "Learning loop config:"
                 + " OpenAI=" + (openai ? "configured" : "not_configured")
                 + " evaluatorModel=" + evaluator
+                + " evaluatorReasoningEffort=high"
                 + " chatEndpoint=https://api.openai.com/v1/chat/completions"
                 + " sttProvider=" + stt.id()
                 + " sttModel=" + stt.model()
@@ -70,7 +71,7 @@ public class LearningLoopStartupDiagnostics implements ServletContextListener {
         if (notBlank(System.getenv("OPENAI_CLASSIFIER_MODEL"))) {
             return System.getenv("OPENAI_CLASSIFIER_MODEL").trim();
         }
-        return "gpt-4o";
+        return "gpt-6.1-sol";
     }
 
     private static boolean notBlank(String value) {
