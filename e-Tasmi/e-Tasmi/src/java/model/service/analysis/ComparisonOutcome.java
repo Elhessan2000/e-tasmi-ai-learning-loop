@@ -19,9 +19,19 @@ public final class ComparisonOutcome {
     private final int missingCount;
     private final int incorrectCount;
     private final int extraCount;
+    /** Informational only. Never a finding and never part of the verification count. */
+    private final String openingNote;
+    private final String continuationNote;
 
     private ComparisonOutcome(boolean available, List<RecitationFinding> findings, List<String> correctWords,
                               int referenceWordCount, int missingCount, int incorrectCount, int extraCount) {
+        this(available, findings, correctWords, referenceWordCount, missingCount, incorrectCount, extraCount,
+                null, null);
+    }
+
+    private ComparisonOutcome(boolean available, List<RecitationFinding> findings, List<String> correctWords,
+                              int referenceWordCount, int missingCount, int incorrectCount, int extraCount,
+                              String openingNote, String continuationNote) {
         this.available = available;
         this.findings = List.copyOf(findings == null ? List.of() : findings);
         this.correctWords = List.copyOf(correctWords == null ? List.of() : correctWords);
@@ -29,6 +39,8 @@ public final class ComparisonOutcome {
         this.missingCount = missingCount;
         this.incorrectCount = incorrectCount;
         this.extraCount = extraCount;
+        this.openingNote = openingNote;
+        this.continuationNote = continuationNote;
     }
 
     static ComparisonOutcome of(List<RecitationFinding> findings, List<String> correctWords,
@@ -64,13 +76,22 @@ public final class ComparisonOutcome {
         List<RecitationFinding> merged = new ArrayList<>(findings);
         merged.addAll(extra);
         return new ComparisonOutcome(available, merged, correctWords,
-                referenceWordCount, missingCount, incorrectCount, extraCount);
+                referenceWordCount, missingCount, incorrectCount, extraCount,
+                openingNote, continuationNote);
     }
 
     /** Returns a copy whose findings are replaced wholesale, preserving the counts. */
     public ComparisonOutcome withFindings(List<RecitationFinding> replacement) {
         return new ComparisonOutcome(available, replacement, correctWords,
-                referenceWordCount, missingCount, incorrectCount, extraCount);
+                referenceWordCount, missingCount, incorrectCount, extraCount,
+                openingNote, continuationNote);
+    }
+
+    /** Attaches informational boundary notes. They are not findings and do not change counts. */
+    public ComparisonOutcome withObservations(String opening, String continuation) {
+        return new ComparisonOutcome(available, findings, correctWords,
+                referenceWordCount, missingCount, incorrectCount, extraCount,
+                opening, continuation);
     }
 
     public boolean isAvailable() {
@@ -104,6 +125,16 @@ public final class ComparisonOutcome {
 
     public int getExtraCount() {
         return extraCount;
+    }
+
+    /** Leading isti'adhah or basmala excluded from comparison, or null. */
+    public String getOpeningNote() {
+        return openingNote;
+    }
+
+    /** Speech after the assigned passage, excluded from comparison, or null. */
+    public String getContinuationNote() {
+        return continuationNote;
     }
 
     /** Share of reference words recited correctly. Extra words do not reduce it. */

@@ -49,7 +49,13 @@ public final class RecitationComparisonEngine {
             heardNormalized.add(normalized);
         }
 
-        return align(referenceTokens, heardSurfaces, heardNormalized);
+        RecitationBoundaryPolicy.Split split = RecitationBoundaryPolicy.stripLeading(
+                referenceTokens, heardSurfaces, heardNormalized);
+        ComparisonOutcome aligned = align(referenceTokens, split.surfaces, split.normalized);
+        if (split.openingNote == null) {
+            return aligned;
+        }
+        return aligned.withObservations(split.openingNote, aligned.getContinuationNote());
     }
 
     /** Flattens the reference into positioned tokens, numbering words within each verse. */
@@ -98,64 +104,138 @@ public final class RecitationComparisonEngine {
             }
         }
 
-        List<RecitationFinding> findings = new ArrayList<>();
-        List<String> correctWords = new ArrayList<>();
-        int missing = 0;
-        int incorrect = 0;
-        int extra = 0;
-
+        List<Step> backward = new ArrayList<>();
         int i = m;
         int j = n;
         while (i > 0 || j > 0) {
-            if (i > 0 && j > 0
+            boolean match = i > 0 && j > 0
                     && referenceTokens.get(i - 1).matches(heardNormalized.get(j - 1))
-                    && dp[i][j] == dp[i - 1][j - 1]) {
-                correctWords.add(referenceTokens.get(i - 1).getSurface());
+                    && dp[i][j] == dp[i - 1][j - 1];
+            boolean trailingCopy = match && j > 0 && dp[i][j] == dp[i][j - 1] + 1;
+            // A later copy of a reference word has the same cost as aligning that word
+            // earlier and treating the rest as extra. Keep the earlier alignment so speech
+            // after the assigned passage stays a trailing run.
+            if (trailingCopy) {
+                backward.add(Step.extra(extraWordAt(referenceTokens, i, heardSurfaces.get(j - 1))));
+                j--;
+                continue;
+            }
+            if (match) {
+                backward.add(Step.match(referenceTokens.get(i - 1).getSurface()));
                 i--;
                 j--;
                 continue;
             }
             if (i > 0 && j > 0 && dp[i][j] == dp[i - 1][j - 1] + 1) {
                 ReferenceToken token = referenceTokens.get(i - 1);
-                findings.add(RecitationFinding.incorrectWord(
+                backward.add(Step.incorrect(RecitationFinding.incorrectWord(
                         token.getVerseKey(), token.getWordPosition(),
-                        token.getSurface(), heardSurfaces.get(j - 1)));
-                incorrect++;
+                        token.getSurface(), heardSurfaces.get(j - 1))));
                 i--;
                 j--;
                 continue;
             }
             if (i > 0 && dp[i][j] == dp[i - 1][j] + 1) {
                 ReferenceToken token = referenceTokens.get(i - 1);
-                findings.add(RecitationFinding.missingWord(
-                        token.getVerseKey(), token.getWordPosition(), token.getSurface()));
-                missing++;
+                backward.add(Step.missing(RecitationFinding.missingWord(
+                        token.getVerseKey(), token.getWordPosition(), token.getSurface())));
                 i--;
                 continue;
             }
             if (j > 0 && dp[i][j] == dp[i][j - 1] + 1) {
-                findings.add(extraWordAt(referenceTokens, i, heardSurfaces.get(j - 1)));
-                extra++;
+                backward.add(Step.extra(extraWordAt(referenceTokens, i, heardSurfaces.get(j - 1))));
                 j--;
                 continue;
             }
             // Defensive: the edit path is always one of the four cases above, but never loop.
             if (i > 0) {
                 ReferenceToken token = referenceTokens.get(i - 1);
-                findings.add(RecitationFinding.missingWord(
-                        token.getVerseKey(), token.getWordPosition(), token.getSurface()));
-                missing++;
+                backward.add(Step.missing(RecitationFinding.missingWord(
+                        token.getVerseKey(), token.getWordPosition(), token.getSurface())));
                 i--;
             } else if (j > 0) {
-                findings.add(extraWordAt(referenceTokens, i, heardSurfaces.get(j - 1)));
-                extra++;
+                backward.add(Step.extra(extraWordAt(referenceTokens, i, heardSurfaces.get(j - 1))));
                 j--;
             }
         }
 
-        Collections.reverse(findings);
-        Collections.reverse(correctWords);
-        return ComparisonOutcome.of(findings, correctWords, m, missing, incorrect, extra);
+        Collections.reverse(backward);
+        int lastReferenceStep = -1;
+        for (int step = 0; step < backward.size(); step++) {
+            if (backward.get(step).kind != StepKind.EXTRA) {
+                lastReferenceStep = step;
+            }
+        }
+
+        List<RecitationFinding> findings = new ArrayList<>();
+        List<String> correctWords = new ArrayList<>();
+        int missing = 0;
+        int incorrect = 0;
+        int extra = 0;
+        int continuationWords = 0;
+        for (int step = 0; step < backward.size(); step++) {
+            Step current = backward.get(step);
+            boolean trailing = current.kind == StepKind.EXTRA && step > lastReferenceStep;
+            if (trailing) {
+                continuationWords++;
+                continue;
+            }
+            switch (current.kind) {
+                case MATCH:
+                    correctWords.add(current.surface);
+                    break;
+                case INCORRECT:
+                    findings.add(current.finding);
+                    incorrect++;
+                    break;
+                case MISSING:
+                    findings.add(current.finding);
+                    missing++;
+                    break;
+                case EXTRA:
+                    findings.add(current.finding);
+                    extra++;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        ComparisonOutcome outcome = ComparisonOutcome.of(findings, correctWords, m, missing, incorrect, extra);
+        if (continuationWords > 0) {
+            return outcome.withObservations(null, RecitationBoundaryPolicy.CONTINUATION_NOTE);
+        }
+        return outcome;
+    }
+
+    private enum StepKind { MATCH, INCORRECT, MISSING, EXTRA }
+
+    private static final class Step {
+        private final StepKind kind;
+        private final RecitationFinding finding;
+        private final String surface;
+
+        private Step(StepKind kind, RecitationFinding finding, String surface) {
+            this.kind = kind;
+            this.finding = finding;
+            this.surface = surface;
+        }
+
+        private static Step match(String surface) {
+            return new Step(StepKind.MATCH, null, surface);
+        }
+
+        private static Step incorrect(RecitationFinding finding) {
+            return new Step(StepKind.INCORRECT, finding, null);
+        }
+
+        private static Step missing(RecitationFinding finding) {
+            return new Step(StepKind.MISSING, finding, null);
+        }
+
+        private static Step extra(RecitationFinding finding) {
+            return new Step(StepKind.EXTRA, finding, null);
+        }
     }
 
     /** Anchors an extra word to the reference word it follows, so it stays addressable. */

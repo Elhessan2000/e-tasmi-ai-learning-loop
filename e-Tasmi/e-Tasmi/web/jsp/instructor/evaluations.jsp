@@ -10,8 +10,11 @@
 <%@ page import="model.service.RecitationAiAnalysisService" %>
 <%@ page import="model.service.RecitationAiAnalysisService.Status" %>
 <%@ page import="model.service.analysis.FindingAiStatus" %>
+<%@ page import="model.service.analysis.FindingGroups" %>
+<%@ page import="model.service.analysis.FindingReviewPayload" %>
 <%@ page import="model.service.analysis.FindingInstructorStatus" %>
 <%@ page import="model.service.analysis.FindingType" %>
+<%@ page import="model.service.analysis.RecitationBoundaryPolicy" %>
 <%@ page import="model.service.quran.TrustedReference" %>
 <%!
   private String escapeHtml(Object value) {
@@ -83,6 +86,42 @@
       case PASSAGE_MISMATCH: return "Passage mismatch";
       case PRONUNCIATION_OBSERVATION: return "Pronunciation observation";
       default: return "Other";
+    }
+  }
+
+  private String findingGroupLabel(FindingType type) {
+    if (type == null) return "Other";
+    switch (type) {
+      case MISSING_WORD: return "Missing words";
+      case INCORRECT_WORD: return "Incorrect words";
+      case EXTRA_WORD: return "Extra words";
+      case PASSAGE_MISMATCH: return "Passage mismatch";
+      case PRONUNCIATION_OBSERVATION: return "Pronunciation observations";
+      default: return "Other";
+    }
+  }
+
+  private String findingGroupKey(FindingType type) {
+    if (type == null) return "typeOther";
+    switch (type) {
+      case MISSING_WORD: return "missingWords";
+      case INCORRECT_WORD: return "incorrectWords";
+      case EXTRA_WORD: return "extraWords";
+      case PASSAGE_MISMATCH: return "typePassageMismatch";
+      case PRONUNCIATION_OBSERVATION: return "groupPronunciation";
+      default: return "typeOther";
+    }
+  }
+
+  private String findingTypeClass(FindingType type) {
+    if (type == null) return "other";
+    switch (type) {
+      case MISSING_WORD: return "missing";
+      case INCORRECT_WORD: return "incorrect";
+      case EXTRA_WORD: return "extra";
+      case PASSAGE_MISMATCH: return "passage";
+      case PRONUNCIATION_OBSERVATION: return "pronunciation";
+      default: return "other";
     }
   }
 
@@ -358,8 +397,9 @@
   <%@ include file="/jsp/common/instructor_ui_head.jspf" %>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500;600&family=Amiri+Quran&display=swap">
-  <link rel="stylesheet" href="<%= ctx %>/css/learning-loop-experience.css?v=20261003-ux2">
+  <link rel="stylesheet" href="<%= ctx %>/css/learning-loop-experience.css?v=20261005-rw2">
   <script defer src="<%= ctx %>/assets/js/ll-player.js?v=20261003-ux2"></script>
+  <script defer src="<%= ctx %>/assets/js/finding-review.js?v=20261005-rw2"></script>
 </head>
 <body class="instructor-premium-page instructor-package-page instructor-module-page instructor-evaluations-page lx-shell">
 <div class="app-shell">
@@ -924,7 +964,7 @@
     var closer = e.target.closest('[data-lx-dialog-close]');
     if (closer) closeDialog(closer.closest('dialog'));
   });
-  root.querySelectorAll('dialog').forEach(function (dialog) {
+  root.querySelectorAll('dialog:not([data-lx-review])').forEach(function (dialog) {
     dialog.addEventListener('click', function (e) { if (e.target === dialog) closeDialog(dialog); });
   });
 
@@ -985,48 +1025,6 @@
   if (!detail) return;
 
   detail.addEventListener('click', function (e) {
-    var editToggle = e.target.closest('[data-lx-edit-toggle]');
-    if (editToggle) {
-      var editForm = document.getElementById(editToggle.getAttribute('aria-controls'));
-      if (!editForm) return;
-      var opening = editForm.hidden;
-      editForm.hidden = !opening;
-      editToggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
-      var card = editToggle.closest('[data-rr-finding]');
-      if (card) card.classList.toggle('is-editing', opening);
-      if (opening) {
-        var first = editForm.querySelector('input:not([type="hidden"]), textarea');
-        if (first) first.focus();
-      }
-      return;
-    }
-    var editCancel = e.target.closest('[data-lx-edit-cancel]');
-    if (editCancel) {
-      var cancelForm = editCancel.closest('[data-rr-edit-form]');
-      if (!cancelForm) return;
-      cancelForm.hidden = true;
-      var owner = cancelForm.closest('[data-rr-finding]');
-      if (owner) owner.classList.remove('is-editing');
-      var toggle = owner && owner.querySelector('[data-lx-edit-toggle]');
-      if (toggle) { toggle.setAttribute('aria-expanded', 'false'); toggle.focus(); }
-      return;
-    }
-    var addToggle = e.target.closest('[data-rr-add-toggle]');
-    if (addToggle) {
-      var form = document.getElementById(addToggle.getAttribute('aria-controls'));
-      if (!form) return;
-      var open = form.hidden;
-      form.hidden = !open;
-      var mainToggle = detail.querySelector('.lx-add[aria-controls="' + form.id + '"]');
-      if (mainToggle) mainToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) {
-        var firstField = form.querySelector('select, input:not([type="hidden"])');
-        if (firstField) firstField.focus();
-      } else if (mainToggle) {
-        mainToggle.focus();
-      }
-      return;
-    }
     var retry = e.target.closest('[data-ai-analyze]');
     if (retry && !retry.disabled) {
       e.preventDefault();
@@ -1071,14 +1069,16 @@
   try { last = JSON.parse(sessionStorage.getItem(STORE_KEY) || 'null'); sessionStorage.removeItem(STORE_KEY); } catch (err) {}
   if (last && String(last.recitation) === detail.getAttribute('data-recitation-detail')) {
     var target = null;
-    if (last.finding) target = detail.querySelector('[data-finding-id="' + last.finding + '"]');
-    else if (last.action === 'add_finding') {
-      var all = detail.querySelectorAll('[data-rr-finding]');
-      target = all.length ? all[all.length - 1] : null;
-    } else if (last.action === 'save') target = detail.querySelector('[data-lx-done]');
+    if (last.action === 'save') target = detail.querySelector('[data-lx-done]');
+    else if (last.action === 'continue-publish') target = detail.querySelector('form[data-lx-eval-form]');
+    else if (last.action === 'review-return') target = detail.querySelector('.lx-findings');
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     if (last.action === 'save' && target) {
       target.scrollIntoView({ behavior: 'auto', block: 'center' });
+    } else if (last.action === 'continue-publish' && target) {
+      target.scrollIntoView({ behavior: 'auto', block: 'start' });
+      var scoreField = target.querySelector('input[name="score"]');
+      if (scoreField) scoreField.focus({ preventScroll: true });
     } else if (typeof last.scrollY === 'number') {
       window.scrollTo(0, last.scrollY);
       if (target) {

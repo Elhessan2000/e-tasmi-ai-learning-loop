@@ -5,6 +5,7 @@ import model.entity.RecitationFindingRecord;
 import model.service.analysis.ComparisonOutcome;
 import model.service.analysis.FindingAiStatus;
 import model.service.analysis.FindingType;
+import model.service.analysis.RecitationBoundaryPolicy;
 import model.service.analysis.RecitationComparisonEngine;
 import model.service.analysis.RecitationFinding;
 import model.service.quran.TrustedReference;
@@ -303,6 +304,7 @@ public class RecitationAiAnalysisService {
             passageNote = report != null && trimToNull(report.matchedPassageNote) != null
                     ? report.matchedPassageNote
                     : "Recitation compared against the trusted reference.";
+            passageNote = RecitationBoundaryPolicy.mergeIntoPassageNote(passageNote, comparison);
         } else {
             // Word-level diffing against the wrong passage is noise, so it is withheld.
             String mismatchNote = (trimToNull(report.matchedPassageNote) != null
@@ -455,6 +457,26 @@ public class RecitationAiAnalysisService {
     }
 
     /**
+     * Boundary notes are already decided. The model may see them as context, but they are
+     * not findings and must not be reclassified.
+     */
+    private static String observationBlock(ComparisonOutcome comparison) {
+        if (comparison.getOpeningNote() == null && comparison.getContinuationNote() == null) {
+            return "";
+        }
+        StringBuilder block = new StringBuilder();
+        block.append("Out-of-scope observations already decided in software. ");
+        block.append("These are NOT findings. Do not explain them as mistakes and do not change the counts.\n");
+        if (comparison.getOpeningNote() != null) {
+            block.append("- ").append(comparison.getOpeningNote()).append('\n');
+        }
+        if (comparison.getContinuationNote() != null) {
+            block.append("- ").append(comparison.getContinuationNote()).append('\n');
+        }
+        return block.append('\n').toString();
+    }
+
+    /**
      * Asks the model to explain findings that were already computed in Java. The model is not
      * asked for a word diff and is not permitted to emit Qur'an text.
      */
@@ -545,6 +567,7 @@ public class RecitationAiAnalysisService {
                         + reference.getReferenceText() + "\n\"\"\"\n\n" +
                 "Student transcript (from ASR — may contain small errors):\n\"\"\"\n" + transcript + "\n\"\"\"\n\n" +
                 "Deterministic comparison counts: " + comparison.countsLabel() + "\n\n" +
+                observationBlock(comparison) +
                 "Findings already computed in software (explain these, do not change them):\n"
                         + findingLines + "\n" +
                 "Return JSON with EXACTLY this schema:\n" +

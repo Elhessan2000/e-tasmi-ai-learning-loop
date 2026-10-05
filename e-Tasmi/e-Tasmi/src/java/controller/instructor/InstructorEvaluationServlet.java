@@ -29,11 +29,13 @@ import model.service.FindingVerificationService;
 import model.service.RecitationAiAnalysisService;
 import model.service.RecitationAnalysisService;
 import model.service.RecitationAutoAnalysisService;
+import model.service.analysis.FindingReviewPayload;
 import model.service.analysis.FindingType;
 import model.service.quran.RecitationReferenceService;
 import model.service.quran.TrustedReference;
 import model.service.quran.TrustedReferenceResult;
 import util.Db;
+import util.JsonUtil;
 import util.LocalFileUtil;
 
 import javax.servlet.ServletException;
@@ -429,6 +431,11 @@ public class InstructorEvaluationServlet extends HttpServlet {
             }
         }
 
+        if (isAjax(request)) {
+            writeFindingActionJson(response, userId, recitationId, result);
+            return;
+        }
+
         if (result.isSuccess()) {
             String redirect = request.getContextPath() + "/instructor/evaluations?verified="
                     + (added ? "added" : "1");
@@ -445,6 +452,33 @@ public class InstructorEvaluationServlet extends HttpServlet {
 
         request.setAttribute("error", result.getError());
         forwardWithFreshGroups(request, response, userId);
+    }
+
+    /** The review workspace stays open, so it receives the recitation's current findings instead of a redirect. */
+    private void writeFindingActionJson(HttpServletResponse response, long userId, long recitationId,
+                                        EvaluationResult result) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-store");
+        if (!result.isSuccess()) {
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("ok", Boolean.FALSE);
+            error.put("error", result.getError());
+            response.getWriter().write(JsonUtil.obj(error));
+            return;
+        }
+        RecitationAnalysis latest = recitationId <= 0 ? null
+                : recitationAnalysisService.loadLatestForRecitations(userId, List.of(recitationId)).get(recitationId);
+        String findings = latest == null || latest.getFindings() == null ? "null"
+                : FindingReviewPayload.findingsJson(latest.getFindings());
+        response.getWriter().write("{\"ok\":true,\"findings\":" + findings + "}");
+    }
+
+    private static boolean isAjax(HttpServletRequest request) {
+        String xrw = request.getHeader("X-Requested-With");
+        String accept = request.getHeader("Accept");
+        return "XMLHttpRequest".equalsIgnoreCase(xrw)
+                || (accept != null && accept.toLowerCase().contains("application/json"));
     }
 
     private FindingType parseFindingType(String raw) {
