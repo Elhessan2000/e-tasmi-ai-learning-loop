@@ -27,7 +27,7 @@
       <link rel="stylesheet" crossorigin href="<%= ctx %>/learnhub-dist/assets/css/index.css">
       <link rel="stylesheet" href="<%= ctx %>/css/etasmi-theme.css?v=20260609-theme-unified">
       <link rel="stylesheet" href="<%= ctx %>/css/etasmi-dark-polish.css?v=20260609-theme-unified">
-      <link rel="stylesheet" href="<%= ctx %>/css/home-landing-bridge.css?v=20260616-about">
+      <link rel="stylesheet" href="<%= ctx %>/css/home-landing-bridge.css?v=20261005-instructors2">
       <link rel="stylesheet" href="<%= ctx %>/css/home-scroll-experience.css?v=20260614-scroll">
       <script defer src="<%= ctx %>/assets/js/etasmi-theme.js?v=20260609-theme-unified"></script>
       <script defer src="<%= ctx %>/assets/js/home-scroll-reveal.js?v=20260614-scroll"></script>
@@ -422,6 +422,7 @@
                   <img src="<%= ctx %>/assets/img/instructors/instructor-abass.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.abass.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
+                    onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-empty');"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
@@ -437,6 +438,7 @@
                   <img src="<%= ctx %>/assets/img/instructors/instructor-shoaib.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.shoaib.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
+                    onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-empty');"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
@@ -452,6 +454,7 @@
                   <img src="<%= ctx %>/assets/img/instructors/instructor-ayman.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.ayman.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
+                    onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-empty');"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
@@ -467,6 +470,7 @@
                   <img src="<%= ctx %>/assets/img/instructors/instructor-ziaul-haq.png" alt="Demo instructor avatar"
                     data-i18n="landing.instructors.ziaulHaq.alt" data-i18n-attr="alt"
                     class="etasmi-instructor-card-img" width="640" height="800"
+                    onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('is-empty');"
                     sizes="(max-width: 767px) 100vw, (max-width: 991px) 50vw, 25vw" loading="lazy" decoding="async" />
                 </div>
                 <div class="etasmi-instructor-card-footer">
@@ -784,7 +788,8 @@
                 <div class="etasmi-about-media__glow" aria-hidden="true"></div>
                 <div class="etasmi-about-media__frame">
                   <img
-                    src="https://res.cloudinary.com/dd5yqvxhf/image/upload/f_auto,q_auto,c_fill,g_auto,w_1200,h_900,dpr_auto/etasmi/landing/sessions/live-tasmi-call"
+                    src="<%= ctx %>/assets/img/landing/about-history.jpg"
+                    srcset="<%= ctx %>/assets/img/landing/about-history-800.jpg 800w, <%= ctx %>/assets/img/landing/about-history.jpg 1152w"
                     alt="Guided online Qur&apos;an recitation session with learner and instructor"
                     data-i18n="landing.about.imageAlt" data-i18n-attr="alt"
                     class="img-fluid w-100" width="1200" height="900"

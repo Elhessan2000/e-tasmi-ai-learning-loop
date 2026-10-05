@@ -1,6 +1,6 @@
 # Challenge Evidence
 
-This folder will contain evidence created during challenge-period development.
+This folder will contain evidence created during challenge-period development. Tool and service screenshots are kept in [docs/evidence](../../evidence/README.md), not here.
 
 No evidence files are included yet.
 

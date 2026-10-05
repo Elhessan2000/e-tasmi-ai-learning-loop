@@ -2142,8 +2142,13 @@ body.student-module-page .container.sd-container.student-workspace-shell {
 }
 
 body.student-module-page .student-shell-layout {
-  grid-template-columns: var(--student-sidebar-width) minmax(0, 1fr);
   gap: 36px;
+}
+
+@media (min-width: 1101px) {
+  body.student-module-page .student-shell-layout {
+    grid-template-columns: var(--student-sidebar-width) minmax(0, 1fr);
+  }
 }
 
 body.student-module-page .student-shell-content {
@@ -2430,8 +2435,14 @@ body.student-dashboard-page.student-package-page .student-shell-layout {
   background: var(--student-shell-bg);
   border-radius: 0 0 28px 28px;
   box-shadow: var(--student-shadow-soft);
-  /* Must use --student-sidebar-width so body.student-nav-collapsed (76px rail) matches the grid column. */
-  grid-template-columns: var(--student-sidebar-width, 312px) minmax(0, 1fr);
+}
+
+@media (min-width: 1101px) {
+  body.student-package-page.student-module-page .student-shell-layout,
+  body.student-dashboard-page.student-package-page .student-shell-layout {
+    /* Must use --student-sidebar-width so body.student-nav-collapsed (76px rail) matches the grid column. */
+    grid-template-columns: var(--student-sidebar-width, 312px) minmax(0, 1fr);
+  }
 }
 
 body.student-package-page.student-module-page .student-shell-sidebar__panel,

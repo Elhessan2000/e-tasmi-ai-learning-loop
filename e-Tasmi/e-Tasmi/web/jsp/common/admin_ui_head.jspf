@@ -20,10 +20,10 @@
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-ui-refine.css?v=20260610-admin-shell3">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-theme.css?v=20260609-theme-unified">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-dark-polish.css?v=20260609-theme-unified">
-<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-mobile-responsive.css?v=20260511-no-dash-float-qc">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-mobile-responsive.css?v=20261005-shell-overlay1">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-typography.css?v=20260520-type-balanced">
 <%-- Shell grid + flex layout + collapse rail: MUST load after all theme/polish layers --%>
-<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-shell-layout.css?v=20260610-admin-shell3">
+<link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-shell-layout.css?v=20261005-shell-overlay1">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-layout-behavior.css?v=20260610-admin-shell3">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-sidebar-collapsed.css?v=20260610-admin-shell3">
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/admin-shell-override.css?v=20260621-no-brandbar-divider">

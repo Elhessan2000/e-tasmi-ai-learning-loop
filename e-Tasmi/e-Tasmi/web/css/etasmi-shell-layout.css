@@ -1,202 +1,209 @@
-/**
- * e-Tasmi — shared workspace shell GRID (layout dimensions only).
- * Student (.student-shell-layout), Instructor (.instructor-shell-layout),
- * Admin (.admin-layout) must stay synchronized here.
- *
- * Colors: *-figma-shell.css + theme layers. Never set widths in dark mode.
- * Load this file LAST among shell CSS in *\_ui_head.jspf.
- */
-
-@media (min-width: 1101px) {
-  :root[data-student-nav="collapsed"],
-  body.student-nav-collapsed,
-  :root[data-instructor-nav="collapsed"],
-  body.instructor-nav-collapsed,
-  :root[data-admin-nav="collapsed"],
-  body.admin-nav-collapsed,
-  body.admin-package-page.admin-module-page.admin-nav-collapsed {
-    --student-sidebar-width: var(--etasmi-shell-sidebar-width-collapsed, 76px);
-    --instructor-sidebar-width: var(--etasmi-shell-sidebar-width-collapsed, 76px);
-    --admin-sidebar-width: var(--etasmi-shell-sidebar-width-collapsed, 76px);
-    --admin-sidenav-gutter: var(--etasmi-shell-sidebar-width-collapsed, 76px);
-  }
-}
-
-@media (min-width: 1101px) {
-  :root[data-student-nav="collapsed"] body.student-package-page.student-module-page .student-shell-layout,
-  :root[data-student-nav="collapsed"] body.student-dashboard-page.student-package-page .student-shell-layout,
-  body.student-package-page.student-module-page.student-nav-collapsed .student-shell-layout,
-  body.student-dashboard-page.student-package-page.student-nav-collapsed .student-shell-layout {
-    grid-template-columns: var(--student-sidebar-width, var(--etasmi-shell-sidebar-width-collapsed, 76px)) minmax(0, 1fr);
-    gap: 0;
-    column-gap: 0;
-  }
-
-  :root[data-instructor-nav="collapsed"] body.instructor-package-page.instructor-module-page .instructor-shell-layout,
-  body.instructor-package-page.instructor-module-page.instructor-nav-collapsed .instructor-shell-layout {
-    grid-template-columns: var(--instructor-sidebar-width, var(--etasmi-shell-sidebar-width-collapsed, 76px)) minmax(0, 1fr);
-    gap: 0;
-    column-gap: 0;
-  }
-
-  :root[data-admin-nav="collapsed"] html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout,
-  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-layout {
-    grid-template-columns: var(--admin-sidebar-width, var(--etasmi-shell-sidebar-width-collapsed, 76px)) minmax(0, 1fr);
-    gap: 0;
-    column-gap: 0;
-  }
-
-  body.student-package-page.student-module-page .student-shell-layout,
-  body.student-dashboard-page.student-package-page .student-shell-layout {
-    display: grid;
-    grid-template-columns: var(--student-sidebar-width, var(--etasmi-shell-sidebar-width, 272px)) minmax(0, 1fr);
-    grid-template-areas: "shell-sidebar shell-main";
-    gap: 0;
-    column-gap: 0;
-    align-items: stretch;
-    min-height: 0;
-    overflow: hidden;
-    transition: grid-template-columns 0.22s ease;
-  }
-
-  body.instructor-package-page.instructor-module-page .instructor-shell-layout {
-    display: grid;
-    grid-template-columns: var(--instructor-sidebar-width, var(--etasmi-shell-sidebar-width, 272px)) minmax(0, 1fr);
-    grid-template-areas: "shell-sidebar shell-main";
-    gap: 0;
-    column-gap: 0;
-    align-items: stretch;
-    min-height: 0;
-    overflow: hidden;
-    transition: grid-template-columns 0.22s ease;
-  }
-
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
-    display: grid;
-    grid-template-columns: var(--admin-sidebar-width, var(--etasmi-shell-sidebar-width, 272px)) minmax(0, 1fr);
-    grid-template-areas: "shell-sidebar shell-main";
-    gap: 0;
-    column-gap: 0;
-    align-items: stretch;
-    min-height: 0;
-    overflow: hidden;
-    transition: grid-template-columns 0.22s ease;
-  }
-
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__scrim {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 68;
-    grid-column: 1 / -1;
-    grid-row: 1;
-    pointer-events: none;
-  }
-
-  body.student-package-page.student-module-page .student-shell-sidebar,
-  body.student-dashboard-page.student-package-page .student-shell-sidebar,
-  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar,
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
-    grid-area: shell-sidebar;
-    grid-column: 1;
-    position: relative;
-    inset-inline-start: auto;
-    top: auto;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    height: 100%;
-    min-height: 0;
-    align-self: stretch;
-    justify-self: stretch;
-    transform: none;
-    box-sizing: border-box;
-    z-index: 2;
-    isolation: isolate;
-    margin: 0;
-    padding: 0;
-  }
-
-  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar__panel,
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__panel {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    margin: 0;
-    box-sizing: border-box;
-  }
-
-  body.student-package-page.student-module-page .student-shell-content,
-  body.student-dashboard-page.student-package-page .student-shell-content,
-  body.instructor-package-page.instructor-module-page .instructor-shell-content,
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
-    grid-area: shell-main;
-    grid-column: 2 / -1;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-gutter: stable;
-    box-sizing: border-box;
-    position: relative;
-    z-index: 1;
-    margin: 0;
-    margin-inline-start: 0;
-  }
-}
-
-@media (min-width: 1101px) and (max-width: 1180px) {
-  body.student-package-page.student-module-page .student-shell-layout,
-  body.student-dashboard-page.student-package-page .student-shell-layout {
-    grid-template-columns: var(--student-sidebar-width, var(--etasmi-shell-sidebar-width-md, 256px)) minmax(0, 1fr);
-  }
-
-  body.instructor-package-page.instructor-module-page .instructor-shell-layout {
-    grid-template-columns: var(--instructor-sidebar-width, var(--etasmi-shell-sidebar-width-md, 256px)) minmax(0, 1fr);
-  }
-
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
-    grid-template-columns: var(--admin-sidebar-width, var(--etasmi-shell-sidebar-width-md, 256px)) minmax(0, 1fr);
-  }
-
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) {
-    --admin-sidebar-width: var(--etasmi-shell-sidebar-width-md, 256px);
-    --admin-sidenav-gutter: var(--etasmi-shell-sidebar-width-md, 256px);
-  }
-}
-
-@media (max-width: 1100px) {
-  body.student-package-page .student-shell-layout,
-  body.student-dashboard-page.student-package-page .student-shell-layout,
-  body.instructor-package-page .instructor-shell-layout,
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    width: 100%;
-    max-width: none;
-    overflow: visible;
-    gap: 0;
-    column-gap: 0;
-  }
-
-  body.student-package-page .student-shell-sidebar,
-  body.student-dashboard-page.student-package-page .student-shell-sidebar,
-  body.instructor-package-page .instructor-shell-sidebar,
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
-    position: fixed;
-    width: min(86vw, 280px);
-    max-width: 280px;
-  }
-
-  body.student-package-page.student-module-page .student-shell-content,
-  body.student-dashboard-page.student-package-page .student-shell-content,
-  body.instructor-package-page.instructor-module-page .instructor-shell-content,
-  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
-    width: 100%;
-    max-width: none;
-    margin-inline-start: 0;
-  }
-}
+/**
+ * e-Tasmi — shared workspace shell GRID (layout dimensions only).
+ * Student (.student-shell-layout), Instructor (.instructor-shell-layout),
+ * Admin (.admin-layout) must stay synchronized here.
+ *
+ * Colors: *-figma-shell.css + theme layers. Never set widths in dark mode.
+ * Load this file LAST among shell CSS in *\_ui_head.jspf.
+ */
+
+@media (min-width: 1101px) {
+  :root[data-student-nav="collapsed"],
+  body.student-nav-collapsed,
+  :root[data-instructor-nav="collapsed"],
+  body.instructor-nav-collapsed,
+  :root[data-admin-nav="collapsed"],
+  body.admin-nav-collapsed,
+  body.admin-package-page.admin-module-page.admin-nav-collapsed {
+    --student-sidebar-width: var(--etasmi-shell-sidebar-width-collapsed, 76px);
+    --instructor-sidebar-width: var(--etasmi-shell-sidebar-width-collapsed, 76px);
+    --admin-sidebar-width: var(--etasmi-shell-sidebar-width-collapsed, 76px);
+    --admin-sidenav-gutter: var(--etasmi-shell-sidebar-width-collapsed, 76px);
+  }
+}
+
+@media (min-width: 1101px) {
+  :root[data-student-nav="collapsed"] body.student-package-page.student-module-page .student-shell-layout,
+  :root[data-student-nav="collapsed"] body.student-dashboard-page.student-package-page .student-shell-layout,
+  body.student-package-page.student-module-page.student-nav-collapsed .student-shell-layout,
+  body.student-dashboard-page.student-package-page.student-nav-collapsed .student-shell-layout {
+    grid-template-columns: var(--student-sidebar-width, var(--etasmi-shell-sidebar-width-collapsed, 76px)) minmax(0, 1fr);
+    gap: 0;
+    column-gap: 0;
+  }
+
+  :root[data-instructor-nav="collapsed"] body.instructor-package-page.instructor-module-page .instructor-shell-layout,
+  body.instructor-package-page.instructor-module-page.instructor-nav-collapsed .instructor-shell-layout {
+    grid-template-columns: var(--instructor-sidebar-width, var(--etasmi-shell-sidebar-width-collapsed, 76px)) minmax(0, 1fr);
+    gap: 0;
+    column-gap: 0;
+  }
+
+  :root[data-admin-nav="collapsed"] html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout,
+  html body.admin-package-page.admin-module-page.admin-nav-collapsed:not(.admin-dashboard-brutal) .admin-layout {
+    grid-template-columns: var(--admin-sidebar-width, var(--etasmi-shell-sidebar-width-collapsed, 76px)) minmax(0, 1fr);
+    gap: 0;
+    column-gap: 0;
+  }
+
+  body.student-package-page.student-module-page .student-shell-layout,
+  body.student-dashboard-page.student-package-page .student-shell-layout {
+    display: grid;
+    grid-template-columns: var(--student-sidebar-width, var(--etasmi-shell-sidebar-width, 272px)) minmax(0, 1fr);
+    grid-template-areas: "shell-sidebar shell-main";
+    gap: 0;
+    column-gap: 0;
+    align-items: stretch;
+    min-height: 0;
+    overflow: hidden;
+    transition: grid-template-columns 0.22s ease;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-layout {
+    display: grid;
+    grid-template-columns: var(--instructor-sidebar-width, var(--etasmi-shell-sidebar-width, 272px)) minmax(0, 1fr);
+    grid-template-areas: "shell-sidebar shell-main";
+    gap: 0;
+    column-gap: 0;
+    align-items: stretch;
+    min-height: 0;
+    overflow: hidden;
+    transition: grid-template-columns 0.22s ease;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    display: grid;
+    grid-template-columns: var(--admin-sidebar-width, var(--etasmi-shell-sidebar-width, 272px)) minmax(0, 1fr);
+    grid-template-areas: "shell-sidebar shell-main";
+    gap: 0;
+    column-gap: 0;
+    align-items: stretch;
+    min-height: 0;
+    overflow: hidden;
+    transition: grid-template-columns 0.22s ease;
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 68;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    pointer-events: none;
+  }
+
+  body.student-package-page.student-module-page .student-shell-sidebar,
+  body.student-dashboard-page.student-package-page .student-shell-sidebar,
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
+    grid-area: shell-sidebar;
+    grid-column: 1;
+    position: relative;
+    inset-inline-start: auto;
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    align-self: stretch;
+    justify-self: stretch;
+    transform: none;
+    box-sizing: border-box;
+    z-index: 2;
+    isolation: isolate;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-sidebar__panel,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar__panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  body.student-package-page.student-module-page .student-shell-content,
+  body.student-dashboard-page.student-package-page .student-shell-content,
+  body.instructor-package-page.instructor-module-page .instructor-shell-content,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
+    grid-area: shell-main;
+    grid-column: 2 / -1;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    margin-inline-start: 0;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1180px) {
+  body.student-package-page.student-module-page .student-shell-layout,
+  body.student-dashboard-page.student-package-page .student-shell-layout {
+    grid-template-columns: var(--student-sidebar-width, var(--etasmi-shell-sidebar-width-md, 256px)) minmax(0, 1fr);
+  }
+
+  body.instructor-package-page.instructor-module-page .instructor-shell-layout {
+    grid-template-columns: var(--instructor-sidebar-width, var(--etasmi-shell-sidebar-width-md, 256px)) minmax(0, 1fr);
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    grid-template-columns: var(--admin-sidebar-width, var(--etasmi-shell-sidebar-width-md, 256px)) minmax(0, 1fr);
+  }
+
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) {
+    --admin-sidebar-width: var(--etasmi-shell-sidebar-width-md, 256px);
+    --admin-sidenav-gutter: var(--etasmi-shell-sidebar-width-md, 256px);
+  }
+}
+
+@media (max-width: 1100px) {
+  body.student-package-page.student-module-page .student-shell-layout,
+  body.student-package-page .student-shell-layout,
+  body.student-dashboard-page.student-package-page .student-shell-layout,
+  body.student-module-page .student-shell-layout,
+  body.instructor-package-page.instructor-module-page .instructor-shell-layout,
+  body.instructor-package-page .instructor-shell-layout,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "content";
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    gap: 0;
+    column-gap: 0;
+  }
+
+  body.student-package-page .student-shell-sidebar,
+  body.student-dashboard-page.student-package-page .student-shell-sidebar,
+  body.instructor-package-page .instructor-shell-sidebar,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-shell-sidebar {
+    position: fixed;
+    width: min(86vw, 280px);
+    max-width: 280px;
+  }
+
+  body.student-package-page.student-module-page .student-shell-content,
+  body.student-package-page .student-shell-content,
+  body.student-dashboard-page.student-package-page .student-shell-content,
+  body.instructor-package-page.instructor-module-page .instructor-shell-content,
+  html body.admin-package-page.admin-module-page:not(.admin-dashboard-brutal) .admin-main {
+    width: 100%;
+    max-width: none;
+    margin-inline-start: 0;
+    grid-column: 1 / -1;
+    grid-area: content;
+  }
+}
 

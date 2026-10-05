@@ -563,6 +563,15 @@ function toggleMoreMenu(btn) {
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){document.getElementById('createSessionModal').classList.remove('active');document.querySelectorAll('.isess-more-menu.is-open').forEach(function(m){m.classList.remove('is-open');});}});
 document.getElementById('createSessionModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');});
 (function(){
+    var form=document.querySelector('#createSessionModal form');
+    if(!form)return;
+    form.addEventListener('submit',function(){
+        var btn=form.querySelector('button[type="submit"]');
+        if(!btn||btn.disabled)return;
+        btn.disabled=true;
+    });
+})();
+(function(){
     var btns=document.querySelectorAll('[data-iup-toggle]'), views=document.querySelectorAll('[data-iup-view]');
     if (!btns.length||!views.length) return;
     function activate(t){btns.forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-iup-toggle')===t?'true':'false');});views.forEach(function(v){var m=v.getAttribute('data-iup-view')===t;v.hidden=!m;if(m){v.classList.remove('iup-fade-in');void v.offsetWidth;v.classList.add('iup-fade-in');}});}

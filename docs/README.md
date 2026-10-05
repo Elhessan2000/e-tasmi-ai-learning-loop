@@ -6,6 +6,7 @@ Public documentation for the e-Tasmi AI Learning Loop challenge entry.
 |---|---|
 | [Architecture](architecture/learning-loop.md) | Current Learning Loop architecture |
 | [Challenge](challenge/README.md) | Challenge-period work, validation, and evidence |
+| [Tools evidence](evidence/README.md) | Services, screenshots, and the licensing booklet |
 | [Baseline](baseline/README.md) | Pre-challenge system, tagged `baseline-pre-ai-challenge-2026` |
 | [Development](development/README.md) | Local installation |
 | [Testing](testing/README.md) | Where validation is recorded |

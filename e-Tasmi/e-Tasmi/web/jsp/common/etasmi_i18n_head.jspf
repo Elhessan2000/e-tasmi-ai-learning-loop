@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <%@ include file="/jsp/common/etasmi_i18n_init.jspf" %>
 <link rel="stylesheet" href="<%= request.getContextPath() %>/css/etasmi-i18n.css?v=20260614-breadcrumb">
-<script defer src="<%= request.getContextPath() %>/assets/js/i18n/etasmi-i18n.js?v=20260710-modal-labels"
+<script defer src="<%= request.getContextPath() %>/assets/js/i18n/etasmi-i18n.js?v=20261005-progress-history"
   data-etasmi-i18n-auto
   data-etasmi-context="<%= request.getContextPath() %>"
   data-etasmi-locale="<%= LocaleSupport.getLocale(request) %>"

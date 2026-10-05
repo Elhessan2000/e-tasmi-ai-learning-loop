@@ -13,7 +13,7 @@
   var DEFAULT_LOCALE = 'en';
   var SUPPORTED = ['en', 'ar', 'ms'];
   /** Bump when locale JSON changes so browsers refetch /assets/locales/*.json */
-  var LOCALE_BUILD_ID = '20260710-modal-labels';
+  var LOCALE_BUILD_ID = '20261005-progress-history';
 
   var LOCALE_META = {
     en: { dir: 'ltr', nativeLabel: 'English' },

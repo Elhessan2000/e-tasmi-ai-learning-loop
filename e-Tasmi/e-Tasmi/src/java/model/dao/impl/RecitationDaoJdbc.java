@@ -1,6 +1,7 @@
 package model.dao.impl;
 
 import model.dao.RecitationDao;
+import model.entity.PublishedRecitationRecord;
 import model.entity.Recitation;
 import model.entity.RecitationAnalysisJobState;
 
@@ -109,6 +110,72 @@ public class RecitationDaoJdbc implements RecitationDao {
             }
         }
         return results;
+    }
+
+    private static final String PUBLISHED_FROM =
+            " FROM " + TABLE + " r"
+                    + " JOIN enrollment e ON e.enrollment_id = r.enrollment_id"
+                    + " JOIN tasmi_session s ON s.session_id = e.session_id"
+                    + " JOIN evaluation ev ON ev.recitation_id = r.recitation_id AND ev.published_at IS NOT NULL"
+                    + " WHERE e.student_id = ?";
+
+    @Override
+    public List<PublishedRecitationRecord> listPublishedForStudent(Connection connection, long studentId, int limit)
+            throws SQLException {
+        String sql = "SELECT r.recitation_id, r.enrollment_id, r.parent_recitation_id, r.attempt_number,"
+                + " r.submission_date, ev.score, ev.published_at,"
+                + " s.title, s.surah_number, s.ayah_start, s.ayah_end, s.quran_portion,"
+                + " (SELECT COUNT(*) FROM recitation_analysis ra"
+                + "    JOIN recitation_finding f ON f.analysis_id = ra.analysis_id"
+                + "   WHERE ra.analysis_id = ev.analysis_id AND ra.recitation_id = r.recitation_id"
+                + "     AND f.instructor_status IN ('ACCEPTED','EDITED','INSTRUCTOR_ADDED')) AS focus_count"
+                + PUBLISHED_FROM
+                + " ORDER BY r.submission_date DESC, r.recitation_id DESC"
+                + " LIMIT ?";
+        List<PublishedRecitationRecord> rows = new ArrayList<>();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, studentId);
+            ps.setInt(2, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PublishedRecitationRecord row = new PublishedRecitationRecord();
+                    row.setRecitationId(rs.getLong("recitation_id"));
+                    row.setEnrollmentId(rs.getLong("enrollment_id"));
+                    long parentId = rs.getLong("parent_recitation_id");
+                    row.setParentRecitationId(rs.wasNull() ? null : parentId);
+                    row.setAttemptNumber(Math.max(1, rs.getInt("attempt_number")));
+                    Timestamp submitted = rs.getTimestamp("submission_date");
+                    row.setSubmittedAt(submitted == null ? null : submitted.toInstant());
+                    Timestamp published = rs.getTimestamp("published_at");
+                    row.setPublishedAt(published == null ? null : published.toInstant());
+                    row.setScore(rs.getInt("score"));
+                    row.setSessionTitle(rs.getString("title"));
+                    row.setSurahNumber(nullableInt(rs, "surah_number"));
+                    row.setAyahStart(nullableInt(rs, "ayah_start"));
+                    row.setAyahEnd(nullableInt(rs, "ayah_end"));
+                    row.setQuranPortion(rs.getString("quran_portion"));
+                    row.setFocusCount(rs.getInt("focus_count"));
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
+    }
+
+    @Override
+    public int countPublishedForStudent(Connection connection, long studentId) throws SQLException {
+        String sql = "SELECT COUNT(*)" + PUBLISHED_FROM;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    private static Integer nullableInt(ResultSet rs, String column) throws SQLException {
+        int value = rs.getInt(column);
+        return rs.wasNull() ? null : value;
     }
 
     @Override

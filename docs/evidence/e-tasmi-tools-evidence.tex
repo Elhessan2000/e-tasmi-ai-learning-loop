@@ -1,0 +1,303 @@
+\documentclass[10.5pt]{article}
+\usepackage[a4paper,margin=15mm,top=14mm,bottom=14mm]{geometry}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+
+\setmainfont{Segoe UI}
+\setsansfont{Segoe UI}
+\defaultfontfeatures{Ligatures=TeX}
+
+\definecolor{navy}{HTML}{0E2433}
+\definecolor{teal}{HTML}{0C7C86}
+\definecolor{tealsoft}{HTML}{E7F4F5}
+\definecolor{ink}{HTML}{1C2830}
+\definecolor{muted}{HTML}{5C6B74}
+\definecolor{line}{HTML}{D3DDE1}
+\definecolor{row}{HTML}{F4F7F8}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{line}\leaders\hrule height \footrulewidth\hfill}}
+\fancyfoot[L]{\fontsize{8}{10}\selectfont\color{muted} e-Tasmi AI Learning Loop}
+\fancyfoot[C]{\fontsize{8}{10}\selectfont\color{muted} Tools, Services \& Evidence}
+\fancyfoot[R]{\fontsize{8}{10}\selectfont\color{navy}\thepage}
+\setlength{\headheight}{0pt}
+\setlength{\footskip}{12mm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.32em}
+\raggedbottom
+\setlist[itemize]{leftmargin=1.15em,itemsep=0.15em,topsep=0.25em,parsep=0pt}
+\color{ink}
+
+\newcommand{\secno}[2]{%
+  {\sffamily\bfseries\fontsize{10}{12}\selectfont\color{teal}#1}\par\vspace{0.4mm}%
+  {\sffamily\bfseries\fontsize{15.5}{18}\selectfont\color{navy}#2}\par\vspace{1mm}%
+  {\color{teal}\rule{\textwidth}{0.7pt}}\par\vspace{1.6mm}%
+}
+\newcommand{\evbox}[1]{%
+  \vspace{0.6mm}\noindent\colorbox{tealsoft}{%
+    \begin{minipage}{\dimexpr\textwidth-2\fboxsep\relax}
+      \fontsize{9.5}{12.4}\selectfont #1
+    \end{minipage}}\par\vspace{0.8mm}%
+}
+\newcommand{\evfig}[2]{%
+  \vspace{0.7mm}%
+  \noindent\fcolorbox{line}{white}{%
+    \includegraphics[width=\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax,height=#1,keepaspectratio]{#2}}%
+  \par\nopagebreak\vspace{0.35mm}%
+}
+\newcommand{\evcap}[1]{%
+  {\fontsize{8.4}{10.8}\selectfont\color{muted}#1}\par\vspace{0.2mm}%
+}
+\newcommand{\hlabel}[1]{{\sffamily\bfseries\color{navy}#1}}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[navy] (current page.south west) rectangle (current page.north east);
+  \fill[teal] ([xshift=15mm,yshift=18mm]current page.south west) rectangle ([xshift=52mm,yshift=19.6mm]current page.south west);
+\end{tikzpicture}
+\vspace*{28mm}
+{\sffamily\bfseries\fontsize{12}{15}\selectfont\color{teal} AI Challenge in Service of Islamic Content 2026}\par
+\vspace{7mm}
+{\sffamily\bfseries\fontsize{28}{32}\selectfont\color{white} e-Tasmi AI Learning Loop}\par
+\vspace{3mm}
+{\sffamily\fontsize{16}{20}\selectfont\color{white} Tools, Services \& Evidence Documentation}\par
+\vspace{8mm}
+{\color{teal}\rule{42mm}{1.1pt}}\par
+\vspace{7mm}
+\begin{minipage}{0.86\textwidth}
+{\fontsize{11.5}{16}\selectfont\color{white}
+This document records the principal tools, services, APIs, development platforms, and supporting resources used to build and validate the e-Tasmi AI Learning Loop during the challenge.}
+\end{minipage}
+\par\vspace{18mm}
+{\fontsize{11}{14}\selectfont\color{white} Track 03 --- Interactive Experiences \& Learning Journeys for Islam}\par
+\vspace{2mm}
+{\fontsize{10}{13}\selectfont\color{teal} Individual entry}\par
+\vfill
+{\fontsize{9}{12}\selectfont\color{white} Evidence booklet \quad\textbar\quad Screenshots supplied separately from application source}\par
+\vspace{6mm}
+
+\clearpage
+\secno{01}{Documentation scope and evidence method}
+
+This booklet lets a reviewer see which external services support e-Tasmi, what each one is used for, and what the supplied screenshots actually show. It is an evidence record for the challenge submission, not a claim about commercial terms that were never on screen.
+
+\hlabel{Categories covered}\par
+AI models and speech-to-text; Qur'an reference and library sources; the design, writing, and local development toolchain; and hosting, media, and session platforms.
+
+\hlabel{How the evidence was collected}\par
+Eleven screenshots were supplied in the project folder \texttt{Evidence e-tasmi}. Each file was inspected before it was copied into \texttt{docs/evidence/screenshots/}. The original folder was not renamed or edited. Where a screen was too tall or mostly empty, the PDF shows the panel that carries the evidence, and the full image remains in the evidence folder.
+
+Implementation details were checked against the project source and the challenge setup notes. Those checks are labelled as source or project records. They are not treated as something a screenshot proved by itself.
+
+\evbox{%
+\textbf{Evidence standard.} Evidence statements are limited to what can be supported by the supplied screenshots and project records.\par\vspace{0.7mm}
+A screenshot proves the account or tool state that is visible on it. Source code and project configuration prove how the application is written. A screenshot does not establish a price, a plan name, or a licence unless that information is visible or is stated on the official page shown in the screenshot.}
+
+Four kinds of statement appear in this booklet:
+\begin{itemize}
+  \item \textbf{Screenshot.} What is on the supplied image.
+  \item \textbf{Project record.} What the challenge notes or example configuration document.
+  \item \textbf{Source.} What the application code does.
+  \item \textbf{Inference.} Not used to fill gaps. If a price is not shown, this booklet says so.
+\end{itemize}
+
+No credentials, API keys, passwords, or sensitive beneficiary data are included in this evidence package. The Cloudinary account email was covered on the documentation copy and marked as redacted. The original screenshot was left unchanged.
+
+\clearpage
+\secno{02}{AI models and intelligent services}
+
+The learning loop separates three jobs. Quranpedia supplies the trusted Qur'an text. A Java comparison computes the word-level findings. The model explains those findings. The instructor accepts, edits, or rejects each finding before an ordinary result is published. The Qur'an text itself is not generated by the model.
+
+\subsection*{\color{teal}\sffamily OpenAI API}
+\hlabel{Purpose.} Explanation of findings that have already been computed, and the existing Qur'an assistant on a separate model.\par
+\hlabel{Implementation.} Source: the explainer defaults to model id \texttt{gpt-6.1-sol} with reasoning effort high. That id can be overridden. The Qur'an assistant defaults to \texttt{gpt-4o-mini}. A legacy path on \texttt{gpt-4o} is not the learning-loop path. EV-01 does not show these request settings.\par
+\hlabel{Evidence.} The Home screen introduces GPT-6.1 Sol and records 123,378 tokens, 84 responses and chat completions, a 22.1\% prompt-cache hit rate, and 84 requests. October spend is labeled Personal and shows \$0.68 of \$100.00, with a credit balance of \$2.83. No plan name or unit price is shown, and the totals do not prove that every request was the explainer.
+
+\evfig{46mm}{screenshots/openai/EV-01-openai-api-usage.png}
+\evcap{\textbf{\color{ink}Figure EV-01} --- OpenAI API Home, with GPT-6.1 Sol announced and project usage recorded, including an October spend card and a credit balance. Evidence purpose: supports documentation of the OpenAI API environment used during challenge development. It does not show the application request body.}
+
+\subsection*{\color{teal}\sffamily ElevenLabs}
+\hlabel{Purpose.} Speech-to-text for a recitation recording, before the deterministic comparison.\par
+\hlabel{Implementation.} Source: when the speech provider is ElevenLabs, the client uses model id \texttt{scribe\_v2}. The challenge setup notes document that choice. If the provider is unset, the selector uses OpenAI transcription instead. The live environment file is not reproduced here.\par
+\hlabel{Evidence.} EV-02 is a signed-in Speech to Text page with a card for Scribe Realtime v2. The transcript titles are not identified as e-Tasmi recordings. Pricing status not established by the supplied evidence.
+
+\evfig{42mm}{screenshots/elevenlabs/EV-02-elevenlabs-speech-to-text.png}
+\evcap{\textbf{\color{ink}Figure EV-02} --- ElevenLabs Speech to Text, including a Scribe Realtime v2 card. Evidence purpose: supports documentation of ElevenLabs access during challenge development. The model id used by the application is established from source, not from this screen. No price is visible.}
+
+\clearpage
+\secno{03}{Qur'an and Islamic content sources}
+
+Two sources have different jobs. Quranpedia is the trusted text for the learning-loop comparison. Quran Foundation is the Qur'an library used for content such as verses, translations, tafsir, and audio. Neither source is model output. The comparison runs in Java against the trusted reference, and the explainer is instructed that the word-level comparison is already done.
+
+\subsection*{\color{teal}\sffamily Quranpedia API}
+\hlabel{Role.} Source: the reference client defaults to \texttt{https://api.quranpedia.net/v1} and does not send credentials. Publication of a normal analysis requires that reference source. The comparison label in the service is the Quranpedia Hafs text.\par
+\hlabel{Evidence.} EV-04 is the public documentation page. The page states free, read-only access, no authentication, and the base URL above. The same page states attribution rules for republished dumps and rate limits of 120 requests per minute and 10,000 per day. The figure shows the upper portion; the full page is in the evidence folder.\par
+\hlabel{Pricing.} The supplied documentation page states that the API is free and that no authentication is required. That statement is from the page, not from an invoice.
+
+\evfig{54mm}{screenshots/quranpedia/EV-04-quranpedia-upper.png}
+\evcap{\textbf{\color{ink}Figure EV-04} --- Quranpedia documentation: free read-only access, no authentication, and the documented base URL. Evidence purpose: supports the reference source and the terms printed on that page. Rate limits appear further down the full screenshot.}
+
+\subsection*{\color{teal}\sffamily Quran Foundation}
+\hlabel{Role.} Source: the Content API client is configured from server environment variables and uses OAuth2 client credentials. It is the library source. It is not the text the learning loop compares against.\par
+\hlabel{Evidence.} EV-03 is the official documentation portal, showing Content APIs, a JavaScript SDK, and manual OAuth2. It does not show an e-Tasmi billing account or an approved production credential.\par
+\hlabel{Pricing.} Pricing status not established by the supplied screenshot.
+
+\evfig{44mm}{screenshots/quran-foundation/EV-03-quran-foundation-docs.png}
+\evcap{\textbf{\color{ink}Figure EV-03} --- Quran Foundation documentation portal. Evidence purpose: identifies the official Content API and OAuth2 documentation used as the library reference. It does not show account pricing.}
+
+\clearpage
+\secno{04}{Development and design toolchain}
+
+These tools supported design, writing, and local development. They are not the runtime services in the learning loop. ChatGPT, in particular, is a separate product from the OpenAI API billed on EV-01.
+
+\subsection*{\color{teal}\sffamily LaTeX and TeXstudio}
+\hlabel{Role.} Authoring the challenge presentation. EV-06 shows TeXstudio with the deck source, XeLaTeX selected, and a preview of pages 1 to 3 of 28.\par
+\hlabel{Licensing.} The screenshot does not show a price. LaTeX is distributed by the LaTeX Project as free software. TeXstudio's own licence is not shown on this screen.
+
+\evfig{58mm}{screenshots/latex/EV-06-texstudio-xelatex.png}
+\evcap{\textbf{\color{ink}Figure EV-06} --- TeXstudio and XeLaTeX open on the e-Tasmi challenge presentation. Evidence purpose: shows the documentation toolchain used for the submission deck.}
+
+\subsection*{\color{teal}\sffamily ChatGPT}
+\hlabel{Role.} Research and ideation. EV-05 is a project named AI Challenge. The visible thread discusses attempt progression using the existing attempt fields. It is not an API usage dashboard and it is not evidence of API billing.\par
+\hlabel{Pricing.} Pricing status not established by the supplied evidence.
+
+\evfig{54mm}{screenshots/chatgpt/EV-05-chatgpt-ai-challenge.png}
+\evcap{\textbf{\color{ink}Figure EV-05} --- ChatGPT project used while shaping the learning journey. Evidence purpose: distinguishes the chat product, used for development discussion, from the OpenAI API used at runtime.}
+
+\subsection*{\color{teal}\sffamily Figma and Git}
+EV-07 shows a Figma team workspace and starter templates. The file visible on that screen was edited two years earlier. It proves account access. It does not prove a challenge-period design file for this interface, and it does not show a price. The application is maintained in Git. No Git hosting screenshot was supplied, so no Git plan is stated. EV-07 is retained in \texttt{screenshots/figma/}.
+
+\clearpage
+\secno{05}{Hosting, media, and platform services}
+
+The running system is a Java servlet and JSP application, using JDBC and MySQL. Docker is the local challenge environment. Railway is the deployment shown for the public hostname. Zoom is used when a Tasmi session meeting is created. Cloudinary is the media utility in the application source.
+
+\subsection*{\color{teal}\sffamily Railway}
+EV-09 shows MySQL online and the learning-loop application online at \texttt{e-tasmi.com}. Pricing status not established by the supplied evidence.
+
+\evfig{46mm}{screenshots/railway/EV-09-railway-services.png}
+\evcap{\textbf{\color{ink}Figure EV-09} --- Railway services for the learning-loop application and MySQL, both online. Evidence purpose: shows the deployment layout. The full canvas is in the evidence folder. No plan or price is visible.}
+
+\subsection*{\color{teal}\sffamily Docker}
+EV-08 is Docker Desktop. The header displays PERSONAL. Running containers include the challenge application published on port 8084, Caddy, MySQL 8.4 on port 3317, and phpMyAdmin. The PERSONAL label is not a price.
+
+\evfig{40mm}{screenshots/docker/EV-08-docker-desktop.png}
+\evcap{\textbf{\color{ink}Figure EV-08} --- Local Docker Desktop with the challenge containers running. Evidence purpose: shows the isolated development environment, including MySQL 8.4.}
+
+\subsection*{\color{teal}\sffamily Zoom and Cloudinary}
+EV-11 lists an authorized Zoom app named \texttt{e-tasmi}, type \texttt{Private\_OAuth}. It does not show a priced plan or a count of meetings. EV-10, redacted, shows an active Cloudinary account, one user against a displayed limit of 3, and an Upgrade control. The plan name and price are not shown. The account email is covered.
+
+\begin{minipage}[t]{0.49\textwidth}
+\evfig{34mm}{screenshots/zoom/EV-11-zoom-app.png}
+\evcap{\textbf{\color{ink}Figure EV-11} --- Zoom app \texttt{e-tasmi}, type Private\_OAuth. Evidence purpose: shows the developer app used for session meetings.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\textwidth}
+\evfig{34mm}{screenshots/cloudinary/EV-10-cloudinary-header.png}
+\evcap{\textbf{\color{ink}Figure EV-10} --- Cloudinary account, email redacted. Evidence purpose: shows account access and a displayed user limit. It does not show stored media or a price.}
+\end{minipage}
+
+\clearpage
+\secno{06}{Licensing, pricing, and evidence register}
+
+A blank price is recorded as not established. The only free-of-charge statement below is the one printed on the Quranpedia documentation page in EV-04. Dollar amounts for OpenAI are the figures visible on EV-01, not a reconstructed invoice.
+
+{\fontsize{8}{10}\selectfont
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.35cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.55cm}@{}}
+\toprule
+\textbf{Service} & \textbf{Purpose and evidence} & \textbf{Pricing / access note} \\
+\midrule
+OpenAI API &
+Explainer for compared findings. EV-01: GPT-6.1 Sol banner and project usage. Source: default model \texttt{gpt-6.1-sol}, reasoning effort high. Assistant default \texttt{gpt-4o-mini}. &
+October spend card labeled Personal, \$0.68 of \$100.00. Credit balance \$2.83. Plan name and unit price not shown. \\
+ElevenLabs &
+Speech-to-text when selected. EV-02: Speech to Text page and Scribe Realtime v2 card. Source model id \texttt{scribe\_v2}. &
+Pricing status not established by the supplied evidence. \\
+Quranpedia &
+Trusted comparison text. EV-04 and source base URL \texttt{https://api.quranpedia.net/v1}. &
+The documentation page states that the API is free and needs no authentication. Rate limits are stated on that page. \\
+Quran Foundation &
+Qur'an library, not the comparison text. EV-03: official docs portal. Source uses OAuth2 client credentials. &
+Pricing status not established by the supplied screenshot. \\
+Zoom &
+Tasmi session meetings. EV-11: app \texttt{e-tasmi}, Private\_OAuth. &
+Pricing status not established by the supplied evidence. \\
+Cloudinary &
+Media handling in source. EV-10: active account, displayed user limit 3, Upgrade control. Email redacted. &
+Pricing status not established by the supplied evidence. \\
+Railway &
+Application hosting. EV-09: app and MySQL online at \texttt{e-tasmi.com}. &
+Pricing status not established by the supplied evidence. \\
+Docker &
+Local challenge environment. EV-08: Desktop header PERSONAL; MySQL 8.4 and the app container running. &
+PERSONAL is visible. No price is shown. \\
+Figma &
+Design account. EV-07: team and templates. Visible file edited two years earlier. &
+Pricing status not established by the supplied evidence. \\
+LaTeX / TeXstudio &
+Presentation authoring. EV-06: TeXstudio and XeLaTeX on the challenge deck. &
+No price on the screenshot. LaTeX Project distributes LaTeX as free software. \\
+ChatGPT &
+Development discussion. EV-05: project AI Challenge. Not the runtime API. &
+Pricing status not established by the supplied evidence. Not an API invoice. \\
+\bottomrule
+\end{tabularx}
+}
+
+\clearpage
+\secno{07}{References and evidence index}
+
+Official destinations checked for this booklet. Quran Foundation is cited at its current documentation portal, which is the portal shown in EV-03 and the address already used in the project source.
+
+{\fontsize{9.5}{12.6}\selectfont
+\begin{tabular}{@{}l l@{}}
+OpenAI API & \url{https://platform.openai.com/} \\
+ElevenLabs & \url{https://elevenlabs.io/} \\
+Quran Foundation & \url{https://api-docs.quran.foundation/} \\
+Quranpedia & \url{https://quranpedia.net/api-docs} \\
+Zoom Developer & \url{https://developers.zoom.us/} \\
+Cloudinary & \url{https://cloudinary.com/} \\
+Railway & \url{https://railway.com/} \\
+Figma & \url{https://www.figma.com/} \\
+Docker & \url{https://www.docker.com/} \\
+LaTeX Project & \url{https://www.latex-project.org/} \\
+\end{tabular}}
+
+\vspace{1.5mm}
+\hlabel{Screenshot index}\par
+{\fontsize{9}{12}\selectfont
+\begin{tabular}{@{}l l l@{}}
+EV-01 & OpenAI API usage and GPT-6.1 Sol & Page 3 \\
+EV-02 & ElevenLabs Speech to Text & Page 3 \\
+EV-03 & Quran Foundation documentation & Page 4 \\
+EV-04 & Quranpedia API documentation & Page 4 \\
+EV-05 & ChatGPT, AI Challenge project & Page 5 \\
+EV-06 & TeXstudio / XeLaTeX presentation & Page 5 \\
+EV-07 & Figma team (file retained; not a primary figure) & Page 5 \\
+EV-08 & Docker Desktop, challenge containers & Page 6 \\
+EV-09 & Railway application and MySQL & Page 6 \\
+EV-10 & Cloudinary account, email redacted & Page 6 \\
+EV-11 & Zoom developer app \texttt{e-tasmi} & Page 6 \\
+\end{tabular}}
+
+\vspace{1.6mm}
+\hlabel{Implementation notes checked in source}\par
+The explainer defaults to \texttt{gpt-6.1-sol} with reasoning effort high, and it explains findings already produced by \texttt{RecitationComparisonEngine}. ElevenLabs \texttt{scribe\_v2} is the speech-to-text model id when that provider is selected. Quranpedia is the trusted reference required for publication of a normal analysis. Pending findings block that publication until the instructor accepts, edits, or rejects them. The stack is Java servlets and JSP, JDBC, and MySQL.
+
+\vspace{1.2mm}
+\evbox{No credentials, API keys, passwords, or sensitive beneficiary data are included in this evidence package. Originals remain in \texttt{Evidence e-tasmi}. Organized copies, including the redacted Cloudinary image, are in \texttt{docs/evidence/screenshots/}. The full register is \texttt{docs/evidence/evidence-index.md}.}
+
+\end{document}

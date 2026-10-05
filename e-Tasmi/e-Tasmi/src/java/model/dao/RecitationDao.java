@@ -1,5 +1,6 @@
 package model.dao;
 
+import model.entity.PublishedRecitationRecord;
 import model.entity.Recitation;
 import model.entity.RecitationAnalysisJobState;
 
@@ -20,6 +21,16 @@ public interface RecitationDao {
      * Lists recitations for a given instructor by joining: recitation -> enrollment -> tasmi_session.
      */
     List<Recitation> listForInstructor(Connection connection, long instructorId) throws SQLException;
+
+    /**
+     * Published recitations for one student, newest submission first. Rows without
+     * {@code evaluation.published_at} are never returned. The focus count uses the same
+     * student-facing statuses as the verified learning focus.
+     */
+    List<PublishedRecitationRecord> listPublishedForStudent(Connection connection, long studentId, int limit)
+            throws SQLException;
+
+    int countPublishedForStudent(Connection connection, long studentId) throws SQLException;
 
     /** Highest attempt number already stored for this enrollment, or 0 when none exist. */
     int maxAttemptNumber(Connection connection, long enrollmentId) throws SQLException;

@@ -10,6 +10,7 @@ It is separate from the [pre-challenge baseline](../baseline/README.md). A chang
 - [Validation](validation.md) — functional and end-to-end results
 - [Development plan](development-plan.md) — original plan. Prefer the contribution log for what was built
 - [Challenge evidence](challenge-evidence/README.md) — files produced during challenge-period development
+- [Tools and services evidence](../evidence/README.md) — screenshot register and the licensing booklet
 
 Current architecture: [../architecture/learning-loop.md](../architecture/learning-loop.md)
 

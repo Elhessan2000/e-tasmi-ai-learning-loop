@@ -780,7 +780,9 @@
   .ip-table-wrap,
   .isess-table-wrap,
   .eval-table-wrap,
-  .report-table-wrap {
+  .report-table-wrap,
+  .sp-history,
+  .lx-table-wrap {
     overflow-x: auto !important;
     overflow-y: visible !important;
     -webkit-overflow-scrolling: touch;

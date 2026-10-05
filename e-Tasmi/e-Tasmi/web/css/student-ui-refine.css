@@ -46,10 +46,15 @@ body.student-package-page.student-module-page .student-shell-topbar {
 }
 
 body.student-package-page.student-module-page .student-shell-layout {
-  grid-template-columns: var(--student-sidebar-width, 312px) minmax(0, 1fr);
   border-radius: 0;
   box-shadow: none;
   background: #ffffff;
+}
+
+@media (min-width: 1101px) {
+  body.student-package-page.student-module-page .student-shell-layout {
+    grid-template-columns: var(--student-sidebar-width, 312px) minmax(0, 1fr);
+  }
 }
 
 body.student-package-page.student-module-page .student-shell-sidebar__panel {

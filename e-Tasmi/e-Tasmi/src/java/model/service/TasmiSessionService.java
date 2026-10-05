@@ -32,12 +32,16 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,6 +49,11 @@ public class TasmiSessionService {
     private static final Logger LOGGER = Logger.getLogger(TasmiSessionService.class.getName());
     private static final String LIVE_PROVIDER_MANUAL = "MANUAL";
     private static final String LIVE_PROVIDER_ZOOM = "ZOOM";
+    /**
+     * One in-flight create per identical session. A second request (double submit while Zoom
+     * is still responding) waits, then reuses the row the first request inserted.
+     */
+    private static final ConcurrentMap<String, Object> CREATE_IN_FLIGHT = new ConcurrentHashMap<>();
 
     private final InstructorDao instructorDao;
     private final TasmiSessionDao tasmiSessionDao;
@@ -166,6 +175,10 @@ public class TasmiSessionService {
             return TasmiSessionCreateResult.failure(passageError);
         }
 
+        String createKey = sessionCreateKey(instructorUserId, title, description, level, date, time,
+                durationMinutes, quranPortion, surahNumber, ayahStart, ayahEnd, fee, capacity);
+        Object inFlight = CREATE_IN_FLIGHT.computeIfAbsent(createKey, key -> new Object());
+        synchronized (inFlight) {
         try (Connection connection = Db.getConnection()) {
             Optional<Instructor> instructorOpt = instructorDao.findByUserId(connection, instructorUserId);
             if (instructorOpt.isEmpty()) {
@@ -187,6 +200,16 @@ public class TasmiSessionService {
             }
 
             int duration = durationMinutes == null || durationMinutes <= 0 ? 60 : durationMinutes;
+            Optional<Long> existingSessionId = findIdenticalOpenSessionId(
+                    connection, instructor.getInstructorId(), title, description, level, date, time,
+                    duration, quranPortion, surahNumber, ayahStart, ayahEnd, fee, capacity);
+            if (existingSessionId.isPresent()) {
+                LOGGER.log(Level.INFO,
+                        "Duplicate session create reused session {0} instead of creating another Zoom meeting",
+                        existingSessionId.get());
+                return TasmiSessionCreateResult.success(existingSessionId.get());
+            }
+
             ZoomMeetingInfo zoomInfo;
             try {
                 ZoomApiClient zoomClient = new ZoomApiClient();
@@ -230,6 +253,7 @@ public class TasmiSessionService {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Failed to create tasmi session", ex);
             return TasmiSessionCreateResult.failure(dbErrorToUserMessage(ex));
+        }
         }
     }
 
@@ -937,6 +961,112 @@ public class TasmiSessionService {
         } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "Failed to notify enrolled students for session " + sessionId, ex);
         }
+    }
+
+    private static String sessionCreateKey(long instructorUserId,
+                                           String title,
+                                           String description,
+                                           StudentLevel level,
+                                           LocalDate date,
+                                           LocalTime time,
+                                           Integer durationMinutes,
+                                           String quranPortion,
+                                           Integer surahNumber,
+                                           Integer ayahStart,
+                                           Integer ayahEnd,
+                                           BigDecimal fee,
+                                           int capacity) {
+        int duration = durationMinutes == null || durationMinutes <= 0 ? 60 : durationMinutes;
+        BigDecimal amount = fee == null ? BigDecimal.ZERO : fee;
+        return instructorUserId + "|"
+                + textKey(title) + "|"
+                + textKey(description) + "|"
+                + (level == null ? "" : level.name()) + "|"
+                + (date == null ? "" : date) + "|"
+                + (time == null ? "" : time.truncatedTo(ChronoUnit.SECONDS)) + "|"
+                + duration + "|"
+                + textKey(quranPortion) + "|"
+                + surahNumber + "|"
+                + ayahStart + "|"
+                + ayahEnd + "|"
+                + amount.stripTrailingZeros().toPlainString() + "|"
+                + capacity;
+    }
+
+    private Optional<Long> findIdenticalOpenSessionId(Connection connection,
+                                                      long instructorId,
+                                                      String title,
+                                                      String description,
+                                                      StudentLevel level,
+                                                      LocalDate date,
+                                                      LocalTime time,
+                                                      int duration,
+                                                      String quranPortion,
+                                                      Integer surahNumber,
+                                                      Integer ayahStart,
+                                                      Integer ayahEnd,
+                                                      BigDecimal fee,
+                                                      int capacity) throws SQLException {
+        BigDecimal amount = fee == null ? BigDecimal.ZERO : fee;
+        for (TasmiSession existing : tasmiSessionDao.listByInstructorId(connection, instructorId)) {
+            if (existing == null || existing.getSessionId() <= 0) {
+                continue;
+            }
+            TasmiSessionStatus status = existing.getStatus();
+            if (status != TasmiSessionStatus.SCHEDULED && status != TasmiSessionStatus.ONGOING) {
+                continue;
+            }
+            if (!textKey(existing.getTitle()).equals(textKey(title))) {
+                continue;
+            }
+            if (!textKey(existing.getDescription()).equals(textKey(description))) {
+                continue;
+            }
+            if (existing.getLevel() != level) {
+                continue;
+            }
+            if (!Objects.equals(existing.getSessionDate(), date) || !sameClockTime(existing.getSessionTime(), time)) {
+                continue;
+            }
+            int existingDuration = existing.getDurationMinutes() == null || existing.getDurationMinutes() <= 0
+                    ? 60 : existing.getDurationMinutes();
+            if (existingDuration != duration) {
+                continue;
+            }
+            if (!textKey(existing.getQuranPortion()).equals(storedPortionKey(quranPortion, surahNumber, ayahStart, ayahEnd))) {
+                continue;
+            }
+            if (!Objects.equals(existing.getSurahNumber(), surahNumber)
+                    || !Objects.equals(existing.getAyahStart(), ayahStart)
+                    || !Objects.equals(existing.getAyahEnd(), ayahEnd)) {
+                continue;
+            }
+            BigDecimal existingFee = existing.getFee() == null ? BigDecimal.ZERO : existing.getFee();
+            if (existingFee.compareTo(amount) != 0 || existing.getCapacity() != capacity) {
+                continue;
+            }
+            return Optional.of(existing.getSessionId());
+        }
+        return Optional.empty();
+    }
+
+    private static boolean sameClockTime(LocalTime left, LocalTime right) {
+        if (left == null || right == null) {
+            return left == right;
+        }
+        return left.truncatedTo(ChronoUnit.SECONDS).equals(right.truncatedTo(ChronoUnit.SECONDS));
+    }
+
+    private static String textKey(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private static String storedPortionKey(String quranPortion, Integer surahNumber, Integer ayahStart, Integer ayahEnd) {
+        String portion = textKey(quranPortion);
+        if (portion.isEmpty() && surahNumber != null && ayahStart != null && ayahEnd != null) {
+            portion = surahNumber + ":" + ayahStart + "–" + ayahEnd;
+        }
+        return portion;
     }
 
     private void applyStructuredPassage(TasmiSession session,
