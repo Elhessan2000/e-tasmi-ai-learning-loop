@@ -35,7 +35,7 @@ The Git commit and tag identify the pre-challenge source snapshot. Details are i
 | [baseline-declaration.md](baseline-declaration.md) | Formal declaration of the pre-challenge starting state |
 | [existing-system.md](existing-system.md) | Existing e-Tasmi functionality and workflows |
 | [existing-ai-capabilities.md](existing-ai-capabilities.md) | AI capabilities already present before the challenge |
-| [existing-vs-challenge.md](existing-vs-challenge.md) | Boundary between existing functionality and planned challenge contribution |
+| [existing-vs-challenge.md](existing-vs-challenge.md) | Boundary between the pre-challenge column and the delivered challenge column |
 | [technical-environment.md](technical-environment.md) | Pre-challenge technology and environment information |
 | [third-party-rights.md](third-party-rights.md) | Third-party services, components, licences, and permissions |
 | [data-privacy.md](data-privacy.md) | Data, privacy, secrets, and public repository handling |
@@ -73,4 +73,4 @@ Pre-existing work is not attributed to the challenge period.
 
 Later local Docker isolation is not part of the baseline source commit.
 
-Challenge-period implementation will be associated with later commits and evidence.
+Challenge-period implementation is recorded in later commits, the contribution log, and the validation record.

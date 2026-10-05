@@ -8,7 +8,7 @@ It is separate from the [pre-challenge baseline](../baseline/README.md). A chang
 
 - [Contribution log](contribution-log.md) — work performed during the challenge period
 - [Validation](validation.md) — functional and end-to-end results
-- [Development plan](development-plan.md) — original plan. Prefer the contribution log for what was built
+- [Development plan](development-plan.md) — delivered milestones, with the demo file and the missing behaviour screenshots marked open
 - [Challenge evidence](challenge-evidence/README.md) — files produced during challenge-period development
 - [Tools and services evidence](../evidence/README.md) — screenshot register and the licensing booklet
 

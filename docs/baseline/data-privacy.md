@@ -30,7 +30,7 @@ The verified baseline approach is:
 
 The root `.gitignore` ignores `.env`, `.env.*`, and `.env.template-overwrite-backup`, and it keeps `.env.example` with a negation rule. The existing system audit records a local `.env` as present and gitignored, and it records `.env.example` as a tracked template.
 
-A check of this repository's current Git history found one commit, `a358719`. `.env` is not present in that history, and `.env` is not tracked. This check applies to this repository's current Git history only. It does not apply to any other repository or historical copy. The broader privacy checklist in section 10 remains open.
+A baseline check found a single commit, `a358719`, and `.env` was not in that history. The public repository now has later commits on `master`. `.env` remains gitignored. A full secret scan of the later history is still an open review item in section 10.
 
 No secret values are written here.
 
@@ -128,4 +128,18 @@ Screenshot review is recorded below. The other items remain open.
 
 ## 11. Baseline Boundary
 
-This document records data and privacy considerations associated with the pre-challenge system and public repository preparation. It does not describe new challenge-period data flows as already implemented.
+Sections 1–10 record the pre-challenge handling and the public-repository rules. Section 12 records the challenge-period recitation path that is now implemented.
+
+## 12. Challenge-period recitation data
+
+The learning-loop path is:
+
+Student audio → stored by the application (Cloudinary or local `/uploads`) → one ElevenLabs transcription request → stored transcript → Java comparison with Quranpedia text → stored findings → instructor verification → published subset on the student page.
+
+The ElevenLabs request is `POST https://api.elevenlabs.io/v1/speech-to-text` with the audio bytes, `model_id`, and `language_code=ar`. The application keeps the returned transcript text. It does not send a provider retention flag. The uploaded audio remains available for instructor playback. ElevenLabs account retention is not stated here.
+
+Stored findings are database rows. The student page loads a finding only when its instructor status is `ACCEPTED`, `EDITED`, or `INSTRUCTOR_ADDED` and the evaluation is published. `PENDING` and `REJECTED` findings stay on the instructor side. `REFERENCE_UNAVAILABLE` stores no findings and no generated Qur'an text.
+
+Student Progress reads the same published rows for the signed-in student. The servlet uses the session user id. It does not accept a student id from the browser.
+
+This section is an application-behaviour statement. It is not a certification of ElevenLabs, OpenAI, Quranpedia, or Cloudinary retention terms, and it is not a claim that the system is fully secure.

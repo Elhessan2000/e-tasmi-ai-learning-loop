@@ -12,8 +12,10 @@ Roles below are taken from the existing system audit and the completed baseline 
 
 | Service / Component | Existing Use | Pre-Challenge Status | Licence / Terms | Evidence / Source |
 |---|---|---|---|---|
-| OpenAI | Instructor recitation transcription and evaluation; separate student assistant, voice, and translation-fallback features when configured | Pre-existing | To be verified | Existing system audit, section 10; [existing-ai-capabilities.md](existing-ai-capabilities.md) |
-| Quran Foundation | Qur'an Library chapters, verses, and related reference resources when configured | Pre-existing | To be verified | Existing system audit, section 11; [existing-system.md](existing-system.md) |
+| OpenAI | Learning-loop explanation of stored findings (`gpt-6.1-sol`, reasoning effort high). Pre-challenge recitation evaluation used another model. The Qur'an assistant default remains `gpt-4o-mini` | Pre-existing service. Challenge evaluator changed | To be verified | [../architecture/learning-loop.md](../architecture/learning-loop.md) |
+| ElevenLabs | Learning-loop speech-to-text, `POST /v1/speech-to-text`, default model `scribe_v2`. Scribe Realtime v2 is not the implemented path | Added in the challenge period | Commercial API. No grant text is stored in this repository. Current pricing should be checked against the provider's official pricing page at submission time. Terms: To be verified | [../architecture/learning-loop.md](../architecture/learning-loop.md); EV-02 |
+| Quranpedia | Learning-loop comparison text, Hafs mushaf id 1, `GET /mushafs/1/{surah}`, no API key | Added in the challenge period | The public API page states free read-only access, no authentication, attribution, 120 requests per minute, and 10,000 requests per day. That is a usage notice, not a named software licence | EV-04; E2E-17 |
+| Quran Foundation | Qur'an Library chapters, verses, and related reference resources when configured. Not the current learning-loop comparison source | Pre-existing | To be verified | Existing system audit, section 11; [existing-system.md](existing-system.md) |
 | Cloudinary | One storage path for recitation audio and some other uploads. Local `/uploads` storage is the other path recorded by the audit | Pre-existing | To be verified | Existing system audit, recitation pipeline |
 | Zoom | Optional live-session meetings and embedded join | Pre-existing | To be verified | Existing system audit, live-session rows |
 | MySQL | Relational database for the application | Pre-existing. Image tag `mysql:8.4` in Compose | To be verified | [technical-environment.md](technical-environment.md) |
@@ -25,7 +27,7 @@ The audit records that API terms for Quran Foundation, the Qur'an CDN, OpenAI, Z
 
 ## 3. OpenAI
 
-OpenAI was already used by the pre-challenge system for instructor recitation transcription and evaluation. The audit also records other student AI features that call OpenAI when configured: the Qur'an assistant chat, the voice assistant, and the translation fallback. Those student features are separate from the recitation evaluation workflow.
+OpenAI was already used by the pre-challenge system for instructor recitation transcription and evaluation. In the current learning loop, OpenAI explains stored findings with `gpt-6.1-sol` and `reasoning_effort=high`. Transcription of that loop is ElevenLabs Scribe v2. The Qur'an assistant chat still defaults to `gpt-4o-mini`. The voice assistant and translation fallback remain separate features.
 
 API credentials are not reproduced here.
 
@@ -121,4 +123,6 @@ This document records third-party components and rights considerations associate
 
 ## 12. Challenge period
 
-Speech-to-text for recitation analysis stayed on the existing OpenAI path. The new trusted passage text is Quran Foundation `text_uthmani`, read through the existing Quran Foundation client. No new vendor was added. ElevenLabs and Quranpedia were not integrated. The licence and terms cells in this document stay “To be verified”.
+Recitation analysis transcription uses ElevenLabs Scribe v2 when `STT_PROVIDER=elevenlabs`. The trusted comparison text is Quranpedia Hafs, field `text`, from `GET https://api.quranpedia.net/v1/mushafs/1/{surah}`. Word differences are computed in Java before any model explanation. OpenAI `gpt-6.1-sol` explains stored findings with `reasoning_effort=high`. Quran Foundation remains the Qur'an Library. The Qur'an assistant remains a separate `gpt-4o-mini` path.
+
+Quranpedia’s public documentation, captured as EV-04, is the source for the access and attribution notice above. ElevenLabs terms have not been copied into this repository. The other licence cells in this document stay “To be verified”. Current pricing should be checked against each provider's official pricing page at submission time.

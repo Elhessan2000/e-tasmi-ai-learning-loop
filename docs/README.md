@@ -10,6 +10,6 @@ Public documentation for the e-Tasmi AI Learning Loop challenge entry.
 | [Baseline](baseline/README.md) | Pre-challenge system, tagged `baseline-pre-ai-challenge-2026` |
 | [Development](development/README.md) | Local installation |
 | [Testing](testing/README.md) | Where validation is recorded |
-| [Submission](submission/README.md) | Final report and checklist |
+| [Submission](submission/README.md) | Final report, checklist, and demo video |
 
 The product overview is in the root [README.md](../README.md).

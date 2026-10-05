@@ -45,3 +45,23 @@ Analysis 29 (`CANNOT_EVALUATE`) still stores `stt_provider=NULL` because it was 
 Active STT in this Docker environment is **ElevenLabs Scribe v2**. OpenAI `gpt-6.1-sol` (reasoning effort high) is the explanation model. Rows above that name `gpt-4o` record the model used on those dates. From E2E-17 the Learning Loop comparison source is Quranpedia Hafs (`GET /mushafs/1/{surah}`, field `text`). Quran Foundation remains the student Qur'an library only. Older analyses may still store `reference_source=QURAN_FOUNDATION`.
 
 E2E-19 changes the `REJECTED` publication rule that V-10, V-11, and the first E2E-16 pass recorded. Those rows stay as the historical result: at that time a save was refused. A `REJECTED` analysis is still not retried. The instructor can now publish a score and feedback when the session has a structured range and no finding is pending. `FAILED` and `CANNOT_EVALUATE` still cannot be published.
+
+Rows that name `gpt-4o` are the model stored on that dated run. They are not the current evaluator. The current explainer default is `gpt-6.1-sol` with `reasoning_effort=high`.
+
+## Student Progress
+
+These rows are not part of the 31 functional cases or the 32 comparison checks. They were confirmed by reading the working tree on 6 Oct 2026. The page was exercised in the local challenge browser before this documentation pass. This pass did not repeat that browser session, so it does not add a new pass/fail count and it does not claim a clean browser console.
+
+| ID | Check | Verification | What the source shows |
+|---|---|---|---|
+| SP-01 | Published history only | Code-verified | `listPublishedForStudent` joins `evaluation` on `published_at IS NOT NULL` |
+| SP-02 | Load bound | Code-verified | `HISTORY_LIMIT` is 60. Focus counts are a subquery in that same statement, not a query per displayed row. A second statement counts the total |
+| SP-03 | Focus statuses | Code-verified | The count includes `ACCEPTED`, `EDITED`, and `INSTRUCTOR_ADDED` only |
+| SP-04 | Comparison | Code-verified | The previous row is the published parent when that parent is in the loaded list. Otherwise it is the latest earlier published attempt on the same enrollment |
+| SP-05 | Existing routes | Code-verified | View Result uses `/student/recitation-result?id=`. Practice Again uses `/student/recitations?practice=` |
+| SP-06 | First page and Show more | Code-verified | `initialRows` is 8. Show more reveals the next 8 and moves keyboard focus to the first revealed link |
+| SP-07 | Snapshot unchanged | Code-verified | `StudentProgressServlet` still calls `ProgressService` for the existing `progress` row and summary. No new progress table was added for history |
+| SP-08 | No academic term | Code-verified | The chip label is "Last updated" |
+| SP-09 | RTL, reduced motion, focus | Code-verified | `student-progress.css` has `[dir="rtl"]` rules and a `prefers-reduced-motion: reduce` block. Rows use `:focus-within`. The script skips count animation when reduced motion is set |
+| SP-10 | Ownership | Code-verified | The history service takes the session user id only. `AuthFilter` requires the `STUDENT` role on `/student/*` |
+| SP-11 | Browser exercise | Not re-verified in this pass | Completed earlier in the local challenge environment. No new result is recorded here |

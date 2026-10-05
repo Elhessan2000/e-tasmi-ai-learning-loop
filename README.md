@@ -88,12 +88,54 @@ flowchart TD
 > [!NOTE]
 > Accept, edit, and instructor-added findings are the only items in the verified learning focus. Rejected and pending findings stay off the student screen.
 
+## Challenge contribution
+
+The pre-challenge platform already had accounts, sessions, recitation upload, instructor scores, and a Qur'an library. The challenge adds a closed learning loop:
+
+1. ElevenLabs Scribe v2 transcribes the audio. This is the batch speech-to-text API, not Scribe Realtime v2.
+2. Quranpedia Hafs text (mushaf id 1) is the comparison source. Quran Foundation stays on the library.
+3. A Java comparison writes structured findings. The model does not invent the verse.
+4. GPT-6.1 Sol explains those findings with `reasoning_effort=high`. The default is `OPENAI_EVALUATOR_MODEL=gpt-6.1-sol`.
+5. The instructor accepts, edits, rejects, or adds a finding. Pending findings block publication.
+6. The student sees the published score, feedback, and Verified Learning Focus, then starts Practice Again on the same enrollment (`parent_recitation_id`, `attempt_number`).
+
+Student Progress keeps the existing Learning Snapshot. It adds Latest Verified Focus, a comparison with the previous published attempt, and Recitation History of published results only. There is no new history table and no academic term, so the page says "Last updated".
+
+## Validation and demo
+
+Recorded on 2–3 Oct 2026: 31 functional cases and 32 comparison checks, all passed. That count does not include Student Progress. The progress page was checked in source on 6 Oct 2026. Its earlier browser session was not repeated in the documentation pass.
+
+The demo file is [docs/submission/demo/Live Demo.mp4](docs/submission/demo/Live%20Demo.mp4). The script is in [docs/submission/demo/README.md](docs/submission/demo/README.md).
+
+## Run the local challenge copy
+
+From `e-Tasmi`, copy `.env.example` to `.env` and run `docker compose up -d --build`. The Compose project is `etasmi-ai-challenge`. The app is at http://localhost:8084. Details, including Caddy on port 8444, are in [docs/development/installation.md](docs/development/installation.md). Do not point this stack at a production database.
+
+## Privacy and limits
+
+Keys stay in the ignored `.env` file. The student sees a finding only after it is accepted, edited, or added by the instructor and the evaluation is published. Ownership checks in the tested flows return the same 404 for a missing recitation and for one the student does not own. This is not a claim that the system is fully secure.
+
+Practice attempts still count in the existing progress average. Behaviour screenshots are not in `docs/challenge/challenge-evidence/` yet. Vendor prices and licences that are not copied from a provider page stay unverified. Current pricing should be checked against the provider's official pricing page at submission time.
+
+## Documentation
+
+| Read this | For |
+|---|---|
+| [docs/architecture/learning-loop.md](docs/architecture/learning-loop.md) | Current loop, progress page, and which tools are actually used |
+| [docs/challenge/validation.md](docs/challenge/validation.md) | Recorded tests, with code-verified progress notes kept separate |
+| [docs/challenge/contribution-log.md](docs/challenge/contribution-log.md) | What was built, and when |
+| [docs/submission/final-report.md](docs/submission/final-report.md) | Submission report |
+| [docs/baseline/README.md](docs/baseline/README.md) | Pre-challenge snapshot `a358719` |
+| [docs/README.md](docs/README.md) | Full index |
+
 <p align="center">
   <a href="docs/architecture/learning-loop.md">Architecture</a>
   ·
   <a href="docs/development/installation.md">Local setup</a>
   ·
   <a href="docs/challenge/validation.md">Validation · 31/31 and 32/32</a>
+  ·
+  <a href="docs/submission/demo/README.md">Demo</a>
   ·
   <a href="docs/evidence/README.md">Tools &amp; evidence</a>
   ·

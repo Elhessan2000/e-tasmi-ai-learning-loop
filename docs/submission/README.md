@@ -1,6 +1,6 @@
 # Submission
 
-Final report, checklist, and demo notes.
+Final report, checklist, and the demo video at [demo/Live Demo.mp4](demo/Live%20Demo.mp4).
 
 ## Documents
 

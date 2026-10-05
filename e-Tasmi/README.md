@@ -17,6 +17,7 @@ docker compose up -d --build
 | App | http://localhost:8084/ |
 | phpMyAdmin | http://localhost:8083/ |
 | MySQL host port | `localhost:3317` |
+| Caddy HTTPS | https://localhost:8444/ |
 
 Compose project name: `etasmi-ai-challenge`.
 

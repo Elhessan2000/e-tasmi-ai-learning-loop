@@ -1,5 +1,7 @@
 # e-Tasmi': Platform Architecture, Workflows, and Features
 
+> This essay describes the platform as it stood before the challenge learning loop. Where it names `gpt-4o` or `gpt-4o-transcribe` as the recitation evaluator or recitation transcription model, that is the pre-challenge path. The current loop is in [../../docs/architecture/learning-loop.md](../../docs/architecture/learning-loop.md): Quranpedia Hafs text, a Java comparison, ElevenLabs Scribe v2, and GPT-6.1 Sol as the explainer. The Qur'an assistant default `gpt-4o-mini` is a separate feature and is still accurate below.
+
 ## 1. Executive Summary / Overview
 
 e-Tasmi' is a web-based Qur'anic recitation and evaluation platform designed to digitalize and augment traditional *Tasmi'* practice—the instructor-supervised recitation, memorization, and oral assessment of the Holy Qur'an. Conventional Tasmi' is pedagogically robust but operationally fragmented: scheduling, audio collection, grading, feedback, and progress records are often distributed across messaging applications, spreadsheets, and disconnected live-video links. e-Tasmi' consolidates these activities into a single, role-based learning environment in which students submit recitations tied to assigned Surahs and Ayahs, instructors manage classes and evaluations, and automated analysis accelerates—but does not replace—expert review.

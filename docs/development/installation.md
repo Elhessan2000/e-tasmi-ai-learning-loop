@@ -35,7 +35,7 @@ Compose project name: `etasmi-ai-challenge`
 
 Application image: `etasmi-challenge-tomcat:latest`
 
-Containers: `etasmi-challenge-app`, `etasmi-challenge-db`, `etasmi-challenge-phpmyadmin`.
+Containers: `etasmi-challenge-app`, `etasmi-challenge-db`, `etasmi-challenge-caddy`, `etasmi-challenge-phpmyadmin`.
 
 ## Database setup
 
@@ -55,6 +55,7 @@ Wait until the database container is healthy and the application container is ru
 | Login page | http://localhost:8084/en/auth/login |
 | phpMyAdmin | http://localhost:8083 |
 | MySQL host port | 3317 |
+| Caddy HTTPS | https://localhost:8444 |
 | Application-to-database connection inside Docker | `jdbc:mysql://db:3306/etasmi` |
 
 Inside Docker, Tomcat listens on 8080 and MySQL listens on 3306. The host ports in the table are the published ports for this challenge copy.
