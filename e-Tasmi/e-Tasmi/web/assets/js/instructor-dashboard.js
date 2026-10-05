@@ -309,8 +309,10 @@
         }
       }
 
-      // Digits
-      this.renderDigits(Math.abs(deltaMs));
+      // Digits. Days are a display split of the same remaining duration.
+      // Live elapsed time keeps the existing hours format.
+      var showDays = state !== 'live' && deltaMs >= 24 * 60 * 60 * 1000;
+      this.renderDigits(Math.abs(deltaMs), showDays);
 
       // Ring
       if (this.ringFg) {
@@ -321,18 +323,31 @@
         this.ringPct.textContent = Math.round(pctRing * 100) + '%';
       }
     },
-    renderDigits: function (ms) {
+    renderDigits: function (ms, withDays) {
       if (!this.digitsNode) return;
-      var totalSec = Math.floor(ms / 1000);
-      var h = Math.floor(totalSec / 3600);
-      var m = Math.floor((totalSec % 3600) / 60);
-      var s = totalSec % 60;
-      this.digitsNode.innerHTML =
-        '<span>' + pad2(h) + '<span class="idash-countdown__unit">h</span></span>' +
+      var totalSec = Math.max(0, Math.floor(ms / 1000));
+      var days = 0;
+      var hours;
+      if (withDays) {
+        days = Math.floor(totalSec / 86400);
+        hours = Math.floor((totalSec % 86400) / 3600);
+      } else {
+        hours = Math.floor(totalSec / 3600);
+      }
+      var minutes = Math.floor((totalSec % 3600) / 60);
+      var seconds = totalSec % 60;
+      var html = '';
+      if (withDays && days > 0) {
+        html += '<span>' + String(days) + '<span class="idash-countdown__unit">d</span></span>' +
+          '<span class="idash-d-sep">:</span>';
+      }
+      html +=
+        '<span>' + pad2(hours) + '<span class="idash-countdown__unit">h</span></span>' +
         '<span class="idash-d-sep">:</span>' +
-        '<span>' + pad2(m) + '<span class="idash-countdown__unit">m</span></span>' +
+        '<span>' + pad2(minutes) + '<span class="idash-countdown__unit">m</span></span>' +
         '<span class="idash-d-sep">:</span>' +
-        '<span>' + pad2(s) + '<span class="idash-countdown__unit">s</span></span>';
+        '<span>' + pad2(seconds) + '<span class="idash-countdown__unit">s</span></span>';
+      this.digitsNode.innerHTML = html;
     }
   };
 

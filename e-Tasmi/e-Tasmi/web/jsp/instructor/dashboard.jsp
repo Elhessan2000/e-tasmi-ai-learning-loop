@@ -195,7 +195,7 @@
     <link rel="stylesheet" href="<%= contextPath %>/css/instructor-page-headers.css?v=20260625-student-theme">
     <link rel="stylesheet" href="<%= contextPath %>/css/instructor-dashboard-greeting.css?v=20260610-greet-premium1">
     <script defer src="<%= contextPath %>/assets/js/app.js"></script>
-    <script defer src="<%= contextPath %>/assets/js/instructor-dashboard.js?v=20260610-greet-premium1"></script>
+    <script defer src="<%= contextPath %>/assets/js/instructor-dashboard.js?v=20261005-countdown-days"></script>
 </head>
 <body class="instructor-premium-page instructor-package-page instructor-module-page instructor-dashboard-page">
 <div class="app-shell">
