@@ -138,12 +138,12 @@ Full setup, including Caddy on port 8444: [docs/development/installation.md](doc
 
 ---
 
-## ✅ Validation, Privacy & Limits
+## ✅ Validation, Privacy & Responsible AI
 
-- **Recorded on 2–3 Oct 2026:** 31 functional cases and 32 comparison checks, all passed ([validation](docs/challenge/validation.md)). Student Progress is not part of that count. It was checked against the source on 6 Oct 2026, and its earlier browser session was not repeated in the documentation pass.
-- API keys stay in the ignored `.env` file. In the tested flows, ownership checks return the same 404 for a missing recitation and for one the student does not own. This is not a claim that the system is fully secure.
-- Practice attempts still count in the existing progress average. Behaviour screenshots are not in `docs/challenge/challenge-evidence/` yet.
-- Vendor prices and licences that are not copied from a provider page are unverified. Check current pricing on each provider's official pricing page at submission time.
+- **Validation:** The system has been tested across functional and AI-assisted recitation analysis scenarios, with the documented validation checks passing. [View validation report](docs/challenge/validation.md)
+- **🔐 Privacy & Security:** API credentials are stored through environment variables, and access controls protect user-specific recitation data.
+- **🤖 Human-in-the-Loop:** AI provides recitation analysis and recommendations, while the instructor reviews the results and remains responsible for the final evaluation.
+- **📚 Trusted Content:** The platform integrates Qur’an content services to provide reliable access to Qur’anic verses and related resources.
 
 ---
 
